@@ -1,3 +1,3 @@
-## LICENSE
+## Dark Code Linter
 
 [MIT](./LICENSE)
