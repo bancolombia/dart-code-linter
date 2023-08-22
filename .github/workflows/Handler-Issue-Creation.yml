@@ -1,0 +1,27 @@
+name: workflow to add label and review when create an issue
+on:
+  issues:
+    types:
+      - opened
+env:
+  var_review_users: ${{ vars.VAR_USERS_REVIEWERS_ISSUES }}
+
+jobs:
+  label_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate a token of Github APP
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.APP_ID_ADMIN_GITHUB }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY_ADMIN_GITHUB }}
+      - env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          #GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }} #Use to personal tooken
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          VAR_PROJECT_NAME_REVIEWERS_ISSUES: "${{ vars.VAR_PROJECT_NAME_REVIEWERS_ISSUES }}"
+        run: |
+          gh issue edit $ISSUE_URL --add-label "Review/Pending"
+          gh issue comment $ISSUE_URL --body "Assign to review: $var_review_users"
+          gh issue edit $ISSUE_URL --add-project "$VAR_PROJECT_NAME_REVIEWERS_ISSUES"

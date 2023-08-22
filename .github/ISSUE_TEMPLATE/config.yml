@@ -1,0 +1,4 @@
+contact_links:
+  - name: Support Request
+    url: https://github.com/bancolombia/dart-code-linter/discussions
+    about: Request support o help

@@ -1,0 +1,47 @@
+name: workflow of automations dispatch to commands in comments 
+on: 
+  issue_comment:
+    types: [created]
+env:
+  ISSUE_URL: ${{ github.event.issue.html_url }}
+  USER_COMMENT: ${{ github.event.comment.user.login }}
+  NUMBER: ${{ github.event.issue.number }}
+  COMMENT: ${{ github.event.comment.body }}
+jobs:
+  issue_commented:
+    # comments in Issues
+    name: Issue comment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate a token of Github APP
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.APP_ID_ADMIN_GITHUB }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY_ADMIN_GITHUB }}
+      - name: Read comments and execute actions
+        id: RunWorkFlow
+        env:
+          CMD_ACCEPT_REVIEW: "/review approved"
+          CMD_ASIGN_ISSUE: "/assign"
+          VAR_USERS_REVIEWERS: "${{ vars.VAR_USERS_REVIEWERS_ISSUES }}"
+          VAR_PROJECT_NAME_TO_WORK: "${{ vars.VAR_PROJECT_NAME_TO_WORK }}"
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          #GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }} #Use to personal tooken
+        run: |
+          if [[ ${COMMENT,,} == *"$CMD_ACCEPT_REVIEW"* ]];
+          then
+            if [[ ${VAR_USERS_REVIEWERS,,} =~ ${USER_COMMENT,,} ]];    
+            then
+              gh issue edit $ISSUE_URL --remove-label "Review/Pending"
+              gh issue edit $ISSUE_URL --add-label "Review/Approved"
+              gh issue edit $ISSUE_URL --add-project "$VAR_PROJECT_NAME_TO_WORK"
+              gh issue comment $ISSUE_URL --body "The issue was approved and moved to backlog for pending work. If you are interested in working on this problem, you are free to assign it with the /assign comment."
+            else
+              gh issue comment $ISSUE_URL --body "The user does not have sufficient permission to approved the issue"
+            fi
+          fi
+          if [[ ${COMMENT,,} == *"$CMD_ASIGN_ISSUE"* ]];
+          then
+            gh issue edit $ISSUE_URL --add-assignee "$USER_COMMENT"
+          fi
