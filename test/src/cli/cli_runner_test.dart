@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:dart_code_metrics/src/cli/cli_runner.dart';
+import 'package:dart_code_linter/src/cli/cli_runner.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
@@ -39,7 +39,7 @@ void main() {
             verify(() => output.writeln(captureAny())).captured.cast<String>();
 
         expect(captured, isNotEmpty);
-        expect(captured.first, startsWith('DCM version: '));
+        expect(captured.first, startsWith('DCL version: '));
       });
     });
   });

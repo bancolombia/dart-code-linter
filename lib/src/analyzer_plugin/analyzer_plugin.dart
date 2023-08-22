@@ -28,13 +28,13 @@ class AnalyzerPlugin extends ServerPlugin {
 
   @override
   String get contactInfo =>
-      'https://github.com/dart-code-checker/dart-code-metrics/issues';
+      'https://github.com/bancolombia/dart-code-linter/issues';
 
   @override
   List<String> get fileGlobsToAnalyze => const ['*.dart', '*.yaml'];
 
   @override
-  String get name => 'DCM $packageVersion';
+  String get name => 'DCL $packageVersion';
 
   @override
   String get version => '1.0.0-alpha.0';
@@ -43,7 +43,7 @@ class AnalyzerPlugin extends ServerPlugin {
     required super.resourceProvider,
   }) {
     final location =
-        resourceProvider.getStateLocation('.dart-code-metrics-uuid');
+        resourceProvider.getStateLocation('.dart-code-linter-uuid');
     if (location == null) {
       return;
     }
@@ -59,10 +59,10 @@ class AnalyzerPlugin extends ServerPlugin {
     } else {
       uuid = file.readAsStringSync();
     }
+    // TODO: Realizar implementacion propia de API.
+    // final uri = Uri.parse('');
 
-    final uri = Uri.parse('https://dcm.dev/api/analytics/usage');
-
-    post(uri, body: {'uuid': uuid, 'version': packageVersion}).ignore();
+    // post(uri, body: {'uuid': uuid, 'version': packageVersion}).ignore();
   }
 
   @override

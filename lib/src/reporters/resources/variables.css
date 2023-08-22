@@ -1,73 +1,73 @@
 :root {
   /* Common */
-  --dart-code-metrics-common-padding: 8px;
-  --dart-code-metrics-margin-top: 24px;
-  --dart-code-metrics-font-family: "Open sans", "Lucida grande", "Segoe UI", Arial, Verdana, Tahoma, sans-serif;
-  --dart-code-metrics-border-width: 1px;
+  --dart-code-linter-common-padding: 8px;
+  --dart-code-linter-margin-top: 24px;
+  --dart-code-linter-font-family: "Open sans", "Lucida grande", "Segoe UI", Arial, Verdana, Tahoma, sans-serif;
+  --dart-code-linter-border-width: 1px;
 
   /* Body */
-  --dart-code-metrics-body-padding: 24px;
-  --dart-code-metrics-body-font-size: 14px;
+  --dart-code-linter-body-padding: 24px;
+  --dart-code-linter-body-font-size: 14px;
 
   /* Link */
-  --dart-code-metrics-link-default-color: #48f;
-  --dart-code-metrics-link-default-color-hover: #2fd5d9;
-  --dart-code-metrics-link-default-color-focus-within: #fff;
+  --dart-code-linter-link-default-color: #48f;
+  --dart-code-linter-link-default-color-hover: #2fd5d9;
+  --dart-code-linter-link-default-color-focus-within: #fff;
 
   /* Total table */
-  --dart-code-metrics-total-table-width: calc(100% - (var(--dart-code-metrics-totals-width) + var(--dart-code-metrics-common-padding)));
-  --dart-code-metrics-total-table-border-color: rgba(0, 0, 0, .32);
-  --dart-code-metrics-total-table-cell-width: 128px;
+  --dart-code-linter-total-table-width: calc(100% - (var(--dart-code-linter-totals-width) + var(--dart-code-linter-common-padding)));
+  --dart-code-linter-total-table-border-color: rgba(0, 0, 0, .32);
+  --dart-code-linter-total-table-cell-width: 128px;
 
   /* Totals */
-  --dart-code-metrics-totals-width: 352px;
+  --dart-code-linter-totals-width: 352px;
 
   /* Total */
-  --dart-code-metrics-total-bg-color: rgba(106, 200, 236, .35);
+  --dart-code-linter-total-bg-color: rgba(106, 200, 236, .35);
 
   /* Violations */
-  --dart-code-metrics-violations-bg-color: rgba(252, 142, 0, .35);
+  --dart-code-linter-violations-bg-color: rgba(252, 142, 0, .35);
 
   /* Source code */
-  --dart-code-metrics-source-code-border-color: #ccc;
-  --dart-code-metrics-source-code-number-lines-width: 48px;
-  --dart-code-metrics-source-code-complexity-width: 112px;
-  --dart-code-metrics-source-code-text-after-left: calc(
-    var(--dart-code-metrics-source-code-complexity-width) +
-    var(--dart-code-metrics-source-code-number-lines-width) +
-    var(--dart-code-metrics-body-padding)
+  --dart-code-linter-source-code-border-color: #ccc;
+  --dart-code-linter-source-code-number-lines-width: 48px;
+  --dart-code-linter-source-code-complexity-width: 112px;
+  --dart-code-linter-source-code-text-after-left: calc(
+    var(--dart-code-linter-source-code-complexity-width) +
+    var(--dart-code-linter-source-code-number-lines-width) +
+    var(--dart-code-linter-body-padding)
   );
-  --dart-code-metrics-source-code-text-after-width: calc(
+  --dart-code-linter-source-code-text-after-width: calc(
     100% -
-    var(--dart-code-metrics-source-code-complexity-width) -
-    var(--dart-code-metrics-source-code-number-lines-width) -
-    calc(var(--dart-code-metrics-body-padding) * 2)
+    var(--dart-code-linter-source-code-complexity-width) -
+    var(--dart-code-linter-source-code-number-lines-width) -
+    calc(var(--dart-code-linter-body-padding) * 2)
   );
-  --dart-code-metrics-source-code-text-height: 18px;
-  --dart-code-metrics-source-code-line-bg-color-alpha: .35;
-  --dart-code-metrics-source-code-text-bg-color-alpha: .15;
-  --dart-code-metrics-source-code-color-normal-complexity: 51, 187, 17;
-  --dart-code-metrics-source-code-color-noted-complexity: 89, 197, 255;
-  --dart-code-metrics-source-code-color-warning-complexity: 252, 142, 0;
-  --dart-code-metrics-source-code-color-attention-complexity: 241, 88, 102;
-  --dart-code-metrics-source-code-icon-size: var(--dart-code-metrics-source-code-text-height);
+  --dart-code-linter-source-code-text-height: 18px;
+  --dart-code-linter-source-code-line-bg-color-alpha: .35;
+  --dart-code-linter-source-code-text-bg-color-alpha: .15;
+  --dart-code-linter-source-code-color-normal-complexity: 51, 187, 17;
+  --dart-code-linter-source-code-color-noted-complexity: 89, 197, 255;
+  --dart-code-linter-source-code-color-warning-complexity: 252, 142, 0;
+  --dart-code-linter-source-code-color-attention-complexity: 241, 88, 102;
+  --dart-code-linter-source-code-icon-size: var(--dart-code-linter-source-code-text-height);
 
   /* Tooltip */
-  --dart-code-metrics-source-code-tooltip-arrow-size: 8px;
-  --dart-code-metrics-source-code-tooltip-arrow-left: calc(
-    (var(--dart-code-metrics-source-code-icon-size) - var(--dart-code-metrics-source-code-tooltip-arrow-size)) / 2
+  --dart-code-linter-source-code-tooltip-arrow-size: 8px;
+  --dart-code-linter-source-code-tooltip-arrow-left: calc(
+    (var(--dart-code-linter-source-code-icon-size) - var(--dart-code-linter-source-code-tooltip-arrow-size)) / 2
   );
-  --dart-code-metrics-source-code-tooltip-arrow-bottom: calc(
-    (var(--dart-code-metrics-source-code-tooltip-arrow-size) / 2) * -1
+  --dart-code-linter-source-code-tooltip-arrow-bottom: calc(
+    (var(--dart-code-linter-source-code-tooltip-arrow-size) / 2) * -1
   );
-  --dart-code-metrics-source-code-tooltip-width: 320px;
-  --dart-code-metrics-source-code-tooltip-padding: 16px;
-  --dart-code-metrics-source-code-tooltip-bottom: calc(
-    var(--dart-code-metrics-source-code-icon-size) +
-    calc(var(--dart-code-metrics-source-code-tooltip-arrow-size) / 2)
+  --dart-code-linter-source-code-tooltip-width: 320px;
+  --dart-code-linter-source-code-tooltip-padding: 16px;
+  --dart-code-linter-source-code-tooltip-bottom: calc(
+    var(--dart-code-linter-source-code-icon-size) +
+    calc(var(--dart-code-linter-source-code-tooltip-arrow-size) / 2)
   );
-  --dart-code-metrics-source-code-tooltip-bg-color: #fff;
-  --dart-code-metrics-source-code-tooltip-z-index: 9;
-  --dart-code-metrics-source-code-tooltip-shadow-color: rgba(0, 0, 0, .16);
-  --dart-code-metrics-source-code-tooltip-transition-duration: .3s;
+  --dart-code-linter-source-code-tooltip-bg-color: #fff;
+  --dart-code-linter-source-code-tooltip-z-index: 9;
+  --dart-code-linter-source-code-tooltip-shadow-color: rgba(0, 0, 0, .16);
+  --dart-code-linter-source-code-tooltip-transition-duration: .3s;
 }

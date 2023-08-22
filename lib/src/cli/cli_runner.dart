@@ -48,7 +48,7 @@ class CliRunner extends CommandRunner<void> {
       final showVersion = results[FlagNames.version] as bool;
 
       if (showVersion) {
-        _logger.info('DCM version: $packageVersion');
+        _logger.info('DCL version: $packageVersion');
 
         return;
       }
@@ -90,11 +90,11 @@ class CliRunner extends CommandRunner<void> {
   Future<void> _checkForUpdates() async {
     try {
       final latestVersion =
-          await _pubUpdater?.getLatestVersion('dart_code_metrics');
+          await _pubUpdater?.getLatestVersion('dart_code_linter');
       final isUpToDate = packageVersion == latestVersion;
       if (!isUpToDate && latestVersion != null) {
         final changelogLink =
-            'https://github.com/dart-code-checker/dart-code-metrics/releases/tag/$latestVersion';
+            'https://github.com/bancolombia/dart-code-linter/releases/tag/$latestVersion';
         _logger.updateAvailable(packageVersion, latestVersion, changelogLink);
       }
       // ignore: avoid_catches_without_on_clauses

@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dart_code_metrics/src/analyzers/unused_code_analyzer/models/unused_code_file_report.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_code_analyzer/models/unused_code_issue.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_code_analyzer/reporters/reporters_list/json/unused_code_json_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/models/unused_code_file_report.dart';
+import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/models/unused_code_issue.dart';
+import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/reporters/reporters_list/json/unused_code_json_reporter.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:source_span/source_span.dart';
 import 'package:test/test.dart';

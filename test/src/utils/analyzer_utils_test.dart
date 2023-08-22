@@ -1,7 +1,7 @@
 import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/context_root.dart';
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dart_code_metrics/src/utils/analyzer_utils.dart';
+import 'package:dart_code_linter/src/utils/analyzer_utils.dart';
 import 'package:glob/glob.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';

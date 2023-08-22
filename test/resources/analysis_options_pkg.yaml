@@ -1,6 +1,6 @@
 include: ./analysis_options_repo.yaml
 
-dart_code_metrics:
+dart_code_linter:
   metrics:
     metric-id1: 10
   metrics-exclude:

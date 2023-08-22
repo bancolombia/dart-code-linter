@@ -1,6 +1,6 @@
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/metrics_list/weight_of_class_metric.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/scope_visitor.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/metrics_list/weight_of_class_metric.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/scope_visitor.dart';
 import 'package:test/test.dart';
 
 import '../../../../helpers/file_resolver.dart';

@@ -1,12 +1,12 @@
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/metrics_list/number_of_methods_metric.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/metrics_list/number_of_parameters_metric.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/models/metric_documentation.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/models/metric_value.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/models/entity_type.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/models/lint_file_report.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/models/report.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/reporters/utility_selector.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/metrics_list/number_of_methods_metric.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/metrics_list/number_of_parameters_metric.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_documentation.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_value.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/entity_type.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/lint_file_report.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/report.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/reporters/utility_selector.dart';
 import 'package:test/test.dart';
 
 import '../../../../stubs_builders.dart';

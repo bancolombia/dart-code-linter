@@ -1,6 +1,6 @@
 a {
   text-decoration: none;
-  color: var(--dart-code-metrics-link-default-color);
+  color: var(--dart-code-linter-link-default-color);
 }
 
 a:hover {
@@ -8,7 +8,7 @@ a:hover {
 }
 
 .metric-header {
-  margin-bottom: var(--dart-code-metrics-margin-top);
+  margin-bottom: var(--dart-code-linter-margin-top);
   font-size: 18px;
 }
 
@@ -24,29 +24,29 @@ a:hover {
 }
 
 .metrics-total-table {
-  width: var(--dart-code-metrics-total-table-width);
-  border-top: var(--dart-code-metrics-border-width) solid var(--dart-code-metrics-total-table-border-color);
-  border-left: var(--dart-code-metrics-border-width) solid var(--dart-code-metrics-total-table-border-color);
+  width: var(--dart-code-linter-total-table-width);
+  border-top: var(--dart-code-linter-border-width) solid var(--dart-code-linter-total-table-border-color);
+  border-left: var(--dart-code-linter-border-width) solid var(--dart-code-linter-total-table-border-color);
 }
 
 .metrics-total-table th,
 .metrics-total-table td {
-  padding: var(--dart-code-metrics-common-padding);
-  border-right: var(--dart-code-metrics-border-width) solid var(--dart-code-metrics-total-table-border-color);
+  padding: var(--dart-code-linter-common-padding);
+  border-right: var(--dart-code-linter-border-width) solid var(--dart-code-linter-total-table-border-color);
 }
 
 .metrics-total-table td {
-  border-bottom: var(--dart-code-metrics-border-width) solid var(--dart-code-metrics-total-table-border-color);
+  border-bottom: var(--dart-code-linter-border-width) solid var(--dart-code-linter-total-table-border-color);
 }
 
 .metrics-total-table th {
-  border-bottom: 2px solid var(--dart-code-metrics-total-table-border-color);
+  border-bottom: 2px solid var(--dart-code-linter-total-table-border-color);
 }
 
 .metrics-total-table tr th:first-child,
 .metrics-total-table tr td:first-child {
   text-align: left;
-  min-width: var(--dart-code-metrics-total-table-cell-width);
+  min-width: var(--dart-code-linter-total-table-cell-width);
 }
 
 .metrics-total-table tr td {
@@ -54,7 +54,7 @@ a:hover {
 }
 
 .metrics-total-table tr th:not(:first-child) {
-  width: var(--dart-code-metrics-total-table-cell-width);
+  width: var(--dart-code-linter-total-table-cell-width);
 }
 
 .metrics-total-table tr td:not(:first-child) {
@@ -62,7 +62,7 @@ a:hover {
 }
 
 .metrics-totals {
-  width: var(--dart-code-metrics-totals-width);
+  width: var(--dart-code-linter-totals-width);
 }
 
 .metrics-totals .metrics-total + .metrics-total {
@@ -70,13 +70,13 @@ a:hover {
 }
 
 .metrics-total {
-  padding: var(--dart-code-metrics-common-padding) 12px;
-  background-color: var(--dart-code-metrics-total-bg-color);
+  padding: var(--dart-code-linter-common-padding) 12px;
+  background-color: var(--dart-code-linter-total-bg-color);
 }
 
 .metrics-total--violations,
 .with-violations {
-  background-color: var(--dart-code-metrics-violations-bg-color);
+  background-color: var(--dart-code-linter-violations-bg-color);
 }
 
 .metrics-total__count {
@@ -84,50 +84,50 @@ a:hover {
 }
 
 .metrics-source-code {
-  margin-top: var(--dart-code-metrics-margin-top);
-  border: var(--dart-code-metrics-border-width) solid var(--dart-code-metrics-source-code-border-color);
+  margin-top: var(--dart-code-linter-margin-top);
+  border: var(--dart-code-linter-border-width) solid var(--dart-code-linter-source-code-border-color);
 }
 
 .metrics-source-code__header td {
-  padding: var(--dart-code-metrics-common-padding);
-  font-family: var(--dart-code-metrics-font-family);
+  padding: var(--dart-code-linter-common-padding);
+  font-family: var(--dart-code-linter-font-family);
   font-weight: 800;
   font-size: 12px;
   letter-spacing: .083em;
   text-transform: uppercase;
-  border-bottom: var(--dart-code-metrics-border-width) solid var(--dart-code-metrics-source-code-border-color);
+  border-bottom: var(--dart-code-linter-border-width) solid var(--dart-code-linter-source-code-border-color);
 }
 
 .metrics-source-code__number-lines {
-  width: var(--dart-code-metrics-source-code-number-lines-width);
-  border-right: var(--dart-code-metrics-border-width) solid var(--dart-code-metrics-source-code-border-color);
+  width: var(--dart-code-linter-source-code-number-lines-width);
+  border-right: var(--dart-code-linter-border-width) solid var(--dart-code-linter-source-code-border-color);
   text-align: right
 }
 
 .metrics-source-code__number {
   padding: 0 4px;
   text-decoration: none;
-  color: var(--dart-code-metrics-link-default-color);
-  line-height: var(--dart-code-metrics-source-code-text-height);
+  color: var(--dart-code-linter-link-default-color);
+  line-height: var(--dart-code-linter-source-code-text-height);
 }
 
 .metrics-source-code__number:hover {
-  color: var(--dart-code-metrics-link-default-color-hover);
+  color: var(--dart-code-linter-link-default-color-hover);
 }
 
 .metrics-source-code__number:focus-within {
-  background-color: var(--dart-code-metrics-link-default-color);
-  color: var(--dart-code-metrics-link-default-color-focus-within);
+  background-color: var(--dart-code-linter-link-default-color);
+  color: var(--dart-code-linter-link-default-color-focus-within);
 }
 
 .metrics-source-code__body .metrics-source-code__number-lines {
-  padding: var(--dart-code-metrics-common-padding) 4px;
+  padding: var(--dart-code-linter-common-padding) 4px;
 }
 
 .metrics-source-code__complexity {
-  width: var(--dart-code-metrics-source-code-complexity-width);
-  padding: var(--dart-code-metrics-common-padding) 0;
-  border-right: var(--dart-code-metrics-border-width) solid var(--dart-code-metrics-source-code-border-color);
+  width: var(--dart-code-linter-source-code-complexity-width);
+  padding: var(--dart-code-linter-common-padding) 0;
+  border-right: var(--dart-code-linter-border-width) solid var(--dart-code-linter-source-code-border-color);
 }
 
 pre.prettyprint.prettyprint {
@@ -138,17 +138,17 @@ pre.prettyprint.prettyprint {
 }
 
 .metrics-source-code__text {
-  height: var(--dart-code-metrics-source-code-text-height);
-  padding: 0 var(--dart-code-metrics-common-padding);
-  line-height: var(--dart-code-metrics-source-code-text-height);
+  height: var(--dart-code-linter-source-code-text-height);
+  padding: 0 var(--dart-code-linter-common-padding);
+  line-height: var(--dart-code-linter-source-code-text-height);
 }
 
 .metrics-source-code__text::after {
   content: "";
   position: absolute;
-  left: var(--dart-code-metrics-source-code-text-after-left);
-  width: var(--dart-code-metrics-source-code-text-after-width);
-  height: var(--dart-code-metrics-source-code-text-height);
+  left: var(--dart-code-linter-source-code-text-after-left);
+  width: var(--dart-code-linter-source-code-text-after-width);
+  height: var(--dart-code-linter-source-code-text-height);
   background-color: inherit;
   z-index: -1;
 }
@@ -160,8 +160,8 @@ pre.prettyprint.prettyprint {
 
 .metrics-source-code__icon {
   position: relative; /* for .metrics-source-code__tooltip */
-  width: var(--dart-code-metrics-source-code-icon-size);
-  height: var(--dart-code-metrics-source-code-icon-size);
+  width: var(--dart-code-linter-source-code-icon-size);
+  height: var(--dart-code-linter-source-code-icon-size);
 }
 
 .metrics-source-code__icon--issue {
@@ -176,23 +176,23 @@ pre.prettyprint.prettyprint {
 .metrics-source-code__tooltip {
   position: absolute; /* containing block: .metrics-source-code__icon */
   left: 0;
-  bottom: var(--dart-code-metrics-source-code-tooltip-bottom);
-  min-width: var(--dart-code-metrics-source-code-tooltip-width);
+  bottom: var(--dart-code-linter-source-code-tooltip-bottom);
+  min-width: var(--dart-code-linter-source-code-tooltip-width);
   padding:
-    calc(var(--dart-code-metrics-source-code-tooltip-padding) / 2)
-    var(--dart-code-metrics-source-code-tooltip-padding);
+    calc(var(--dart-code-linter-source-code-tooltip-padding) / 2)
+    var(--dart-code-linter-source-code-tooltip-padding);
   border-radius: 2px;
   font-size: 12px;
-  font-family: var(--dart-code-metrics-font-family);
-  background-color: var(--dart-code-metrics-source-code-tooltip-bg-color);
+  font-family: var(--dart-code-linter-font-family);
+  background-color: var(--dart-code-linter-source-code-tooltip-bg-color);
   box-shadow:
-    0 2px 8px 0 var(--dart-code-metrics-source-code-tooltip-shadow-color),
-    0 0 1px 0 var(--dart-code-metrics-source-code-tooltip-shadow-color);
+    0 2px 8px 0 var(--dart-code-linter-source-code-tooltip-shadow-color),
+    0 0 1px 0 var(--dart-code-linter-source-code-tooltip-shadow-color);
   transition:
-    transform var(--dart-code-metrics-source-code-tooltip-transition-duration),
-    opacity var(--dart-code-metrics-source-code-tooltip-transition-duration),
-    visibility var(--dart-code-metrics-source-code-tooltip-transition-duration);
-  transform: translate(0, var(--dart-code-metrics-source-code-tooltip-arrow-size));
+    transform var(--dart-code-linter-source-code-tooltip-transition-duration),
+    opacity var(--dart-code-linter-source-code-tooltip-transition-duration),
+    visibility var(--dart-code-linter-source-code-tooltip-transition-duration);
+  transform: translate(0, var(--dart-code-linter-source-code-tooltip-arrow-size));
   visibility: hidden;
   opacity: 0;
   z-index: -1;
@@ -201,21 +201,21 @@ pre.prettyprint.prettyprint {
 .metrics-source-code__tooltip::after {
   content: "";
   position: absolute;
-  left: var(--dart-code-metrics-source-code-tooltip-arrow-left);
-  bottom: var(--dart-code-metrics-source-code-tooltip-arrow-bottom);
+  left: var(--dart-code-linter-source-code-tooltip-arrow-left);
+  bottom: var(--dart-code-linter-source-code-tooltip-arrow-bottom);
   display: block;
-  width: var(--dart-code-metrics-source-code-tooltip-arrow-size);
-  height: var(--dart-code-metrics-source-code-tooltip-arrow-size);
-  background-color: var(--dart-code-metrics-source-code-tooltip-bg-color);
+  width: var(--dart-code-linter-source-code-tooltip-arrow-size);
+  height: var(--dart-code-linter-source-code-tooltip-arrow-size);
+  background-color: var(--dart-code-linter-source-code-tooltip-bg-color);
   transform: rotate(45deg);
-  z-index: calc(var(--dart-code-metrics-source-code-tooltip-z-index) - 1);
+  z-index: calc(var(--dart-code-linter-source-code-tooltip-z-index) - 1);
 }
 
 .metrics-source-code__icon:hover .metrics-source-code__tooltip {
   transform: translate(0, 0);
   visibility: visible;
   opacity: 1;
-  z-index: var(--dart-code-metrics-source-code-tooltip-z-index);
+  z-index: var(--dart-code-linter-source-code-tooltip-z-index);
 }
 
 .metrics-source-code__tooltip-title {
@@ -228,79 +228,79 @@ pre.prettyprint.prettyprint {
 }
 
 .metrics-source-code__tooltip-level--alarm {
-  color: rgba(var(--dart-code-metrics-source-code-color-attention-complexity), 1);
+  color: rgba(var(--dart-code-linter-source-code-color-attention-complexity), 1);
 }
 
 .metrics-source-code__tooltip-level--warning {
-  color: rgba(var(--dart-code-metrics-source-code-color-warning-complexity), 1);
+  color: rgba(var(--dart-code-linter-source-code-color-warning-complexity), 1);
 }
 
 .metrics-source-code__tooltip-level--noted {
-  color: rgba(var(--dart-code-metrics-source-code-color-noted-complexity), 1);
+  color: rgba(var(--dart-code-linter-source-code-color-noted-complexity), 1);
 }
 
 .metrics-source-code__tooltip-level--none {
-  color: rgba(var(--dart-code-metrics-source-code-color-normal-complexity), 1);
+  color: rgba(var(--dart-code-linter-source-code-color-normal-complexity), 1);
 }
 
 .metrics-source-code__code {
   position: relative;
-  padding: var(--dart-code-metrics-common-padding);
-  line-height: var(--dart-code-metrics-source-code-text-height);
+  padding: var(--dart-code-linter-common-padding);
+  line-height: var(--dart-code-linter-source-code-text-height);
 }
 
 .metrics-source-code__line--normal-complexity {
   background-color: rgba(
-    var(--dart-code-metrics-source-code-color-normal-complexity),
-    var(--dart-code-metrics-source-code-line-bg-color-alpha)
+    var(--dart-code-linter-source-code-color-normal-complexity),
+    var(--dart-code-linter-source-code-line-bg-color-alpha)
   );
 }
 
 .metrics-source-code__line--noted-complexity {
   background-color: rgba(
-    var(--dart-code-metrics-source-code-color-noted-complexity),
-    var(--dart-code-metrics-source-code-line-bg-color-alpha)
+    var(--dart-code-linter-source-code-color-noted-complexity),
+    var(--dart-code-linter-source-code-line-bg-color-alpha)
   );
 }
 
 .metrics-source-code__line--warning-complexity {
   background-color: rgba(
-    var(--dart-code-metrics-source-code-color-warning-complexity),
-    var(--dart-code-metrics-source-code-line-bg-color-alpha)
+    var(--dart-code-linter-source-code-color-warning-complexity),
+    var(--dart-code-linter-source-code-line-bg-color-alpha)
   );
 }
 
 .metrics-source-code__line--attention-complexity {
   background-color: rgba(
-    var(--dart-code-metrics-source-code-color-attention-complexity),
-    var(--dart-code-metrics-source-code-line-bg-color-alpha)
+    var(--dart-code-linter-source-code-color-attention-complexity),
+    var(--dart-code-linter-source-code-line-bg-color-alpha)
   );
 }
 
 .metrics-source-code__text--normal-complexity {
   background-color: rgba(
-    var(--dart-code-metrics-source-code-color-normal-complexity),
-    var(--dart-code-metrics-source-code-text-bg-color-alpha)
+    var(--dart-code-linter-source-code-color-normal-complexity),
+    var(--dart-code-linter-source-code-text-bg-color-alpha)
   );
 }
 
 .metrics-source-code__text--noted-complexity {
   background-color: rgba(
-    var(--dart-code-metrics-source-code-color-noted-complexity),
-    var(--dart-code-metrics-source-code-text-bg-color-alpha)
+    var(--dart-code-linter-source-code-color-noted-complexity),
+    var(--dart-code-linter-source-code-text-bg-color-alpha)
   );
 }
 
 .metrics-source-code__text--warning-complexity {
   background-color: rgba(
-    var(--dart-code-metrics-source-code-color-warning-complexity),
-    var(--dart-code-metrics-source-code-text-bg-color-alpha)
+    var(--dart-code-linter-source-code-color-warning-complexity),
+    var(--dart-code-linter-source-code-text-bg-color-alpha)
   );
 }
 
 .metrics-source-code__text--attention-complexity {
   background-color: rgba(
-    var(--dart-code-metrics-source-code-color-attention-complexity),
-    var(--dart-code-metrics-source-code-text-bg-color-alpha)
+    var(--dart-code-linter-source-code-color-attention-complexity),
+    var(--dart-code-linter-source-code-text-bg-color-alpha)
   );
 }

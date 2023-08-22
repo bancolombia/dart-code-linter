@@ -21,7 +21,7 @@ Issue createIssue({
 /// Returns a url of a page containing documentation associated with [pattern]
 Uri documentation(Pattern pattern) => Uri(
       scheme: 'https',
-      host: 'dcm.dev',
+      host: 'localhost',
       pathSegments: [
         'docs',
         'individuals',

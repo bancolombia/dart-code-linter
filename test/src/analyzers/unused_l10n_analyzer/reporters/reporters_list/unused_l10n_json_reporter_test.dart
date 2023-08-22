@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dart_code_metrics/src/analyzers/unused_l10n_analyzer/models/unused_l10n_file_report.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_l10n_analyzer/models/unused_l10n_issue.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_l10n_analyzer/reporters/reporters_list/json/unused_l10n_json_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/unused_l10n_analyzer/models/unused_l10n_file_report.dart';
+import 'package:dart_code_linter/src/analyzers/unused_l10n_analyzer/models/unused_l10n_issue.dart';
+import 'package:dart_code_linter/src/analyzers/unused_l10n_analyzer/reporters/reporters_list/json/unused_l10n_json_reporter.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:source_span/source_span.dart';
 import 'package:test/test.dart';

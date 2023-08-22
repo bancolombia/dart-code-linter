@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:dart_code_metrics/src/analyzers/unused_l10n_analyzer/reporters/reporters_list/console/unused_l10n_console_reporter.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_l10n_analyzer/unused_l10n_analyzer.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_l10n_analyzer/unused_l10n_config.dart';
+import 'package:dart_code_linter/src/analyzers/unused_l10n_analyzer/reporters/reporters_list/console/unused_l10n_console_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/unused_l10n_analyzer/unused_l10n_analyzer.dart';
+import 'package:dart_code_linter/src/analyzers/unused_l10n_analyzer/unused_l10n_config.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 

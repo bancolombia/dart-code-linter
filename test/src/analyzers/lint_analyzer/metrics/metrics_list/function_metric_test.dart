@@ -1,9 +1,9 @@
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/models/function_metric.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/models/metric_documentation.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/models/function_type.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/models/scoped_function_declaration.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/function_metric.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_documentation.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/function_type.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/scoped_function_declaration.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 

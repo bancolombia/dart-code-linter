@@ -1,3 +1,3 @@
-dart_code_metrics:
+dart_code_linter:
   extends:
-    - package:dart_code_metrics_presets/flutter_all.yaml
+    - package:dart_code_linter_presets/flutter_all.yaml

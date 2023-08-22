@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/reporters/reporters_list/code_climate/lint_code_climate_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/reporters/reporters_list/code_climate/lint_code_climate_reporter.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 

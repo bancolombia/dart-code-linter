@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:dart_code_metrics/src/analyzers/unused_files_analyzer/reporters/reporter_factory.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_files_analyzer/reporters/reporters_list/console/unused_files_console_reporter.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_files_analyzer/reporters/reporters_list/json/unused_files_json_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/unused_files_analyzer/reporters/reporter_factory.dart';
+import 'package:dart_code_linter/src/analyzers/unused_files_analyzer/reporters/reporters_list/console/unused_files_console_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/unused_files_analyzer/reporters/reporters_list/json/unused_files_json_reporter.dart';
 import 'package:test/test.dart';
 
 void main() {

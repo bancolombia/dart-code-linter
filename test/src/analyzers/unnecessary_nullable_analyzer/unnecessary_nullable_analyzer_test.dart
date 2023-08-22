@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:dart_code_metrics/src/analyzers/unnecessary_nullable_analyzer/models/unnecessary_nullable_file_report.dart';
-import 'package:dart_code_metrics/src/analyzers/unnecessary_nullable_analyzer/reporters/reporters_list/console/unnecessary_nullable_console_reporter.dart';
-import 'package:dart_code_metrics/src/analyzers/unnecessary_nullable_analyzer/unnecessary_nullable_analyzer.dart';
-import 'package:dart_code_metrics/src/analyzers/unnecessary_nullable_analyzer/unnecessary_nullable_config.dart';
+import 'package:dart_code_linter/src/analyzers/unnecessary_nullable_analyzer/models/unnecessary_nullable_file_report.dart';
+import 'package:dart_code_linter/src/analyzers/unnecessary_nullable_analyzer/reporters/reporters_list/console/unnecessary_nullable_console_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/unnecessary_nullable_analyzer/unnecessary_nullable_analyzer.dart';
+import 'package:dart_code_linter/src/analyzers/unnecessary_nullable_analyzer/unnecessary_nullable_config.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 

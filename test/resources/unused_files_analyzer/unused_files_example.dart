@@ -1,4 +1,4 @@
-import 'package:dart_code_metrics/config.dart';
+import 'package:dart_code_linter/config.dart';
 
 import 'unconditional_file.dart' if (dart.library.html) 'conditional_file.dart'
     as file;

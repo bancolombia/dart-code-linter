@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/lint_analyzer.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/lint_config.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/models/lint_file_report.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/models/report.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/lint_analyzer.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/lint_config.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/lint_file_report.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/report.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 

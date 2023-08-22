@@ -53,7 +53,7 @@ class LintAnalysisOptionsValidator {
   static List<_RuleWithSpan>? _getRulesList(YamlNode node) {
     if (node is YamlMap) {
       final rules =
-          (node['dart_code_metrics'] as YamlMap?)?['rules'] as YamlNode?;
+          (node['dart_code_linter'] as YamlMap?)?['rules'] as YamlNode?;
       if (rules is YamlList) {
         return rules.nodes
             // ignore: avoid_types_on_closure_parameters
@@ -118,7 +118,7 @@ class LintAnalysisOptionsValidator {
             severity: Severity.warning,
             message:
                 "'${rule.ruleName}' is not recognized as a valid rule name.",
-            documentation: Uri.parse('https://dcm.dev/docs/individuals/rules'),
+            documentation: Uri.parse('https://localhost/rules'),
             location: _copySpanWithOffset(rule.span),
           ),
         );
@@ -132,7 +132,7 @@ class LintAnalysisOptionsValidator {
             severity: Severity.warning,
             message:
                 "'${rule.ruleName}' requires a config to produce any diagnostics.",
-            documentation: Uri.parse('https://dcm.dev/docs/individuals/rules'),
+            documentation: Uri.parse('https://localhost/rules'),
             location: _copySpanWithOffset(rule.span),
           ),
         );

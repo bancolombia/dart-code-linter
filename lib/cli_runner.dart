@@ -1,3 +1,3 @@
-export 'package:dart_code_metrics/src/cli/cli_runner.dart';
-export 'package:dart_code_metrics/src/logger/logger.dart';
-export 'package:dart_code_metrics/src/logger/progress.dart';
+export 'package:dart_code_linter/src/cli/cli_runner.dart';
+export 'package:dart_code_linter/src/logger/logger.dart';
+export 'package:dart_code_linter/src/logger/progress.dart';

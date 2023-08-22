@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:dart_code_metrics/src/analyzers/unused_files_analyzer/reporters/reporters_list/console/unused_files_console_reporter.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_files_analyzer/unused_files_analyzer.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_files_analyzer/unused_files_config.dart';
+import 'package:dart_code_linter/src/analyzers/unused_files_analyzer/reporters/reporters_list/console/unused_files_console_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/unused_files_analyzer/unused_files_analyzer.dart';
+import 'package:dart_code_linter/src/analyzers/unused_files_analyzer/unused_files_config.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 

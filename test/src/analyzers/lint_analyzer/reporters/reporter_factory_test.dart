@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/reporters/reporter_factory.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/reporters/reporters_list/code_climate/lint_code_climate_reporter.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/reporters/reporters_list/console/lint_console_reporter.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/reporters/reporters_list/github/lint_github_reporter.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/reporters/reporters_list/html/lint_html_reporter.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/reporters/reporters_list/json/lint_json_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/reporters/reporter_factory.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/reporters/reporters_list/code_climate/lint_code_climate_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/reporters/reporters_list/console/lint_console_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/reporters/reporters_list/github/lint_github_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/reporters/reporters_list/html/lint_html_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/reporters/reporters_list/json/lint_json_reporter.dart';
 import 'package:test/test.dart';
 
 void main() {

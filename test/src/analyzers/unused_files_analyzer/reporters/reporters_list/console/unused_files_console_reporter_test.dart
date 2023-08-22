@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_files_analyzer/models/unused_files_file_report.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_files_analyzer/reporters/reporters_list/console/unused_files_console_reporter.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_files_analyzer/reporters/unused_files_report_params.dart';
+import 'package:dart_code_linter/src/analyzers/unused_files_analyzer/models/unused_files_file_report.dart';
+import 'package:dart_code_linter/src/analyzers/unused_files_analyzer/reporters/reporters_list/console/unused_files_console_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/unused_files_analyzer/reporters/unused_files_report_params.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 

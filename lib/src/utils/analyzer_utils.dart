@@ -58,7 +58,7 @@ ByteStore createByteStore(ResourceProvider resourceProvider) {
 
   const memoryCacheSize = miB * 128;
 
-  final stateLocation = resourceProvider.getStateLocation('.dart-code-metrics');
+  final stateLocation = resourceProvider.getStateLocation('.dart-code-linter');
   if (stateLocation != null) {
     return MemoryCachingByteStore(
       EvictingFileByteStore(stateLocation.path, giB),

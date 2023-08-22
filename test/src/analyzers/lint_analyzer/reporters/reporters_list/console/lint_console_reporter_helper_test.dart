@@ -1,8 +1,8 @@
 import 'package:ansicolor/ansicolor.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/models/issue.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/models/severity.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/reporters/reporters_list/console/lint_console_reporter_helper.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/issue.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/severity.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/reporters/reporters_list/console/lint_console_reporter_helper.dart';
 import 'package:source_span/source_span.dart';
 import 'package:test/test.dart';
 

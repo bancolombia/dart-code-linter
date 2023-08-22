@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/reporters/lint_report_params.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/reporters/reporters_list/json/lint_json_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/reporters/lint_report_params.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/reporters/reporters_list/json/lint_json_reporter.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 

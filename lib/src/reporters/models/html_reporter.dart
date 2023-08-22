@@ -43,10 +43,10 @@ abstract class HtmlReporter<T extends FileReport, P> extends Reporter<T, P> {
   /// Copies resources for styling the HTML report.
   Future<void> copyResources() async {
     const resources = [
-      'package:dart_code_metrics/src/reporters/resources/variables.css',
-      'package:dart_code_metrics/src/reporters/resources/normalize.css',
-      'package:dart_code_metrics/src/reporters/resources/base.css',
-      'package:dart_code_metrics/src/reporters/resources/main.css',
+      'package:dart_code_linter/src/reporters/resources/variables.css',
+      'package:dart_code_linter/src/reporters/resources/normalize.css',
+      'package:dart_code_linter/src/reporters/resources/base.css',
+      'package:dart_code_linter/src/reporters/resources/main.css',
     ];
 
     for (final resource in resources) {

@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:dart_code_metrics/src/cli/commands/base_command.dart';
-import 'package:dart_code_metrics/src/cli/exceptions/invalid_argument_exception.dart';
+import 'package:dart_code_linter/src/cli/commands/base_command.dart';
+import 'package:dart_code_linter/src/cli/exceptions/invalid_argument_exception.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 

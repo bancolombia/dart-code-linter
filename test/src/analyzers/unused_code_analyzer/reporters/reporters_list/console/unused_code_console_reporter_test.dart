@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_code_analyzer/models/unused_code_file_report.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_code_analyzer/models/unused_code_issue.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_code_analyzer/reporters/reporters_list/console/unused_code_console_reporter.dart';
-import 'package:dart_code_metrics/src/analyzers/unused_code_analyzer/reporters/unused_code_report_params.dart';
+import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/models/unused_code_file_report.dart';
+import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/models/unused_code_issue.dart';
+import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/reporters/reporters_list/console/unused_code_console_reporter.dart';
+import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/reporters/unused_code_report_params.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:source_span/source_span.dart';
 import 'package:test/test.dart';

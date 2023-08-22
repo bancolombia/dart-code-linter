@@ -5,9 +5,9 @@
 }
 
 body {
-  padding: var(--dart-code-metrics-body-padding);
-  font-family: var(--dart-code-metrics-font-family);
-  font-size: var(--dart-code-metrics-body-font-size);
+  padding: var(--dart-code-linter-body-padding);
+  font-family: var(--dart-code-linter-font-family);
+  font-size: var(--dart-code-linter-body-font-size);
 }
 
 table {

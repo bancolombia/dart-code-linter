@@ -8,7 +8,7 @@ analyzer:
   plugins:
     - code_checker
 
-dart_code_metrics:
+dart_code_linter:
   metrics:
     metric-id1: 20
     metric-id2: 30

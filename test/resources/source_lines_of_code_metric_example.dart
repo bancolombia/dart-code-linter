@@ -1,9 +1,9 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:dart_code_metrics/src/metrics/function_metric.dart';
-import 'package:dart_code_metrics/src/metrics/metric_computation_result.dart';
-import 'package:dart_code_metrics/src/models/scoped_class_declaration.dart';
-import 'package:dart_code_metrics/src/models/scoped_function_declaration.dart';
+import 'package:dart_code_linter/src/metrics/function_metric.dart';
+import 'package:dart_code_linter/src/metrics/metric_computation_result.dart';
+import 'package:dart_code_linter/src/models/scoped_class_declaration.dart';
+import 'package:dart_code_linter/src/models/scoped_function_declaration.dart';
 
 void simpleFunction() {
   // simple comment

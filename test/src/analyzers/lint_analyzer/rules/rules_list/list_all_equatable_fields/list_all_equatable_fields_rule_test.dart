@@ -1,7 +1,7 @@
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/models/severity.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/rules/models/rule_type.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/rules/rule_utils.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/rules/rules_list/list_all_equatable_fields/list_all_equatable_fields_rule.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/severity.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/rules/models/rule_type.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/rules/rule_utils.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/rules/rules_list/list_all_equatable_fields/list_all_equatable_fields_rule.dart';
 import 'package:test/test.dart';
 
 import '../../../../../helpers/rule_test_helper.dart';

@@ -1,5 +1,5 @@
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/base_visitors/source_code_visitor.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/metrics/scope_visitor.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/base_visitors/source_code_visitor.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/scope_visitor.dart';
 import 'package:test/test.dart';
 
 import '../../../../../helpers/file_resolver.dart';

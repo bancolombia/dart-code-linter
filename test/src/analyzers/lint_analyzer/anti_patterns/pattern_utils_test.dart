@@ -1,6 +1,6 @@
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/anti_patterns/models/pattern.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/anti_patterns/pattern_utils.dart';
-import 'package:dart_code_metrics/src/analyzers/lint_analyzer/models/severity.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/anti_patterns/models/pattern.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/anti_patterns/pattern_utils.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/severity.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:source_span/source_span.dart';
 import 'package:test/test.dart';
@@ -14,7 +14,7 @@ void main() {
       () {
         const id = 'pattern-id';
         final documentationUrl = Uri.parse(
-          'https://dcm.dev/docs/individuals/anti-patterns/pattern-id',
+          'https://localhost/anti-patterns/pattern-id',
         );
         const severity = Severity.none;
 
@@ -62,7 +62,7 @@ void main() {
       expect(
         documentation(pattern1).toString(),
         equals(
-          'https://dcm.dev/docs/individuals/anti-patterns/$patternId1',
+          'https://localhost/anti-patterns/$patternId1',
         ),
       );
       expect(

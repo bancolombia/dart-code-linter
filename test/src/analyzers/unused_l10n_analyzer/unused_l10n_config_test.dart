@@ -1,11 +1,11 @@
-import 'package:dart_code_metrics/src/analyzers/unused_l10n_analyzer/unused_l10n_config.dart';
-import 'package:dart_code_metrics/src/config_builder/models/analysis_options.dart';
+import 'package:dart_code_linter/src/analyzers/unused_l10n_analyzer/unused_l10n_config.dart';
+import 'package:dart_code_linter/src/config_builder/models/analysis_options.dart';
 import 'package:test/test.dart';
 
 const _options = AnalysisOptions('path', {
   'analyzer': {
     'exclude': ['test/resources/**'],
-    'plugins': ['dart_code_metrics'],
+    'plugins': ['dart_code_linter'],
     'strong-mode': {'implicit-casts': false, 'implicit-dynamic': false},
   },
 });
