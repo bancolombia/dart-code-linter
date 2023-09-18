@@ -5,7 +5,7 @@ Dart Code Linter (DCL) is a powerful toolkit designed to enhance your developmen
 
 ## Links
 
-- See [CHANGELOG.md](./CHANGELOG.md) for major/breaking updates, and [releases](https://github.com/bancolombia/dart-code-linter/releases) for a detailed version history.
+- See [CHANG ELOG.md](./CHANGELOG.md) for major/breaking updates, and [releases](https://github.com/bancolombia/dart-code-linter/releases) for a detailed version history.
 - To contribute, please read [CONTRIBUTING.md](./CONTRIBUTING.md) first.
 - Please [open an issue](https://github.com/bancolombia/dart-code-linter/issues/new/choose) if anything is missing or unclear in this documentation.
 
@@ -130,9 +130,7 @@ It will produce a result in one of the format:
 - HTML
 - JSON
 
-Console report example:
 
-![Console report example](https://raw.githubusercontent.com/dart-code-checker/dart-code-metrics/master/assets/analyze-console-report.png)
 
 #### Check unnecessary nullable parameters
 
@@ -150,9 +148,7 @@ It will produce a result in one of the format:
 - Console
 - JSON
 
-Console report example:
 
-![Console report example](https://raw.githubusercontent.com/dart-code-checker/dart-code-metrics/master/assets/unnecessary-nullable-console-report.png)
 
 #### Check unused files
 
@@ -170,9 +166,6 @@ It will produce a result in one of the format:
 - Console
 - JSON
 
-Console report example:
-
-![Console report example](https://raw.githubusercontent.com/dart-code-checker/dart-code-metrics/master/assets/unused-files-console-report.png)
 
 #### Check unused localization
 
@@ -207,9 +200,6 @@ It will produce a result in one of the format:
 - Console
 - JSON
 
-Console report example:
-
-![Console report example](https://raw.githubusercontent.com/dart-code-checker/dart-code-metrics/master/assets/unused-l10n-console-report.png)
 
 #### Check unused code
 
@@ -227,9 +217,7 @@ It will produce a result in one of the format:
 - Console
 - JSON
 
-Console report example:
 
-![Console report example](https://raw.githubusercontent.com/dart-code-checker/dart-code-metrics/master/assets/unused-code-console-report.png)
 
 ## Troubleshooting
 
