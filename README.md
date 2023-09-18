@@ -5,7 +5,7 @@ Dart Code Linter (DCL) is a powerful toolkit designed to enhance your developmen
 
 ## Links
 
-- See [CHANG ELOG.md](./CHANGELOG.md) for major/breaking updates, and [releases](https://github.com/bancolombia/dart-code-linter/releases) for a detailed version history.
+- See [CHANGELOG.md](./CHANGELOG.md) for major/breaking updates, and [releases](https://github.com/bancolombia/dart-code-linter/releases) for a detailed version history.
 - To contribute, please read [CONTRIBUTING.md](./CONTRIBUTING.md) first.
 - Please [open an issue](https://github.com/bancolombia/dart-code-linter/issues/new/choose) if anything is missing or unclear in this documentation.
 
