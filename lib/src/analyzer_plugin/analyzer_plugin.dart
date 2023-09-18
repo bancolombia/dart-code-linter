@@ -6,7 +6,6 @@ import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer_plugin/plugin/plugin.dart';
 import 'package:analyzer_plugin/protocol/protocol_generated.dart' as plugin;
-import 'package:http/http.dart';
 import 'package:uuid/uuid.dart';
 
 import '../analyzers/lint_analyzer/lint_analysis_config.dart';
@@ -59,10 +58,6 @@ class AnalyzerPlugin extends ServerPlugin {
     } else {
       uuid = file.readAsStringSync();
     }
-    // TODO: Realizar implementacion propia de API.
-    // final uri = Uri.parse('');
-
-    // post(uri, body: {'uuid': uuid, 'version': packageVersion}).ignore();
   }
 
   @override
