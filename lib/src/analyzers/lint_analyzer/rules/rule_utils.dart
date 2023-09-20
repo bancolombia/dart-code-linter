@@ -27,7 +27,7 @@ Issue createIssue({
 /// Returns a url of a page containing documentation associated with [rule]
 Uri documentation(Rule rule) => Uri(
       scheme: 'https',
-      host: 'localhost',
+      host: 'dcm.dev',
       pathSegments: [
         'docs',
         'individuals',

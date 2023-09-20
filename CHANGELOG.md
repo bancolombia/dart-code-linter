@@ -1,4 +1,6 @@
 # Changelog
+## 1.0.2
+- Fix: report in IDE'S is adjusted
 ## 1.0.1
 - Automated publishing of packages to pub.dev
 

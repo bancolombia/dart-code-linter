@@ -1,3 +1,4 @@
 dart_code_linter:
   extends:
-    - package:dart_code_linter_presets/all.yaml
+    - ./dart_all.yaml
+    - ./flutter_all.yaml
