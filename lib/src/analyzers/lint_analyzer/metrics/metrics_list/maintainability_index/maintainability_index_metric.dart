@@ -2,18 +2,18 @@ import 'dart:math';
 
 import 'package:analyzer/dart/ast/ast.dart';
 
-import '../../models/entity_type.dart';
-import '../../models/internal_resolved_unit_result.dart';
-import '../../models/scoped_class_declaration.dart';
-import '../../models/scoped_function_declaration.dart';
-import '../metric_utils.dart';
-import '../models/function_metric.dart';
-import '../models/metric_computation_result.dart';
-import '../models/metric_documentation.dart';
-import '../models/metric_value.dart';
-import 'cyclomatic_complexity/cyclomatic_complexity_metric.dart';
-import 'halstead_volume/halstead_volume_metric.dart';
-import 'source_lines_of_code/source_lines_of_code_metric.dart';
+import '../../../models/entity_type.dart';
+import '../../../models/internal_resolved_unit_result.dart';
+import '../../../models/scoped_class_declaration.dart';
+import '../../../models/scoped_function_declaration.dart';
+import '../../metric_utils.dart';
+import '../../models/function_metric.dart';
+import '../../models/metric_computation_result.dart';
+import '../../models/metric_documentation.dart';
+import '../../models/metric_value.dart';
+import '../cyclomatic_complexity/cyclomatic_complexity_metric.dart';
+import '../halstead_volume/halstead_volume_metric.dart';
+import '../source_lines_of_code/source_lines_of_code_metric.dart';
 
 const _documentation = MetricDocumentation(
   name: 'Maintainability Index',

@@ -1,14 +1,14 @@
 import '../models/entity_type.dart';
 import 'metrics_list/cyclomatic_complexity/cyclomatic_complexity_metric.dart';
 import 'metrics_list/halstead_volume/halstead_volume_metric.dart';
-import 'metrics_list/lines_of_code_metric.dart';
-import 'metrics_list/maintainability_index_metric.dart';
+import 'metrics_list/lines_of_code/lines_of_code_metric.dart';
+import 'metrics_list/maintainability_index/maintainability_index_metric.dart';
 import 'metrics_list/maximum_nesting_level/maximum_nesting_level_metric.dart';
-import 'metrics_list/number_of_methods_metric.dart';
-import 'metrics_list/number_of_parameters_metric.dart';
+import 'metrics_list/number_of_methods/number_of_methods_metric.dart';
+import 'metrics_list/number_of_parameters/number_of_parameters_metric.dart';
 import 'metrics_list/source_lines_of_code/source_lines_of_code_metric.dart';
 import 'metrics_list/technical_debt/technical_debt_metric.dart';
-import 'metrics_list/weight_of_class_metric.dart';
+import 'metrics_list/weight_of_class/weight_of_class_metric.dart';
 import 'models/metric.dart';
 
 final _implementedMetrics = <String, Metric Function(Map<String, Object>)>{

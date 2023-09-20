@@ -11,7 +11,7 @@ import 'package:uuid/uuid.dart';
 import '../analyzers/lint_analyzer/lint_analysis_config.dart';
 import '../analyzers/lint_analyzer/lint_analysis_options_validator.dart';
 import '../analyzers/lint_analyzer/lint_analyzer.dart';
-import '../analyzers/lint_analyzer/metrics/metrics_list/number_of_parameters_metric.dart';
+import '../analyzers/lint_analyzer/metrics/metrics_list/number_of_parameters/number_of_parameters_metric.dart';
 import '../analyzers/lint_analyzer/metrics/metrics_list/source_lines_of_code/source_lines_of_code_metric.dart';
 import '../config_builder/config_builder.dart';
 import '../config_builder/models/analysis_options.dart';

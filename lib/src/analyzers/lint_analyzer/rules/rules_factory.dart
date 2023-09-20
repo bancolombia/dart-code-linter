@@ -19,7 +19,6 @@ import 'rules_list/avoid_nested_conditional_expressions/avoid_nested_conditional
 import 'rules_list/avoid_non_ascii_symbols/avoid_non_ascii_symbols_rule.dart';
 import 'rules_list/avoid_non_null_assertion/avoid_non_null_assertion_rule.dart';
 import 'rules_list/avoid_passing_async_when_sync_expected/avoid_passing_async_when_sync_expected_rule.dart';
-import 'rules_list/avoid_preserve_whitespace_false/avoid_preserve_whitespace_false_rule.dart';
 import 'rules_list/avoid_redundant_async/avoid_redundant_async_rule.dart';
 import 'rules_list/avoid_redundant_async_on_load/avoid_redundant_async_on_load_rule.dart';
 import 'rules_list/avoid_returning_widgets/avoid_returning_widgets_rule.dart';
@@ -37,7 +36,6 @@ import 'rules_list/avoid_wrapping_in_padding/avoid_wrapping_in_padding_rule.dart
 import 'rules_list/ban_name/ban_name_rule.dart';
 import 'rules_list/binary_expression_operand_order/binary_expression_operand_order_rule.dart';
 import 'rules_list/check_for_equals_in_render_object_setters/check_for_equals_in_render_object_setters_rule.dart';
-import 'rules_list/component_annotation_arguments_ordering/component_annotation_arguments_ordering_rule.dart';
 import 'rules_list/consistent_update_render_object/consistent_update_render_object_rule.dart';
 import 'rules_list/correct_game_instantiating/correct_game_instantiating_rule.dart';
 import 'rules_list/double_literal_format/double_literal_format_rule.dart';
@@ -70,7 +68,6 @@ import 'rules_list/prefer_iterable_of/prefer_iterable_of_rule.dart';
 import 'rules_list/prefer_last/prefer_last_rule.dart';
 import 'rules_list/prefer_match_file_name/prefer_match_file_name_rule.dart';
 import 'rules_list/prefer_moving_to_variable/prefer_moving_to_variable_rule.dart';
-import 'rules_list/prefer_on_push_cd_strategy/prefer_on_push_cd_strategy_rule.dart';
 import 'rules_list/prefer_provide_intl_description/prefer_provide_intl_description_rule.dart';
 import 'rules_list/prefer_single_widget_per_file/prefer_single_widget_per_file_rule.dart';
 import 'rules_list/prefer_static_class/prefer_static_class_rule.dart';
@@ -104,7 +101,6 @@ final _implementedRules = <String, Rule Function(Map<String, Object>)>{
   AvoidNonNullAssertionRule.ruleId: AvoidNonNullAssertionRule.new,
   AvoidPassingAsyncWhenSyncExpectedRule.ruleId:
       AvoidPassingAsyncWhenSyncExpectedRule.new,
-  AvoidPreserveWhitespaceFalseRule.ruleId: AvoidPreserveWhitespaceFalseRule.new,
   AvoidRedundantAsyncRule.ruleId: AvoidRedundantAsyncRule.new,
   AvoidRedundantAsyncOnLoadRule.ruleId: AvoidRedundantAsyncOnLoadRule.new,
   AvoidReturningWidgetsRule.ruleId: AvoidReturningWidgetsRule.new,
@@ -126,8 +122,6 @@ final _implementedRules = <String, Rule Function(Map<String, Object>)>{
   BinaryExpressionOperandOrderRule.ruleId: BinaryExpressionOperandOrderRule.new,
   CheckForEqualsInRenderObjectSettersRule.ruleId:
       CheckForEqualsInRenderObjectSettersRule.new,
-  ComponentAnnotationArgumentsOrderingRule.ruleId:
-      ComponentAnnotationArgumentsOrderingRule.new,
   ConsistentUpdateRenderObjectRule.ruleId: ConsistentUpdateRenderObjectRule.new,
   CorrectGameInstantiatingRule.ruleId: CorrectGameInstantiatingRule.new,
   DoubleLiteralFormatRule.ruleId: DoubleLiteralFormatRule.new,
@@ -162,7 +156,6 @@ final _implementedRules = <String, Rule Function(Map<String, Object>)>{
   PreferLastRule.ruleId: PreferLastRule.new,
   PreferMatchFileNameRule.ruleId: PreferMatchFileNameRule.new,
   PreferMovingToVariableRule.ruleId: PreferMovingToVariableRule.new,
-  PreferOnPushCdStrategyRule.ruleId: PreferOnPushCdStrategyRule.new,
   PreferProvideIntlDescriptionRule.ruleId: PreferProvideIntlDescriptionRule.new,
   PreferSingleWidgetPerFileRule.ruleId: PreferSingleWidgetPerFileRule.new,
   PreferStaticClassRule.ruleId: PreferStaticClassRule.new,
