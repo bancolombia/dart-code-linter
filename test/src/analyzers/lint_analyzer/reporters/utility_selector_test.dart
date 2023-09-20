@@ -1,5 +1,5 @@
-import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/metrics_list/number_of_methods_metric.dart';
-import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/metrics_list/number_of_parameters_metric.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/metrics_list/number_of_methods/number_of_methods_metric.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/metrics_list/number_of_parameters/number_of_parameters_metric.dart';
 import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_documentation.dart';
 import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_value.dart';
 import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
