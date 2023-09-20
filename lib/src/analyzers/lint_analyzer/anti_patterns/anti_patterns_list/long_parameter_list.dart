@@ -3,7 +3,7 @@
 import '../../../../utils/node_utils.dart';
 import '../../lint_utils.dart';
 import '../../metrics/metric_utils.dart';
-import '../../metrics/metrics_list/number_of_parameters_metric.dart';
+import '../../metrics/metrics_list/number_of_parameters/number_of_parameters_metric.dart';
 import '../../models/function_type.dart';
 import '../../models/internal_resolved_unit_result.dart';
 import '../../models/issue.dart';
