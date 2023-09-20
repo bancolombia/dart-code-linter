@@ -7,8 +7,15 @@ on:
     - 'v[0-9]+.[0-9]+.[0-9]+*' 
 jobs:
   publish:
+    name: 'Publish to pub.dev'
+    environment: pub.dev
     permissions:
       id-token: write
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
-    with:
-      environment: pub.dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dart-lang/setup-dart@d6a63dab3335f427404425de0fbfed4686d93c4f
+      - name: Install dependencies
+        run: dart pub get
+      - name: Publish to pub.dev
+        run: dart pub publish -f

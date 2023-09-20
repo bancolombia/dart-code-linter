@@ -46,7 +46,6 @@ class PreferTrailingCommaRule extends CommonRule {
   @override
   Iterable<Issue> check(InternalResolvedUnitResult source) {
     final visitor = _Visitor(source.lineInfo, _itemsBreakpoint);
-
     source.unit.visitChildren(visitor);
 
     return visitor.nodes

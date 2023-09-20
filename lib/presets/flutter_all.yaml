@@ -1,3 +1,35 @@
 dart_code_linter:
-  extends:
-    - package:dart_code_linter_presets/flutter_all.yaml
+  rules:
+    - prefer-define-hero-tag
+    - always-remove-listener
+    - avoid-border-all
+    - avoid-returning-widgets
+    - avoid-shrink-wrap-in-lists
+    - avoid-unnecessary-setstate
+    - avoid-expanded-as-spacer
+    - avoid-wrapping-in-padding
+    - check-for-equals-in-render-object-setters
+    - consistent-update-render-object
+    - prefer-const-border-radius
+    - prefer-correct-edge-insets-constructor
+    - prefer-extracting-callbacks
+    - prefer-single-widget-per-file
+    - prefer-using-list-view
+    - use-setstate-synchronously
+    - avoid-incomplete-copy-with
+    - proper-super-calls
+    - add-copy-with
+    - dispose-fields
+    - avoid-empty-setstate
+    - prefer-widget-private-members
+    - prefer-action-button-tooltip
+    - avoid-inherited-widget-in-initstate
+    - avoid-late-context
+    - avoid-state-constructors
+    - avoid-unnecessary-stateful-widgets
+    - avoid-stateless-widget-initialized-fields
+    - avoid-missing-image-alt
+    - avoid-unnecessary-overrides-in-state
+    - prefer-dedicated-media-query-methods
+    - avoid-recursive-widget-calls
+    - prefer-text-rich
