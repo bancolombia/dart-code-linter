@@ -1,0 +1,1 @@
+# no-boolean-literal-compare

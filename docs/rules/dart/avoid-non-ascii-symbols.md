@@ -1,0 +1,1 @@
+# avoid-non-ascii-symbols

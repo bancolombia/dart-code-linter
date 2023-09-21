@@ -1,0 +1,1 @@
+# avoid-unnecessary-type-assertions

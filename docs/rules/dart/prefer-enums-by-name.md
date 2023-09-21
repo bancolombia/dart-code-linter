@@ -1,0 +1,1 @@
+# prefer-enums-by-name

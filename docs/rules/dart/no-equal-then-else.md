@@ -1,0 +1,1 @@
+# no-equal-then-else
