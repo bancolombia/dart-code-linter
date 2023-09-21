@@ -10,13 +10,13 @@ import '../../../lint_utils.dart';
 import '../../../models/internal_resolved_unit_result.dart';
 import '../../../models/issue.dart';
 import '../../../models/severity.dart';
-import '../../models/common_rule.dart';
+import '../../models/dart_rule.dart';
 import '../../node_utils.dart';
 import '../../rule_utils.dart';
 
 part 'visitor.dart';
 
-class PreferMatchFileNameRule extends CommonRule {
+class PreferMatchFileNameRule extends DartRule {
   static const String ruleId = 'prefer-match-file-name';
   static final _onlySymbolsRegex = RegExp('[^a-zA-Z0-9]');
 

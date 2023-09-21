@@ -21,10 +21,9 @@ Issue createIssue({
 /// Returns a url of a page containing documentation associated with [pattern]
 Uri documentation(Pattern pattern) => Uri(
       scheme: 'https',
-      host: 'localhost',
+      host: 'dcl.apps.bancolombia.com',
       pathSegments: [
         'docs',
-        'individuals',
         'anti-patterns',
         pattern.id,
       ],

@@ -1,4 +1,6 @@
 # Changelog
+## 1.1.1
+- Rename common rules to dart rules
 ## 1.1.0
 - Added new presets
 - Removed Angular framework rules

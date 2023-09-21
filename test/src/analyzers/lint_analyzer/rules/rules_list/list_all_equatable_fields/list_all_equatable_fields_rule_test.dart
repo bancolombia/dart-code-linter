@@ -13,7 +13,7 @@ void main() {
     test('is of type common', () {
       expect(
         ListAllEquatableFieldsRule().type,
-        equals(RuleType.common),
+        equals(RuleType.dart),
       );
     });
 

@@ -8,12 +8,12 @@ import '../../../lint_utils.dart';
 import '../../../models/internal_resolved_unit_result.dart';
 import '../../../models/issue.dart';
 import '../../../models/severity.dart';
-import '../../models/common_rule.dart';
+import '../../models/dart_rule.dart';
 import '../../rule_utils.dart';
 
 part 'visitor.dart';
 
-class AvoidNonAsciiSymbolsRule extends CommonRule {
+class AvoidNonAsciiSymbolsRule extends DartRule {
   static const String ruleId = 'avoid-non-ascii-symbols';
 
   static const _warning = 'Avoid using non ascii symbols in string literals.';

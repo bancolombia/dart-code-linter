@@ -10,12 +10,12 @@ import '../../../models/internal_resolved_unit_result.dart';
 import '../../../models/issue.dart';
 import '../../../models/replacement.dart';
 import '../../../models/severity.dart';
-import '../../models/common_rule.dart';
+import '../../models/dart_rule.dart';
 import '../../rule_utils.dart';
 
 part 'visitor.dart';
 
-class BinaryExpressionOperandOrderRule extends CommonRule {
+class BinaryExpressionOperandOrderRule extends DartRule {
   static const String ruleId = 'binary-expression-operand-order';
 
   static const _warningMessage =

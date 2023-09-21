@@ -8,14 +8,14 @@ import '../../../lint_utils.dart';
 import '../../../models/internal_resolved_unit_result.dart';
 import '../../../models/issue.dart';
 import '../../../models/severity.dart';
-import '../../models/common_rule.dart';
+import '../../models/dart_rule.dart';
 import '../../rule_utils.dart';
 
 part 'visitor.dart';
 
 // Inspired by TSLint (https://palantir.github.io/tslint/rules/no-empty/)
 
-class NoEmptyBlockRule extends CommonRule {
+class NoEmptyBlockRule extends DartRule {
   static const String ruleId = 'no-empty-block';
 
   static const _warning =

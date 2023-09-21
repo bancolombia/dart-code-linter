@@ -12,14 +12,14 @@ import '../../../models/internal_resolved_unit_result.dart';
 import '../../../models/issue.dart';
 import '../../../models/replacement.dart';
 import '../../../models/severity.dart';
-import '../../models/common_rule.dart';
+import '../../models/dart_rule.dart';
 import '../../rule_utils.dart';
 
 part 'visitor.dart';
 
 // Inspired by TSLint (https://palantir.github.io/tslint/rules/no-boolean-literal-compare/)
 
-class NoBooleanLiteralCompareRule extends CommonRule {
+class NoBooleanLiteralCompareRule extends DartRule {
   static const String ruleId = 'no-boolean-literal-compare';
 
   static const _warning =

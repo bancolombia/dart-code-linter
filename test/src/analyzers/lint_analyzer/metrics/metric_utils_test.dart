@@ -13,7 +13,7 @@ void main() {
       expect(
         documentation(metricId1).toString(),
         equals(
-          'https://localhost/metrics/metric-id-1',
+          'https://dcl.apps.bancolombia.com/docs/metrics/metric-id-1',
         ),
       );
       expect(

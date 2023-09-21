@@ -9,14 +9,14 @@ import '../../../lint_utils.dart';
 import '../../../models/internal_resolved_unit_result.dart';
 import '../../../models/issue.dart';
 import '../../../models/severity.dart';
-import '../../models/common_rule.dart';
+import '../../models/dart_rule.dart';
 import '../../rule_utils.dart';
 import '../common_config.dart';
 
 part 'config_parser.dart';
 part 'visitor.dart';
 
-class PreferStaticClassRule extends CommonRule {
+class PreferStaticClassRule extends DartRule {
   static const String ruleId = 'prefer-static-class';
 
   static const _warningMessage =

@@ -11,13 +11,13 @@ import '../../../models/internal_resolved_unit_result.dart';
 import '../../../models/issue.dart';
 import '../../../models/replacement.dart';
 import '../../../models/severity.dart';
-import '../../models/common_rule.dart';
+import '../../models/dart_rule.dart';
 import '../../rule_utils.dart';
 
 part 'config_parser.dart';
 part 'visitor.dart';
 
-class ArgumentsOrderingRule extends CommonRule {
+class ArgumentsOrderingRule extends DartRule {
   static const String ruleId = 'arguments-ordering';
 
   static const _warningMessage =
