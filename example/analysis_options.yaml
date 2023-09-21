@@ -1,0 +1,67 @@
+analyzer:
+  language:
+    strict-inference: true
+    strict-raw-types: true
+  # Dart Code Linter uses plugins api from the analyzer
+  # to provide issues highlight in the IDE. If you don't want the issues
+  # to be shown and need only the CLI, you need to remove the section below.
+  plugins:
+    - dart_code_linter
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+
+dart_code_linter:
+  # Dart Code Linter supports presets. The config from a preset will be merged
+  # with the config listed in this file. The config listed here has a higher priority.
+  # Any rule can be simply disabled by setting `- rule-name: false`.
+  # Uncomment the section below to see how presets work.
+  # extends:
+  #   - package:dart_code_linter/presets/all.yaml
+
+  # To enabled anti-patterns and metrics in the analysis report, uncomment the sections below.
+  # Metric violations are not shown in the IDE.
+  # anti-patterns:
+  #   - long-method
+  #   - long-parameter-list
+  # metrics:
+  #   cyclomatic-complexity: 20
+  #   maintainability-index: 50
+  #   maximum-nesting: 5
+  #   number-of-parameters: 5
+  #   source-lines-of-code: 50
+  #   technical-debt:
+  #     threshold: 16
+  #     todo-cost: 4
+  #     ignore-cost: 8
+  #     ignore-for-file-cost: 16
+  #     as-dynamic-cost: 16
+  #     deprecated-annotations-cost: 2
+  #     file-nullsafety-migration-cost: 2
+  #     unit-type: "hours"
+
+  # Dart Code Linter provides custom configurable rules.
+  # The rules have a `kebab-case` naming instead of 
+  # `snake_case` intentionally in order for you to identify,
+  # whether the rule is from Dart Code Metrics or the standard analyzer.
+  # All rules share basic configuration like `exclude` section,
+  # but some also have a rule-specific one.
+  # Not all rules are listed here, the full list can be found on our website: https://github.com/bancolombia/dart-code-linter/wiki/Rules
+  rules:
+    - avoid-top-level-members-in-tests
+    - avoid-collection-methods-with-unrelated-types
+    - avoid-missing-enum-constant-in-map
+    - avoid-unnecessary-type-assertions
+    - avoid-unnecessary-type-casts
+    - avoid-unused-parameters
+    - newline-before-return
+    - no-boolean-literal-compare
+    - no-empty-block
+    - no-equal-then-else
+    - prefer-async-await
+    - prefer-correct-type-name:
+        max-length: 44
+    - prefer-match-file-name:
+        exclude:
+          - test/**
+    - prefer-trailing-comma
