@@ -1,1 +1,0 @@
-# prefer-static-class

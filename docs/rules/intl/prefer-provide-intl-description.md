@@ -1,1 +1,0 @@
-# prefer-provide-intl-description

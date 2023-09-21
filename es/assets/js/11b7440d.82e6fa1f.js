@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdart_code_linter=self.webpackChunkdart_code_linter||[]).push([[1113],{2647:e=>{e.exports=JSON.parse('{"label":"facebook","permalink":"/es/blog/tags/facebook","allTagsPath":"/es/blog/tags","count":1}')}}]);

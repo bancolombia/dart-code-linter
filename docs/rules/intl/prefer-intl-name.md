@@ -1,1 +1,0 @@
-# prefer-intl-name

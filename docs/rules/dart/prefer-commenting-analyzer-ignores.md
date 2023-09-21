@@ -1,1 +1,0 @@
-# prefer-commenting-analyzer-ignores
