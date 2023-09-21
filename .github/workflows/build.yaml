@@ -1,10 +1,5 @@
 name: "flutter-actions"
 on:
-  push:
-    branches:
-      - trunk
-      - feature/*
-      - fix/*
   pull_request:
     branches:
       - trunk
