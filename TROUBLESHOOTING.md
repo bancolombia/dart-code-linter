@@ -1,8 +1,8 @@
 # Troubleshooting
 
-**Note:** If the plugin is analyzing files it should not analyze (like `.dart_tool/` or an external package source code), please create [an issue](https://github.com/dart-code-checker/dart-code-metrics/issues/new?assignees=dkrutskikh&labels=question&template=question.md&title=%5BQuestion%5D+), it's most likely a bug.
+**Note:** If the plugin is analyzing files it should not analyze (like `.dart_tool/` or an external package source code), please create [an issue](https://github.com/bancolombia/dart-code-linter/issues), it's most likely a bug.
 
-If the plugin is not working as you'd expect it to work, please consider going through the following steps before creating [an issue](https://github.com/dart-code-checker/dart-code-metrics/issues/new?assignees=dkrutskikh&labels=question&template=question.md&title=%5BQuestion%5D+):
+If the plugin is not working as you'd expect it to work, please consider going through the following steps before creating [an issue](https://github.com/bancolombia/dart-code-linter/issues):
 
 1. Check that the plugin is added to an `analyzer` entry in the `analysis_options.yaml` as described in the [Configuration](./README.md#Configuration) section.
 

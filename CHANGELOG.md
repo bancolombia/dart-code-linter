@@ -1,4 +1,9 @@
 # Changelog
+## 1.1.0
+- Added new presets
+- Removed Angular framework rules
+- Added example
+
 ## 1.0.2
 - Fix: report in IDE'S is adjusted
 ## 1.0.1
