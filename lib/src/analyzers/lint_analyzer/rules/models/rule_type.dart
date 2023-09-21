@@ -4,7 +4,7 @@ class RuleType {
 
   const RuleType._(this.value);
 
-  static const common = RuleType._('common');
+  static const dart = RuleType._('dart');
   static const flutter = RuleType._('flutter');
   static const intl = RuleType._('intl');
   static const angular = RuleType._('angular');

@@ -14,7 +14,7 @@ void main() {
       () {
         const id = 'pattern-id';
         final documentationUrl = Uri.parse(
-          'https://localhost/anti-patterns/pattern-id',
+          'https://dcl.apps.bancolombia.com/docs/anti-patterns/pattern-id',
         );
         const severity = Severity.none;
 
@@ -62,7 +62,7 @@ void main() {
       expect(
         documentation(pattern1).toString(),
         equals(
-          'https://localhost/anti-patterns/$patternId1',
+          'https://dcl.apps.bancolombia.com/docs/anti-patterns/$patternId1',
         ),
       );
       expect(

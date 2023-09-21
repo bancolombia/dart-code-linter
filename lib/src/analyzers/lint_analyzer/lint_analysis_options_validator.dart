@@ -118,7 +118,8 @@ class LintAnalysisOptionsValidator {
             severity: Severity.warning,
             message:
                 "'${rule.ruleName}' is not recognized as a valid rule name.",
-            documentation: Uri.parse('https://localhost/rules'),
+            documentation:
+                Uri.parse('https://dcl.apps.bancolombia.com/docs/rules'),
             location: _copySpanWithOffset(rule.span),
           ),
         );
@@ -132,7 +133,8 @@ class LintAnalysisOptionsValidator {
             severity: Severity.warning,
             message:
                 "'${rule.ruleName}' requires a config to produce any diagnostics.",
-            documentation: Uri.parse('https://localhost/rules'),
+            documentation:
+                Uri.parse('https://dcl.apps.bancolombia.com/docs/rules'),
             location: _copySpanWithOffset(rule.span),
           ),
         );

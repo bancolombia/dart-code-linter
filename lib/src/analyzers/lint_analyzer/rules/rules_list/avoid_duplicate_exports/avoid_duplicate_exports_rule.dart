@@ -8,12 +8,12 @@ import '../../../lint_utils.dart';
 import '../../../models/internal_resolved_unit_result.dart';
 import '../../../models/issue.dart';
 import '../../../models/severity.dart';
-import '../../models/common_rule.dart';
+import '../../models/dart_rule.dart';
 import '../../rule_utils.dart';
 
 part 'visitor.dart';
 
-class AvoidDuplicateExportsRule extends CommonRule {
+class AvoidDuplicateExportsRule extends DartRule {
   static const ruleId = 'avoid-duplicate-exports';
   static const _issueMessage = 'Avoid declaring duplicate exports.';
 

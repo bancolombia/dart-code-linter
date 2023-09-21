@@ -8,12 +8,12 @@ import '../../../lint_utils.dart';
 import '../../../models/internal_resolved_unit_result.dart';
 import '../../../models/issue.dart';
 import '../../../models/severity.dart';
-import '../../models/common_rule.dart';
+import '../../models/dart_rule.dart';
 import '../../rule_utils.dart';
 
 part 'visitor.dart';
 
-class AvoidDynamicRule extends CommonRule {
+class AvoidDynamicRule extends DartRule {
   static const String ruleId = 'avoid-dynamic';
 
   static const _warning = 'Avoid using dynamic type.';
