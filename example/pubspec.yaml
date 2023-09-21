@@ -14,7 +14,9 @@ dependencies:
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
-  dart_code_linter: 1.0.1
+  #dart_code_linter: <USE-THE-LATEST-VERSION>
+  dart_code_linter: 
+    path: ../
   flutter_test:
     sdk: flutter
 
