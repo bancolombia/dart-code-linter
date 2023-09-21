@@ -1,0 +1,44 @@
+dart_code_linter:
+  rules:
+    - avoid-non-null-assertion
+    - avoid-dynamic
+    - avoid-returning-widgets
+    - avoid-nested-conditional-expressions
+    - avoid-unnecessary-type-casts
+    - avoid-unnecessary-conditionals
+    - avoid-unused-parameters
+    - missing-test-assertion
+    - newline-before-return
+    - no-boolean-literal-compare
+    - no-empty-block
+    - no-equal-then-else
+    - no-magic-number
+    - prefer-trailing-comma
+    - prefer-conditional-expressions
+    - prefer-immediate-return
+    - prefer-moving-to-variable
+    - format-comment:
+        only-doc-comments: true
+    - member-ordering:
+        order:
+          - constructors
+          - public-fields
+          - private-fields
+          - close-method
+          - dispose-method
+        widgets-order:
+          - constructor
+          - build-method
+          - init-state-method
+          - did-change-dependencies-method
+          - did-update-widget-method
+          - dispose-method
+        #Flutter
+    - always-remove-listener
+    - avoid-unnecessary-setstate
+    - prefer-extracting-callbacks
+    - prefer-using-list-view
+
+  anti-patterns:
+    - long-method
+    - long-parameter-list

@@ -1,0 +1,6 @@
+dart_code_linter:
+  rules:
+    - avoid-creating-vector-in-update
+    - avoid-initializing-in-on-mount
+    - avoid-redundant-async-on-load
+    - correct-game-instantiating
