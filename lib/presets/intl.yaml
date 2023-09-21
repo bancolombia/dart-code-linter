@@ -1,0 +1,5 @@
+dart_code_linter:
+  rules:
+    - prefer-intl-name
+    - prefer-provide-intl-description
+    - provide-correct-intl-args

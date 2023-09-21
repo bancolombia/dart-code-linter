@@ -1,0 +1,12 @@
+dart_code_linter:
+  metrics:
+    cyclomatic-complexity: 20
+    halstead-volume: 150
+    maintainability-index: 50
+    maximum-nesting-level: 5
+    number-of-parameters: 4
+    number-of-methods: 10
+    source-lines-of-code: 250
+  metrics-exclude:
+    - test/**
+
