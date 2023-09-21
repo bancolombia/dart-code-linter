@@ -27,10 +27,9 @@ Issue createIssue({
 /// Returns a url of a page containing documentation associated with [rule]
 Uri documentation(Rule rule) => Uri(
       scheme: 'https',
-      host: 'localhost',
+      host: 'dcl.apps.bancolombia.com',
       pathSegments: [
         'docs',
-        'individuals',
         'rules',
         rule.type.value,
         rule.id,
