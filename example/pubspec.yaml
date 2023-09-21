@@ -17,8 +17,6 @@ dev_dependencies:
 # dart_code_linter: <USE-THE-LATEST-VERSION>
   dart_code_linter:
     path: ../
-  flutter_test:
-    sdk: flutter
 
 flutter:
   uses-material-design: true
