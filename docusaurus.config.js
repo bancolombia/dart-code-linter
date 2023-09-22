@@ -107,7 +107,7 @@ const config = {
               },
               {
                 label: 'Presets',
-                to: '/docs/presets',
+                to: '/docs/configuration/presets',
               },
             ],
           },
