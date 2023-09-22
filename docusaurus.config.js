@@ -41,12 +41,12 @@ const config = {
           sidebarPath: require.resolve('./sidebars.js'),
 
           editUrl:
-            'https://github.com/bancolombia/dart-code-linter/tree/gh-pages',
+            'https://github.com/bancolombia/dart-code-linter/tree/gh-pages-source',
         },
         blog: {
           showReadingTime: true,
           editUrl:
-            'https://github.com/bancolombia/dart-code-linter/tree/gh-pages',
+            'https://github.com/bancolombia/dart-code-linter/tree/gh-pages-source',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),

@@ -1,47 +1,46 @@
 ---
 sidebar_position: 1
+title: Getting Started
 ---
+# Guia de inicio con DCL
 
-# Guia de inicio
 
-Let's discover **Docusaurus in less than 5 minutes**.
+Dart code Linter - DCL is a tool that helps improve the quality and consistency of Dart code by identifying and reporting problems, such as bugs and code that doesn't follow best practices. It also collects analytical data on the code through calculating code metrics and can be configured to set thresholds for these metrics.
 
-## Getting Started
+## Installation
+Installation
+To use DCL, add it as a dev dependency to your project:
 
-Get started by **creating a new site**.
-
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
-
-### What you'll need
-
-- [Node.js](https://nodejs.org/en/download/) version 16.14 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
-
-## Generate a new site
-
-Generate a new Docusaurus site using the **classic template**.
-
-The classic template will automatically be added to your project after you run the command:
-
-```bash
-npm init docusaurus@latest my-website classic
+```sh
+$ dart pub add --dev dart_code_linter
+```
+_or for a Flutter package_
+```sh
+$ flutter pub add --dev dart_code_linter
 ```
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+## Usage
+### CLI
 
-The command also installs all necessary dependencies you need to run Docusaurus.
+You can run DCL analysis from the console using the following command:
 
-## Start your site
-
-Run the development server:
-
-```bash
-cd my-website
-npm run start
+```sh
+$ dart pub run dart_code_metrics:metrics analyze lib
+```
+_or for a Flutter package_
+```sh
+$ flutter pub run dart_code_metrics:metrics analyze lib
 ```
 
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
+DCL also provides other commands such as check-unused-code and check-unused-files that can help you maintain the codebase. For more information on using DCL as a command-line tool, see the Command Line Interface documentation.
+### Analyzer plugin
 
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
+DCL can be used as a plugin for the Dart analyzer, providing instant feedback on found issues directly in your integrated development environment (IDE). For more information on using DCL as an analyzer plugin, see the Analyzer Plugin documentation.
+### Library (additional option)
 
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+You can use DCL as a library directly in your code. See this example for more information. This might be useful if you have a separate package for linting config and want to run DCL from that package's executable.
+## Next Steps
+
+- Learn about the [configuration options](/docs/configuration/) for customizing DCL's behavior.
+- Get familiar with the [Command Line Interface](/docs/cli/) for running DCL from the console.
+- Test existing [presets](/docs/configuration/presets)
