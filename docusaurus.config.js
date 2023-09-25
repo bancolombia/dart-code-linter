@@ -152,7 +152,15 @@ const config = {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
       },
-
+      algolia: {
+        appId: 'QWTQS8Z7VD',
+        apiKey: '550f018cc6605cd38b22775e427da2e5',
+        indexName: 'dcls-bancolombia-co',
+        contextualSearch: true,
+        searchParameters: {},
+        searchPagePath: 'search',
+  
+      },
     }),
 };
 
