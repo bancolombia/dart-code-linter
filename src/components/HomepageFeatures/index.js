@@ -4,12 +4,11 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Detect problemse',
+    title: 'Detect problems',
     subtitle: '1.',
     description: (
       <>
-        Quickly find and fix problems
-in your code.
+        Quickly find and fix problems in your code.
       </>
     ),
   },
@@ -18,7 +17,7 @@ in your code.
     subtitle: '2.',
     description: (
       <>
-        Detect places that need attention
+        Detect places that need attention.
       </>
     ),
   },
@@ -27,7 +26,7 @@ in your code.
     subtitle: '3.',
     description: (
       <>
-        Check if any code is unused
+        Check if any code is unused.
       </>
     ),
   },
@@ -36,7 +35,7 @@ in your code.
     subtitle: '4.',
     description: (
       <>
-        View problems with your favorite editor
+        View problems with your favorite editor.
       </>
     ),
   }
