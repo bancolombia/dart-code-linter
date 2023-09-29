@@ -1,0 +1,31 @@
+import Admonition from '@theme/Admonition';
+
+# Anti Patterns
+
+Available anti-patterns:
+<Admonition type="info" icon="-" title="long-method">
+  <p>
+    Long blocks of code are difficult to reuse and understand because they are usually responsible for more than one thing.
+
+  </p>
+</Admonition>
+
+<Admonition type="info" icon="-" title="long-parameter-list">
+  <p>
+    Long parameter lists are difficult to understand and use.
+
+
+  </p>
+</Admonition>
+
+## Configuration
+
+To enable an anti-pattern add its id to the anti-patterns entry. All anti-pattern have severity which can be overridden with severity config entry. For example,
+
+```analysis_options.yaml
+dart_code_linter:
+  anti-patterns:
+    - long-method:
+        severity: warning
+```
+will set severity to warning.
