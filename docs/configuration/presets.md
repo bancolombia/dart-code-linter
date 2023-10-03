@@ -1,10 +1,17 @@
 # Presets
 
-DCL includes 3 sets of predefined configurations:
+DCL includes 7 sets of predefined configurations:
 
-- All: contains all available lint rules for Dart and Flutter.
-- Dart: contains all lint rules applicable to any Dart app.
-- Flutter: contains all lint rules applicable to any Flutter app.
+- **All:** contains all available lint rules for Dart and Flutter.
+- **Dart:** contains all lint rules applicable to any Dart app.
+- **Flutter:** contains all lint rules applicable to any Flutter app.
+
+### Suggestions
+- **Recommended:** contains recommended Dart and Flutter rules (with an emphasis on finding errors).
+- **Recommended metrics:** contains recommended configured metrics.
+### Packages
+- **Flame:** contains lint rules for the Flame package.
+- **Intl:** contains lint rules for the Intl package.
 
 :::info
 
