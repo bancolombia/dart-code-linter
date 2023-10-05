@@ -1,0 +1,682 @@
+---
+sidebar_position: 5
+---
+import Admonition from '@theme/Admonition';
+
+# Rules
+
+:::tip
+
+General rules configuration is [described here](../configuration/configuring-rules).
+:::
+Rules are grouped by category to help you understand their purpose. Each rule has emojis denoting:
+
+- ⚙️ - this rule is configurable
+- 🛠 - some problems reported by this rule can be fixed by editor suggestions
+- ⚠️ - this rule is deprecated and will be removed in the next major release
+
+## Dart
+<Admonition type="info" icon="-" title="arguments-ordering">
+  <p>
+
+
+Enforces named argument order in function and constructor invocations to be the same as corresponding named parameter declaration order.
+style
+⚙️🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-banned-imports
+">
+  <p>
+
+Configure some imports that you want to ban.
+warning
+⚙️
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-cascade-after-if-null
+">
+  <p>
+
+Warns when a cascade expression is used after if null (??) binary expression without parentheses.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-collection-methods-with-unrelated-types
+">
+  <p>
+
+Avoid using collection methods with unrelated types, such as accessing a map of integers using a string key.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-double-slash-imports
+">
+  <p>
+
+Warns when an import/export directive contains a double slash.
+warning
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-duplicate-exports
+">
+  <p>
+
+Warns when a file has multiple exports declarations with the same URI.
+warning
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-dynamic
+">
+  <p>
+
+Warns when dynamic type is used as variable type in declaration, return type of a function, etc.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-global-state
+">
+  <p>
+Warns about usage mutable global variables.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-ignoring-return-values
+">
+  <p>
+
+Warns when a return value of a method or function invocation or a class instance property access is not used.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-late-keyword
+">
+  <p>
+
+Warns when a field or variable is declared with a late keyword.
+warning
+⚙️🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-missing-enum-constant-in-map
+">
+  <p>
+
+Warns when a enum constant is missing in a map declaration.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-nested-conditional-expressions
+">
+  <p>
+
+Warns about nested conditional expressions.
+style
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-non-ascii-symbols
+">
+  <p>
+
+Warns when a string literal contains non ascii characters.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-non-null-assertion
+">
+  <p>
+
+Warns when non null assertion operator ! (or “bang” operator) is used for a property access or method invocation. The operator check works at runtime and it may fail and throw a runtime exception.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-passing-async-when-sync-expected
+">
+  <p>
+
+Warns when an asynchronous function is used as an argument where a synchronous function is expected.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-redundant-async
+">
+  <p>
+
+Checks for redundant async in a method or function body.
+warning
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-throw-in-catch-block
+">
+  <p>
+
+Warns when call throw in a catch block.
+warning
+  </p>
+</Admonition>
+
+<Admonition type="info" icon="-" title="avoid-top-level-members-in-tests
+">
+  <p>
+
+Warns when a public top-level member (except the entrypoint) is declared inside a test file.
+warning
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-unnecessary-conditionals
+">
+  <p>
+
+Checks for unnessesary conditional expressions.
+warning
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-unnecessary-type-assertions
+">
+  <p>
+
+Warns about unnecessary usage of is and whereType operators.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-unnecessary-type-casts
+">
+  <p>
+
+Warns about unnecessary usage of as operators.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-unrelated-type-assertions
+">
+  <p>
+
+Warns about unrelated usages of is operators.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-unused-parameters
+">
+  <p>
+
+Checks for unused parameters inside a function or method body.
+warning
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="ban-name
+">
+  <p>
+
+Configure some names that you want to ban.
+warning
+⚙️
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="binary-expression-operand-order
+">
+  <p>
+
+Warns when a literal value is on the left hand side in a binary expressions.
+style
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="double-literal-format
+">
+  <p>
+
+Checks that double literals should begin with 0. instead of just ., and should not end with a trailing 0.
+style
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="format-comment
+">
+  <p>
+
+Prefer format comments like sentences.
+style
+⚙️🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="list-all-equatable-fields
+">
+  <p>
+
+Warns when a field is not added to props getter of a class that extends Equtable or EquatableMixin.
+warning
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="member-ordering
+">
+  <p>
+
+Enforces ordering for a class members.
+style
+⚙️🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="missing-test-assertion
+">
+  <p>
+
+Warns that there is no assertion in the test.
+warning
+⚙️
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="newline-before-return
+">
+  <p>
+
+Enforces blank line between statements and return in a block.
+style
+⚙️🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="no-boolean-literal-compare
+">
+  <p>
+
+Warns on comparison to a boolean literal, as in x == true.
+style
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="no-empty-block
+">
+  <p>
+
+Disallows empty blocks except catch clause block.
+style
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="no-equal-arguments
+">
+  <p>
+
+Warns when equal arguments are passed to a function or method invocation.
+warning
+⚙️
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="no-equal-then-else
+">
+  <p>
+
+Warns when if statement has equal then and else statements or conditional expression has equal then and else expressions.
+warning
+🛠
+  </p>
+</Admonition>
+
+<Admonition type="info" icon="-" title="no-magic-number
+">
+  <p>
+
+Warns against using number literals outside of named constants or variables.
+warning
+⚙️
+  </p>
+</Admonition>
+
+
+<Admonition type="info" icon="-" title="no-object-declaration
+">
+  <p>
+
+Warns when a class member is declared with Object type.
+style
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-async-await
+">
+  <p>
+
+Recommends to use async/await syntax to handle a Future result instead of .then() invocation.
+style
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-commenting-analyzer-ignores
+">
+  <p>
+
+Warns when // ignore: comments are left without any additional description why this ignore is applied.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-conditional-expressions
+">
+  <p>
+
+Recommends to use a conditional expression instead of assigning to the same thing or return statement in each branch of an if statement.
+style
+⚙️🛠
+  </p>
+</Admonition>
+
+<Admonition type="info" icon="-" title="prefer-correct-identifier-length
+">
+  <p>
+
+Warns when an identifier name length is very short or long.
+style
+⚙️
+  </p>
+</Admonition>
+
+<Admonition type="info" icon="-" title="prefer-correct-test-file-name
+">
+  <p>
+
+Warns if the file within /test contains a main, but the file name doesn't end with _test.dart.
+warning
+  </p>
+</Admonition>
+
+<Admonition type="info" icon="-" title="prefer-correct-type-name
+">
+  <p>
+
+Type name should only contain alphanumeric characters, start with an uppercase character and span between min-length and max-length characters in length.
+style
+⚙️
+  </p>
+</Admonition>
+
+
+<Admonition type="info" icon="-" title="prefer-enums-by-name
+">
+  <p>
+
+Since Dart 2.15 it's possible to use byName method on enum values prop instead of searching the value with firstWhere.
+style
+  </p>
+</Admonition>
+
+<Admonition type="info" icon="-" title="prefer-first
+">
+  <p>
+
+Use first to gets the first element.
+style
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-immediate-return
+">
+  <p>
+
+Warns when a method or a function returns a variable declared right before the return statement.
+style
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-iterable-of
+">
+  <p>
+
+Warns when List.from() factory is used instead of List.of().
+warning
+🛠
+
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-last
+">
+  <p>
+
+Use last to gets the last element.
+style
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-match-file-name
+">
+  <p>
+
+Warns when a file name does not match the class name.
+warning
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-moving-to-variable
+">
+  <p>
+
+Warns when a property access or a method invocation start with duplicated chains of other invocations / accesses inside a single function or method block.
+warning
+⚙️
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-static-class
+">
+  <p>
+
+Suggests to use static class member instead of global constants, variables and functions.
+style
+⚙️
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-trailing-comma">
+  <p>
+
+Checks for a trailing comma for arguments, parameters, enum values and collections.
+style
+⚙️🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="tag-name">
+  <p>
+Warns when a tag name does not match the class name.
+warning
+⚙️🛠
+
+  </p>
+</Admonition>
+
+## Flutter specific
+
+<Admonition type="info" icon="-" title="always-remove-listener
+">
+  <p>
+
+Warns when an event listener is added but never removed.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-border-all
+">
+  <p>
+
+Avoid using Border.all constructor.
+performance
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-returning-widgets
+">
+  <p>
+
+Warns when a method or function returns a Widget or subclass of a Widget.
+warning
+⚙️
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-shrink-wrap-in-lists
+">
+  <p>
+
+Warns when a ListView widget with shrinkWrap parameter is wrapped in a Column, Row or another ListView widget.
+performance
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-unnecessary-setstate
+">
+  <p>
+
+
+Warns when setState is called inside initState, didUpdateWidget or build methods and when it is called from a sync method that is called inside those methods.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="use-setstate-synchronously">
+  <p>
+
+
+Warns when setState is called past an await point.
+warning
+⚙️
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-expanded-as-spacer
+">
+  <p>
+
+Avoid using Expanded widget as Spacer.
+warning
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-wrapping-in-padding
+">
+  <p>
+
+Warns when a widget is wrapped in a Padding widget but has a padding settings by itself.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="check-for-equals-in-render-object-setters
+">
+  <p>
+
+Warns when a RenderObject setter doesn't have an equality check for the new value.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="consistent-update-render-object
+">
+  <p>
+
+Warns when an updateRenderObject method is absent or doesn't update all fields set in createRenderObject.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-const-border-radius
+">
+  <p>
+
+Warns when a non-const border radius is used.
+performance
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-correct-edge-insets-constructor
+">
+  <p>
+
+Prefer correct EdgeInsets constructor.
+style
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-extracting-callbacks
+">
+  <p>
+
+Warns about inline callbacks in a widget tree and suggest to extract them to a widget method.
+style
+⚙️
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-single-widget-per-file
+">
+  <p>
+
+Warns when a file contains more than a single widget.
+style
+⚙️
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-using-list-view
+">
+  <p>
+
+Warns when a Column widget with only children parameter is wrapped in a SingleChildScrollView widget.
+performance
+  </p>
+</Admonition>
+
+## Flame
+
+Lints for the [Flame package](https://pub.dev/packages/flame).
+<Admonition type="info" icon="-" title="avoid-creating-vector-in-update
+">
+  <p>
+Warns when a Vector2 is created inside a Component's update method.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-initializing-in-on-mount
+">
+  <p>
+Warns when a late final variable is being initialized in the Component's onMount method.
+warning
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="avoid-redundant-async-on-load
+">
+  <p>
+Warns when a Component's onLoad method can be made sync.
+warning
+🛠
+  </p>
+</Admonition>
+
+<!-- <Admonition type="info" icon="-" title="correct-game-instantiating
+">
+  <p>
+Warns when a game is instantiated in a stateless widget build method.
+warning
+🛠
+  </p>
+</Admonition> -->
+
+## Intl specific
+<Admonition type="info" icon="-" title="prefer-intl-name
+">
+  <p>
+Recommends to use ClassName_ClassMemberName pattern for Intl methods name argument.
+style
+🛠
+  </p>
+</Admonition>
+<Admonition type="info" icon="-" title="prefer-provide-intl-description
+">
+  <p>
+Warns when a Intl method invoked without a description.
+warning
+  </p>
+</Admonition>
+
+<!-- <Admonition type="info" icon="-" title="provide-correct-intl-args
+">
+  <p>
+Warns when the Intl.message() invocation has incorrect args.
+ warning</p>
+
+</Admonition> -->
+
+
+
+
+
+
+

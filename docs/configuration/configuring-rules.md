@@ -1,6 +1,6 @@
 # Configuring Rules
 
-Rules are one of the core building blocks of DCM. A rule validates if your code meets a certain expectation, and what to do if it does not meet that expectation.
+Rules are one of the core building blocks of DCL. A rule validates if your code meets a certain expectation, and what to do if it does not meet that expectation.
 
 All rules can be configured with severity, exclude and include options, but some rules also have additional configuration options specific to that rule and are marked with ⚙️.
 ## Enabling a Rule
@@ -68,7 +68,7 @@ All files are included by default.
 
 ## Disabling a Rule
 
-If you include an analysis options file (which has DCM configuration) or use a preset, you might want to disable some of the included rules. Disabling individual rules is similar to enabling them, but the name of a rule should be followed by either : false or : true.
+If you include an analysis options file (which has DCL configuration) or use a preset, you might want to disable some of the included rules. Disabling individual rules is similar to enabling them, but the name of a rule should be followed by either : false or : true.
 
 Here's an example of an analysis options file that has a disabled rule:
 ```analysis_options.yaml
