@@ -6,11 +6,11 @@ import Admonition from '@theme/Admonition';
 # Command Line Interface
 To use the package as a command-line tool, run:
 ~~~
-$ flutter pub run dart_code_metrics:metrics <command> lib
+$ flutter pub run dart_code_linter:metrics <command> lib
 ~~~
 Alternatively, the package can be installed globally:
 ~~~
-$ flutter pub global activate dart_code_metrics 
+$ flutter pub global activate dart_code_linter
 $ metrics <command> lib
 ~~~
 
@@ -31,16 +31,16 @@ You need to configure rules entry in the analysis_options.yaml to have rules rep
 ## Available commands
 | Command | Example of use | Short description |
 |----------|----------|----------|
-| analyze | dart run dart_code_metrics:metrics analyze lib   | Reports code metrics, rules and anti-patterns violations. |
-| check-unnecessary-nullable   | dart run dart_code_metrics:metrics check-unnecessary-nullable lib   | Checks unnecessary nullable parameters.  
-check-unused-files    | dart run dart_code_metrics:metrics check-unused-files lib   | Checks unused *.dart files.   |
-| check-unused-l10n    | dart run dart_code_metrics:metrics check-unused-l10n lib   | Checks unused localization in *.dart files.   |
-| check-unused-code    | dart run dart_code_metrics:metrics check-unused-code lib   | Checks unused code in *.dart files.   |
+| analyze | dart run dart_code_linter:metrics analyze lib   | Reports code metrics, rules and anti-patterns violations. |
+| check-unnecessary-nullable   | dart run dart_code_linter:metrics check-unnecessary-nullable lib   | Checks unnecessary nullable parameters.  
+check-unused-files    | dart run dart_code_linter:metrics check-unused-files lib   | Checks unused *.dart files.   |
+| check-unused-l10n    | dart run dart_code_linter:metrics check-unused-l10n lib   | Checks unused localization in *.dart files.   |
+| check-unused-code    | dart run dart_code_linter:metrics check-unused-code lib   | Checks unused code in *.dart files.   |
 
 For additional help on any of the commands:
 
 ~~~
-$ flutter pub run dart_code_metrics:metrics --help <command>
+$ flutter pub run dart_code_linter:metrics --help <command>
 ~~~
 
 # Multi-package repositories usage
