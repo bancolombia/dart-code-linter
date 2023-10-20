@@ -1,0 +1,28 @@
+# prefer-using-list-view
+added in: 1.6.0 <span style={{color: 'blue'}}>performance</span>
+
+Warns when a `Column` widget with only `children` parameter is wrapped in a `SingleChildScrollView` widget.
+
+Additional resources:
+- https://stackoverflow.com/a/62147092
+## Example
+### Bad:
+```dart
+SingleChildScrollView(
+  child: Column(
+    children: [
+      Text('Wow lint rule'),
+      Text('Wow another lint rule'),
+    ],
+  ),
+),
+```
+### Good:
+```dart
+ListView(
+  children: [
+    Text('Wow lint rule'),
+    Text('Wow another lint rule'),
+  ],
+),
+```

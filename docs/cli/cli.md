@@ -3,7 +3,9 @@ sidebar_position: 4
 title: CLI
 ---
 import Admonition from '@theme/Admonition';
+
 # Command Line Interface
+
 To use the package as a command-line tool, run:
 ~~~
 $ flutter pub run dart_code_linter:metrics <command> lib

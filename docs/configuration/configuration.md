@@ -9,7 +9,6 @@ To configure DCL, add a dart_code_linter entry to `analysis_options.yaml`:
 
 ```analysis_options.yaml
 dart_code_linter:
-dart_code_metrics:
   extends:
     - ... # configures the list of preset configurations
   metrics:

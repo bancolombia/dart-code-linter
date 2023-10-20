@@ -1,0 +1,26 @@
+# avoid-expanded-as-spacer
+added in: 1.6.0 <span style={{color: 'orange'}}>warning</span>
+
+The rule detects `Expanded` widgets that contain empty `SizedBox/Container` and proposes to replace them with the `Spacer` widget.
+
+## Example
+### Bad:
+```dart
+Column(
+    children: [
+        Container(),
+        const Expanded(child: SizedBox()),
+        Container(),
+    ]
+)
+```
+### Good:
+```dart
+Column(
+    children: [
+        Container(),
+        const Spacer(),
+        Container(),
+    ]
+)
+```

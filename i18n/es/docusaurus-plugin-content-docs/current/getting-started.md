@@ -25,11 +25,11 @@ $ flutter pub add --dev dart_code_linter
 You can run DCL analysis from the console using the following command:
 
 ```sh
-$ dart pub run dart_code_metrics:metrics analyze lib
+$ dart pub run dart_code_linter:metrics analyze lib
 ```
 _or for a Flutter package_
 ```sh
-$ flutter pub run dart_code_metrics:metrics analyze lib
+$ flutter pub run dart_code_linter:metrics analyze lib
 ```
 
 DCL also provides other commands such as check-unused-code and check-unused-files that can help you maintain the codebase. For more information on using DCL as a command-line tool, see the Command Line Interface documentation.
