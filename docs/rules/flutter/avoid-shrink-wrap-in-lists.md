@@ -1,1 +1,39 @@
 # avoid-shrink-wrap-in-lists
+added in: 1.6.0 <span style="color: #006CFF">performance</span>
+
+Warns when a `ListView` widget with `shrinkWrap` parameter is wrapped in a `Column`, `Row` or another `ListView` widget.
+
+According to the Flutter documentation, using `shrinkWrap` in lists is expensive performance-wise and should be avoided, since using slivers is significantly cheaper and achieves the same or even better results.
+
+Additional resources:
+- https://github.com/dart-lang/linter/issues/3496
+
+## Example
+### Bad:
+```dart
+Column(
+  children: [
+    Expanded(
+      // LINT
+      child: ListView(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        children: [],
+      ),
+    ),
+  ],
+),
+```
+### Good:
+```dart
+CustomScrollView(
+  slivers: [
+    SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) => Container(),
+        childCount: someObject.length,
+      ),
+    ),
+  ],
+),
+```
