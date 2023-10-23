@@ -19,7 +19,7 @@ jobs:
         uses: flutter-actions/setup-flutter@v2
         with:
           channel: stable
-          version: 3.7.12
+          version: 3.13.8
       - name: Install dependencies
         run: dart pub get
       - name: Publish to pub.dev
