@@ -44,7 +44,7 @@ Additional resources:
 ## Config
 Set `methods` (default is <code>[setState](https://api.flutter.dev/flutter/widgets/State/setState.html)</code>) to configure the list of methods to check for unchecked async calls.
 ```yaml
-dart_code_metrics:
+dart_code_linter:
   ...
   rules:
     ...
