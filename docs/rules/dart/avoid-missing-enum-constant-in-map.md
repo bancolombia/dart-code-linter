@@ -1,1 +1,49 @@
 # avoid-missing-enum-constant-in-map
+added in: 1.6.0 <span style="color: orange">warning</span>
+
+Warns when a enum constant is missing in a map declaration.
+
+## Example
+### Bad:
+```dart
+enum SomeEnum {
+  firstEntry,
+  secondEntry,
+  thirdEntry,
+}
+
+extension SomeX on SomeEnum {
+  // LINT
+  static const firstMap = <SomeEnum, String>{
+    CountyCode.firstEntry: 'foo',
+    CountyCode.secondEntry: 'bar',
+  };
+
+  // LINT twice since `secondEntry` and `thirdEntry` are missing
+  static const secondMap = <SomeEnum, String>{
+    CountyCode.firstEntry: 'foo',
+  };
+}
+```
+### Good:
+```dart
+enum SomeEnum {
+  firstEntry,
+  secondEntry,
+  thirdEntry,
+}
+
+extension SomeX on SomeEnum {
+  static const firstMap = <SomeEnum, String>{
+    CountyCode.firstEntry: 'foo',
+    CountyCode.secondEntry: 'bar',
+    CountyCode.thirdEntry: 'baz',
+  };
+
+  static const secondMap = <SomeEnum, String>{
+    CountyCode.firstEntry: 'foo',
+    CountyCode.secondEntry: 'bar',
+    CountyCode.thirdEntry: 'baz',
+  };
+}
+```
