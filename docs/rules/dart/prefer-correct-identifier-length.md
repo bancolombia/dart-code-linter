@@ -1,1 +1,54 @@
 # prefer-correct-identifier-length
+added in: 1.6.0 <span style="color: green">style</span>
+
+The rule checks the length of variable names in classes, functions, extensions, mixins, and also checks the value of enum.
+
+## Config
+Set `min-identifier-length` (default is `3`) to configure the minimum allowed identifier length.
+
+Set `max-identifier-length` (default is `300`) to configure the maximum allowed identifier length.
+
+Set `exceptions` (default is `none`) to ignore specific identifier names.
+```yaml
+dart_code_linter:
+  ...
+  rules:
+    ...
+    - prefer-correct-identifier-length:
+        exceptions: [ 'a' ]
+        max-identifier-length: 30
+        min-identifier-length: 4
+```
+## Example
+### Bad:
+```dart
+var x = 0; // length equals 1
+var multiplatformConfigurationPoint = 0; // length equals 31
+
+final declarations = <({int f, String s})>{}; // LINT
+
+final value = switch (declarations) {
+  Set s => s.single, // LINT
+  _ => 0,
+};
+
+if (declarations case Set(length: final l)) {  // LINT
+  print(l);
+}
+```
+### Good:
+```dart
+var property = 0; // length equals 8
+var multiplatformConfiguration = 0; // length equals 26
+
+final declarations = <({int first, String second})>{};
+
+final value = switch (declarations) {
+  Set someSet => someSet.single,
+  _ => 0,
+};
+
+if (declarations case Set(: final length)) {
+  print(l);
+}
+```
