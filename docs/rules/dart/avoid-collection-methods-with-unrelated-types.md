@@ -12,7 +12,7 @@ Use strict configuration (default is true), if you want dynamic or Object type k
 
 ## Config example
 ```dart:
-dart_code_metrics:
+dart_code_linter:
   ...
   rules:
     ...
