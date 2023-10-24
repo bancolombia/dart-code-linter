@@ -16,7 +16,7 @@ Set `allowed-line-count` (default is none) to configure the maximum number of li
 Set `ignored-named-arguments` (default is none) to ignore specific named parameters.
 
 ```yaml
-dart_code_metrics:
+dart_code_linter:
   ...
   rules:
     ...
