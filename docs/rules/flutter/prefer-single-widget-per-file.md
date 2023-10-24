@@ -9,7 +9,7 @@ Ensures that files have a single responsibility so that each widget exists in it
 Set `ignore-private-widgets` (default is `false`) to ignore private widgets.
 
 ```yaml
-dart_code_metrics:
+dart_code_linter:
   ...
   rules:
     ...
