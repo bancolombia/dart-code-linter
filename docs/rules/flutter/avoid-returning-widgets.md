@@ -30,7 +30,7 @@ Set `ignored-annotations` (default is [`FunctionalWidget`, `swidget`, `hwidget`,
 Set `allow-nullable` to allow functions or methods with the nullable return type.
 
 ```yaml
-dart_code_metrics:
+dart_code_linter:
   ...
   rules:
     ...
