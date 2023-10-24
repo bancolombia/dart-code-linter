@@ -16,7 +16,7 @@ Set `deny` (can be a regular expression) to configure the list of imports to ban
 Set `message` to configure a user-facing message for each issue created from this config entry.
 
 ```dart
-dart_code_metrics:
+dart_code_linter:
   ...
   rules:
     ...
