@@ -1,4 +1,5 @@
 # Check Unused Files
+
 Checks unused `*.dart` files.
 
 To execute the command, run:
@@ -66,7 +67,8 @@ To disable this behavior use `--monorepo` flag. This might be useful when all th
 ### Console
 Use `--reporter=console` to enable this format.
 
-![Analysis completed](/static/cli/analysis-completed-files.png)
+
+<!-- ![Analysis completed](/static/cli/analysis-completed-files.png) -->
 
 JSON
 The reporter prints a single JSON object containing meta information and the unused file paths. Use `--reporter=json` to enable this format.

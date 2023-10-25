@@ -1,0 +1,74 @@
+# avoid-unrelated-type-assertions
+added in: 1.6.0 <span style={{color: 'orange'}}>warning</span>
+
+Warns about unrelated usages of `is` operator.
+
+## Config
+Set `ignore-mixins` (default is `false`) to exclude mixins from the rule checks.
+
+```yaml
+dart_code_linter:
+  ...
+  rules:
+    - avoid-unrelated-type-assertions:
+        ignore-mixins: false
+```
+## Example
+### Bad:
+```dart
+class Animal {}
+
+class NotAnimal {}
+
+class HomeAnimal extends Animal {}
+
+class Example {
+  final regularString = '';
+  final myList = <int>[1, 2, 3];
+
+  final Animal animal = Animal();
+
+  void main() {
+    final result = regularString is int; // LINT
+    final result2 = myList is List<String>; // LINT
+
+    final result3 = animal is NotAnimal; // LINT
+  }
+
+  void patterns() {
+    final animal = Animal();
+
+    if (animal case HomeAnimal result) {}
+    if (animal case HomeAnimal()) {}
+    if (animal case NotAnimal result) {} // LINT
+    if (animal case NotAnimal()) {} // LINT
+  }
+}
+```
+### Good:
+```dart
+class Animal {}
+
+class HomeAnimal extends Animal {}
+
+class Example {
+  final regularString = '';
+  final myList = <int>[1, 2, 3];
+
+  final Animal animal = Animal();
+
+  void main() {
+    final result = regularString is String;
+    final result2 = myList is List<int>;
+
+    final result3 = animal is Object;
+  }
+
+  void patterns() {
+    final animal = Animal();
+
+    if (animal case HomeAnimal result) {}
+    if (animal case HomeAnimal()) {}
+  }
+}
+```

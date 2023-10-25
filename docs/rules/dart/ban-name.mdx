@@ -1,0 +1,65 @@
+# ban-name
+added in: 1.6.0 <span style={{color: 'orange'}}>warning</span>
+
+Configure some names that you want to ban.
+
+:::danger
+This rule is deprecated. Use https://dcm.dev/docs/rules/common/banned-usage/ instead.
+:::
+
+## Example
+### Bad:
+```dart
+// suppose the configuration is the one shown below
+
+showDialog('some_arguments', 'another_argument'); // LINT
+material.showDialog('some_arguments', 'another_argument'); // LINT
+
+var strangeName = 42; // LINT
+
+void strangeName() {} // LINT
+
+// LINT
+class AnotherStrangeName {
+  late var strangeName; // LINT
+}
+
+StrangeClass.someMethod(); // LINT
+NonStrangeClass.someMethod();
+
+DateTime.now(); // LINT
+DateTime.now().day; // LINT
+class DateTimeTest {
+  final currentTimestamp = DateTime.now(); // LINT
+}
+DateTime currentTimestamp = DateTime('01.01.1959');
+```
+✅ Good:
+```dart
+myShowDialog();
+NonStrangeClass.someMethod();
+clock.now();
+clock.now().day;
+class DateTimeTest {
+  final currentTimestamp = clock.now();
+}
+```
+## Config example
+```yaml
+dart_code_linter:
+  ...
+  rules:
+    ...
+    - ban-name:
+        entries:
+        - ident: showDialog
+          description: Please use myShowDialog in this package
+        - ident: strangeName
+          description: The name is too strange
+        - ident: AnotherStrangeName
+          description: Oops
+        - ident: StrangeClass.someMethod
+          description: Please use a NonStrangeClass.someMethod instead
+        - ident: DateTime.now
+          description: Please use a clock.now instead
+```

@@ -1,0 +1,41 @@
+# no-equal-then-else
+added in: 1.6.0 <span style={{color: 'orange'}}>warning</span>
+
+Warns when an if statement has equal then and else statements or conditional expression has equal then and else expressions.
+
+## Example
+### Bad:
+```dart
+final firstValue = 1;
+final secondValue = 2;
+
+...
+
+// LINT
+if (condition) {
+  result = firstValue;
+} else {
+  result = firstValue;
+}
+
+...
+
+result = condition ? firstValue : firstValue; // LINT
+```
+### Good:
+```dart
+final firstValue = 1;
+final secondValue = 2;
+
+...
+
+if (condition) {
+  result = firstValue;
+} else {
+  result = secondValue;
+}
+
+...
+
+result = condition ? firstValue : secondValue;
+```

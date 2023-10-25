@@ -70,8 +70,8 @@ Usage: dcm check-unused-l10n [arguments] <directories>
 ### Console
 Use `--reporter=console` to enable this format.
 
-![Analysis completed](/static/img/cli/analysis-completed.png)
-
+<!-- ![Analysis completed](/static/img/cli/analysis-completed.png)
+ -->
 ### JSON
 The reporter prints a single JSON object containing meta information and the unused file paths. Use `--reporter=json` to enable this format.
 
