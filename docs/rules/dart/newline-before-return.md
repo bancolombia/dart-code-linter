@@ -1,1 +1,25 @@
 # newline-before-return
+added in: 1.5.0 <span style="color: green">style</span>
+
+Enforces a blank line between statements and return in a block.
+
+## Example
+### Bad:
+```dart
+  if ( ... ) {
+    ...
+    return ...; // LINT
+  }
+```
+### Good:
+```dart
+  if ( ... ) {
+    return ...;
+  }
+
+  if ( ... ) {
+    ...
+
+    return ...;
+  }
+```
