@@ -1,1 +1,21 @@
 # prefer-first
+added in: 1.6.0 <span style="color: green">style</span>
+
+Warns when the first element of an Iterable or a List is accessed by `list[0]` or `iterable.elementAt(0)` instead of calling `iterable.first`.
+
+## Example
+### Bad:
+```dart
+...
+const array = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+array.elementAt(0); // LINT
+array[0]; // LINT
+```
+
+### Good:
+```dart
+const array = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+array.first;
+```
