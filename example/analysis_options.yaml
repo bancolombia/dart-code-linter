@@ -7,9 +7,6 @@ analyzer:
   # to be shown and need only the CLI, you need to remove the section below.
   plugins:
     - dart_code_linter
-  strong-mode:
-    implicit-casts: false
-    implicit-dynamic: false
 
 dart_code_linter:
   # Dart Code Linter supports presets. The config from a preset will be merged
