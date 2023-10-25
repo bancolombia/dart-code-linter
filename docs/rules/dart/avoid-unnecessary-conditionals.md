@@ -1,1 +1,18 @@
 # avoid-unnecessary-conditionals
+added in: 1.6.0 <span style="color: orange">warning</span>
+
+Checks for unnecessary conditional expressions.
+
+## Example
+### Bad:
+```dart
+bool baz() => foo ? true : false; // LINT
+
+bool bar() => foo ? false : true; // LINT
+```
+### Good:
+```dart
+bool baz() => foo;
+
+bool bar() => !foo;
+```
