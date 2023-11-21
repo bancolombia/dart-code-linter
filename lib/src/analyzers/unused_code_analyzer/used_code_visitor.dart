@@ -23,8 +23,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
         return (uri is DirectiveUriWithSource) ? uri.source.fullName : null;
       }).whereNotNull();
-      // ignore: deprecated_member_use
-      final mainImport = node.element2?.importedLibrary?.source.fullName;
+      final mainImport = node.element?.importedLibrary?.source.fullName;
 
       final allPaths = {if (mainImport != null) mainImport, ...paths};
 
@@ -42,8 +41,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   void visitExportDirective(ExportDirective node) {
     super.visitExportDirective(node);
 
-    // ignore: deprecated_member_use
-    final path = node.element2?.exportedLibrary?.source.fullName;
+    final path = node.element?.exportedLibrary?.source.fullName;
     if (path != null) {
       fileElementsUsage.exports.add(path);
     }
@@ -115,8 +113,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
   void _recordIfExtensionMember(Element? element) {
     if (element != null) {
-      // ignore: deprecated_member_use
-      final enclosingElement = element.enclosingElement3;
+      final enclosingElement = element.enclosingElement;
       if (enclosingElement is ExtensionElement) {
         _recordUsedExtension(enclosingElement);
       }
@@ -124,8 +121,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   }
 
   bool _recordConditionalElement(Element element) {
-    // ignore: deprecated_member_use
-    final elementPath = element.enclosingElement3?.source?.fullName;
+    final elementPath = element.enclosingElement?.source?.fullName;
     if (elementPath == null) {
       return false;
     }
@@ -179,8 +175,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    // ignore: deprecated_member_use
-    final enclosingElement = element.enclosingElement3;
+    final enclosingElement = element.enclosingElement;
     if (enclosingElement is CompilationUnitElement) {
       _recordUsedElement(element);
     } else if (enclosingElement is ExtensionElement) {
