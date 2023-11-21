@@ -95,6 +95,44 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     _visitIdentifier(node, node.staticElement);
   }
 
+  @override
+  void visitNamedType(NamedType node) {
+    _recordPrefixedElement(node.importPrefix, node.element);
+    super.visitNamedType(node);
+  }
+
+  void _recordPrefixedElement(
+    ImportPrefixReference? importPrefix,
+    Element? element,
+  ) {
+    if (element is MultiplyDefinedElement) {
+      for (final component in element.conflictingElements) {
+        _recordPrefixedElement(importPrefix, component);
+
+        return;
+      }
+    }
+
+    // Invalid code can use `importPrefix` as a named type;
+    if (element is PrefixElement) {
+      fileElementsUsage.prefixMap[element] ??= [];
+
+      return;
+    }
+
+    if (importPrefix != null) {
+      final prefixElement = importPrefix.element;
+      if (prefixElement is PrefixElement) {
+        final map = fileElementsUsage.prefixMap[prefixElement] ??= [];
+        if (element != null) {
+          map.add(element);
+        }
+      }
+    } else if (element != null) {
+      _recordUsedElement(element);
+    }
+  }
+
   void _recordAssignmentTarget(
     CompoundAssignmentExpression node,
     Expression target,
