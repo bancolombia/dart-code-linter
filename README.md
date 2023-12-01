@@ -92,7 +92,7 @@ DCL can be used as a plugin for the Dart `analyzer` [package](https://pub.dev/pa
 
 Rules that marked with 🛠 have auto-fixes available through the IDE context menu. VS Code example:
 
-![VS Code example](https://github.com/bancolombia/dart-code-linter/assets/12372370/8834e8c9-17dd-4d47-b635-24c2d8c1c919)
+![VS Code example](https://github.com/bancolombia/dart-code-linter/blob/trunk/assets/quick-fixes.png)
 
 
 ### CLI
