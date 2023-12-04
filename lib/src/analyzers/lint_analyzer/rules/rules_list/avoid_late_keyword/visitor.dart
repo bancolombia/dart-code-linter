@@ -28,7 +28,6 @@ class _Visitor extends RecursiveAstVisitor<void> {
       allowInitialized && node.initializer != null;
 
   bool _hasIgnoredType(VariableDeclaration node) => ignoredTypes.contains(
-        // ignore: deprecated_member_use
-        node.declaredElement2?.type.getDisplayString(withNullability: false),
+        node.declaredElement?.type.getDisplayString(withNullability: false),
       );
 }

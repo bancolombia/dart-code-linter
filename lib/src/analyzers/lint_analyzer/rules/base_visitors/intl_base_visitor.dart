@@ -32,8 +32,7 @@ abstract class IntlBaseVisitor extends GeneralizingAstVisitor<void> {
 
   @override
   void visitFieldDeclaration(FieldDeclaration node) {
-    // ignore: deprecated_member_use
-    if (node.fields.type?.as<NamedType>()?.name.name != 'String') {
+    if (node.fields.type?.as<NamedType>()?.name2.lexeme != 'String') {
       return;
     }
 
