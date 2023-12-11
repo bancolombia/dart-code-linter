@@ -5,7 +5,7 @@ Reports lint rules violations.
 To execute the command, run:
 
 ```sh
-$ dcm analyze lib # or dcm a lib
+$ dcl analyze lib # or dcl a lib
 ```
 info
 
@@ -14,7 +14,7 @@ You need to configure rules entry in the analysis_options.yaml to have a rules r
 Full command description:
 
 ```sh
-Usage: dcm analyze [arguments] <directories>
+Usage: dcl analyze [arguments] <directories>
 -h, --help                                       Print this usage information.
 
 
@@ -184,10 +184,10 @@ jobs:
         run: dart pub get
       ...
 ```
-- Run DCM:
+- Run DCL:
 ```yaml
-- name: Run DCM
-  run: dcm analyze --reporter=github lib
+- name: Run DCL
+  run: dcl analyze --reporter=github lib
 ```
 
 #### Full Example
@@ -203,8 +203,8 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Run DCM
-        run: dcm analyze --reporter=github lib
+      - name: Run DCL
+        run: dcl analyze --reporter=github lib
 ```
 Example of a report in a PR:
 ![console](/report.png)
@@ -219,7 +219,7 @@ Reports lint issues in merge requests based on Code Quality custom tool. Use `--
 code_quality:
   image: dart
   script:
-    - dcm analyze --reporter=gitlab lib > code-quality-report.json
+    - dcl analyze --reporter=gitlab lib > code-quality-report.json
   artifacts:
     reports:
       codequality: code-quality-report.json
@@ -267,7 +267,7 @@ pipelines:
     - step:
         name: analyze
         script:
-          - dcm analyze --reporter=checkstyle lib > checkstyle-result.xml
+          - dcl analyze --reporter=checkstyle lib > checkstyle-result.xml
         after-script:
           - pipe: atlassian/checkstyle-report:0.3.1
 ```

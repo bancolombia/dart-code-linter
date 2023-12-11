@@ -4,11 +4,11 @@ Checks unused classes, fields, properties, methods, functions, variables, extens
 
 To execute the command, run:
 ```sh
-$ dcm check-unused-code lib # or dcm uc lib
+$ dcl check-unused-code lib # or dcl uc lib
 ```
 Full command description:
 ```sh
-Usage: dcm check-unused-code [arguments] <directories>
+Usage: dcl check-unused-code [arguments] <directories>
 -h, --help                                       Print this usage information.
 
 
@@ -31,10 +31,6 @@ Usage: dcm check-unused-code [arguments] <directories>
 
 
     --[no-]verbose                               Show verbose logs.
-
-
-    --ci-key                                     The license key to run on CI server. Can be provided via DCM_CI_KEY env variable.
-    --email                                      The email used to purchase the license. Can be provided via DCM_EMAIL env variable.
 
 
     --no-analytics                               Disable sending anonymous usage statistics.

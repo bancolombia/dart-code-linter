@@ -33,10 +33,6 @@ Usage: linter check-unused-files [arguments...] <directories>
     --[no-]verbose                               Show verbose logs.
 
 
-    --ci-key                                     The license key to run on CI server. Can be provided via DCL_CI_KEY env variable.
-    --email                                      The email used to purchase the license. Can be provided via DCL_EMAIL env variable.
-
-
     --no-analytics                               Disable sending anonymous usage statistics.
 
 

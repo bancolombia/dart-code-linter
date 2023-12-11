@@ -26,7 +26,7 @@ $ linter check-unused-l10n lib # or linter ul lib
 ```
 Full command description:
 ```sh
-Usage: dcm check-unused-l10n [arguments] <directories>
+Usage: dcl check-unused-l10n [arguments] <directories>
 -h, --help                                       Print this usage information.
 
 
@@ -53,10 +53,6 @@ Usage: dcm check-unused-l10n [arguments] <directories>
 
 
     --[no-]verbose                               Show verbose logs.
-
-
-    --ci-key                                     The license key to run on CI server. Can be provided via DCM_CI_KEY env variable.
-    --email                                      The email used to purchase the license. Can be provided via DCM_EMAIL env variable.
 
 
     --no-analytics                               Disable sending anonymous usage statistics.
