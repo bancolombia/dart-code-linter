@@ -60,8 +60,6 @@ To disable this behavior use `--monorepo` flag. This might be useful when all th
 
 Use `--reporter=console` to enable this format.
 
-![Console](/console3.png)
-
 ### JSON
 
 The reporter prints a single JSON object containing meta information and the unnecessary nullable parameters. Use --reporter=json to enable this format.

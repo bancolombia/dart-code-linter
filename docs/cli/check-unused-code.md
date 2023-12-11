@@ -62,8 +62,6 @@ To disable this behavior use `--monorepo` flag. This might be useful when all th
 
 Use `--reporter=console` to enable this format.
 
-![console](/console2.png)
-
 ### JSON
 
 The reporter prints a single JSON object containing meta information and the unused code file paths. Use `--reporter=json` to enable this format.

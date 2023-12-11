@@ -57,7 +57,6 @@ Usage: dcl analyze [arguments] <directories>
 ### Console
 
 Use `--reporter=console` to enable this format.
-![console](/analize1.png)
 
 ### JSON
 
@@ -206,8 +205,6 @@ jobs:
       - name: Run DCL
         run: dcl analyze --reporter=github lib
 ```
-Example of a report in a PR:
-![console](/report.png)
 
 ### GitLab
 
@@ -224,13 +221,6 @@ code_quality:
     reports:
       codequality: code-quality-report.json
 ```
-Example of a Code Quality widget in a PR:
-
-![console](/pr.jpg)
-
-Example of a Code Quality in a PR diff view:
-
-![console](/pr2.jpg)
 
 ### Checkstyle
 
@@ -271,5 +261,3 @@ pipelines:
         after-script:
           - pipe: atlassian/checkstyle-report:0.3.1
 ```
-Example of a report:
-![console](/report2.webp)

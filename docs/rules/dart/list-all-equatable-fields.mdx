@@ -1,12 +1,12 @@
 # list-all-equatable-fields
-added in: 1.2.0 <span style="color: organge">warning</span>
+added in: 1.2.0 <span style={{color: 'orange'}}>warning</span>
 
 Warns when a field is not added to `props` getter of a class that extends `Equatable` or `EquatableMixin`.
 Example
 
 ### Bad:
 
-```dart:
+```dart
 class AnotherPerson extends Equatable {
   const AnotherPerson(this.name, this.age);
 
@@ -59,8 +59,10 @@ class EquatableDateTimeSubclass extends EquatableDateTime {
   List<Object> get props => super.props..addAll([]); // LINT
 }
 ```
+
 ### Good:
-```dart:
+
+```dart
 class AnotherPerson extends Equatable {
   const AnotherPerson(this.name, this.age);
 
