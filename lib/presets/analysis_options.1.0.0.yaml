@@ -1,0 +1,82 @@
+dart_code_linter:
+  metrics:
+    cyclomatic-complexity: 40
+    maximum-nesting-level: 5
+    number-of-methods: 20
+    number-of-parameters: 10
+    source-lines-of-code: 400
+  metrics-exclude:
+    - test/**
+  rules:
+    - avoid-non-null-assertion 
+    - avoid-dynamic 
+    - avoid-returning-widgets: 
+        ignored-names:
+          - testFunction
+        ignored-annotations:
+          - allowedAnnotation
+    - avoid-nested-conditional-expressions 
+    - avoid-unnecessary-type-casts 
+    - avoid-unnecessary-conditionals
+    - avoid-unused-parameters: 
+        severity: none
+    - missing-test-assertion 
+    - newline-before-return: 
+        severity: none
+    - no-boolean-literal-compare
+    - no-empty-block 
+    - no-equal-then-else
+    - no-magic-number
+    - prefer-trailing-comma: 
+        severity: none
+    - prefer-conditional-expressions
+    - prefer-immediate-return
+    - prefer-moving-to-variable
+    - format-comment:
+        only-doc-comments: true
+    - member-ordering:
+        order:
+          - public-fields
+          - private-fields
+          - constructors
+          - close-method
+          - dispose-method
+        widgets-order:
+          - constructor
+          - build-method
+          - init-state-method
+          - did-change-dependencies-method
+          - did-update-widget-method
+          - dispose-method
+    - always-remove-listener
+    - avoid-unnecessary-setstate
+    - prefer-extracting-callbacks
+    - prefer-using-list-view
+    - avoid-ignoring-return-values:
+        severity: none
+    - avoid-passing-async-when-sync-expected:
+        exclude:
+          - test/**
+    - avoid-unnecessary-type-assertions
+    - avoid-unrelated-type-assertions
+    - double-literal-format
+    - prefer-async-await
+    - prefer-correct-identifier-length:
+        max-identifier-length: 35
+        min-identifier-length: 3
+    - prefer-correct-test-file-name
+    - prefer-correct-type-name:
+        min-length: 3
+        max-length: 35
+    - prefer-first
+    - prefer-last
+    - prefer-match-file-name:
+        exclude:
+          - test/**
+    - avoid-border-all
+    - avoid-expanded-as-spacer
+    - avoid-wrapping-in-padding
+
+  anti-patterns:
+    - long-method
+    - long-parameter-list
