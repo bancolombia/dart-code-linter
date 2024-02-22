@@ -16,7 +16,7 @@ void main() {
       () {
         const id = 'rule-id';
         final documentationUrl = Uri.parse(
-          'https://dcl.apps.bancolombia.com/rules/flutter/rule-id',
+          'https://dcl.apps.bancolombia.com/docs/rules/flutter/rule-id',
         );
         const severity = Severity.none;
 
@@ -72,7 +72,7 @@ void main() {
       expect(
         documentation(rule1).toString(),
         equals(
-          'https://dcl.apps.bancolombia.com/rules/flutter/$ruleId1',
+          'https://dcl.apps.bancolombia.com/docs/rules/flutter/$ruleId1',
         ),
       );
 
