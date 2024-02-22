@@ -1,12 +1,12 @@
 name: dart_code_linter_plugin_loader
 description: This pubspec determines the version of the analyzer plugin to load.
-version: 1.1.2
+version: 1.1.3
 
 environment:
   sdk: ">=2.14.0 <3.0.0"
 
 dependencies:
-  dart_code_linter: 1.1.2
+  dart_code_linter: 1.1.3
 
 dev_dependencies:
   lints: ^1.0.1
