@@ -1,4 +1,9 @@
 # Changelog
+
+## 1.1.3
+
+- Fix: bug tests
+
 ## 1.1.2
 
 - append new presset `analysis_options.1.0.0.yaml`
