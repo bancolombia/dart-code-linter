@@ -1,8 +1,8 @@
-## Dart Code Linter
+# Dart Code Linter
+
 [![Pub](https://img.shields.io/pub/v/dart_code_linter.svg)](https://pub.dev/packages/dart_code_linter)
 
 Dart Code Linter (DCL) is a powerful toolkit designed to enhance your development process by identifying and resolving issues within your Dart and Flutter code. Whether you're dealing with potential runtime bugs, violations of best practices, or styling concerns, DCL has got you covered. With a comprehensive collection of over 70 pre-built rules, you can effortlessly validate your code against a variety of expectations. Furthermore, DCL offers the flexibility to customize these rules to cater to your specific requirements, ensuring an optimized coding experience.
-
 
 ## Links
 
@@ -22,7 +22,6 @@ $ flutter pub add --dev dart_code_linter
 ## Basic configuration
 
 Add configuration to `analysis_options.yaml` and reload IDE to allow the analyzer to discover the plugin config.
-
 
 ### Basic config example
 
@@ -94,7 +93,6 @@ Rules that marked with 🛠 have auto-fixes available through the IDE context me
 
 ![VS Code example](https://github.com/bancolombia/dart-code-linter/blob/trunk/assets/quick-fixes.png)
 
-
 ### CLI
 
 The package can be used as CLI and supports multiple commands:
@@ -132,8 +130,6 @@ It will produce a result in one of the format:
 - HTML
 - JSON
 
-
-
 #### Check unnecessary nullable parameters
 
 Checks unnecessary nullable parameters in functions, methods, constructors. To execute the command, run
@@ -149,8 +145,6 @@ It will produce a result in one of the format:
 
 - Console
 - JSON
-
-
 
 #### Check unused files
 
@@ -202,7 +196,6 @@ It will produce a result in one of the format:
 - Console
 - JSON
 
-
 #### Check unused code
 
 Checks unused code in `*.dart` files. To execute the command, run
@@ -219,8 +212,6 @@ It will produce a result in one of the format:
 - Console
 - JSON
 
-
-
 ## Troubleshooting
 
 Please read [the following guide](./TROUBLESHOOTING.md) if the plugin is not working as you'd expect it to work.
@@ -230,4 +221,5 @@ Please read [the following guide](./TROUBLESHOOTING.md) if the plugin is not wor
 If you are interested in contributing, please check out the [contribution guidelines](./CONTRIBUTING.md). Feedback and contributions are welcome!
 
 ## License
+
 Dart Code Linter is licensed under the [MIT](./LICENSE)

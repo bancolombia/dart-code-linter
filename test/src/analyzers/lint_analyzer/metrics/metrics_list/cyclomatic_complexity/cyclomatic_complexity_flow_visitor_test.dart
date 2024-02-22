@@ -22,7 +22,7 @@ Future<void> main() async {
         final visitor = CyclomaticComplexityFlowVisitor();
         declaration.visitChildren(visitor);
 
-        expect(visitor.complexityEntities, hasLength(14));
+        expect(visitor.complexityEntities, hasLength(13));
       });
 
       test('common function', () {

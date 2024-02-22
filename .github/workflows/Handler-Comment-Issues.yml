@@ -1,5 +1,5 @@
-name: workflow of automations dispatch to commands in comments 
-on: 
+name: workflow of automations dispatch to commands in comments
+on:
   issue_comment:
     types: [created]
 env:
@@ -31,7 +31,7 @@ jobs:
         run: |
           if [[ ${COMMENT,,} == *"$CMD_ACCEPT_REVIEW"* ]];
           then
-            if [[ ${VAR_USERS_REVIEWERS,,} =~ ${USER_COMMENT,,} ]];    
+            if [[ ${VAR_USERS_REVIEWERS,,} =~ ${USER_COMMENT,,} ]];
             then
               gh issue edit $ISSUE_URL --remove-label "Review/Pending"
               gh issue edit $ISSUE_URL --add-label "Review/Approved"
