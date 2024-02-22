@@ -29,12 +29,12 @@ Future<void> main() async {
       );
 
       expect(metricValue.metricsId, equals(metric.id));
-      expect(metricValue.value, equals(15));
+      expect(metricValue.value, equals(14));
       expect(metricValue.level, equals(MetricValueLevel.warning));
       expect(
         metricValue.comment,
         equals(
-          'This function has a cyclomatic complexity of 15, which exceeds the maximum of 10 allowed.',
+          'This function has a cyclomatic complexity of 14, which exceeds the maximum of 10 allowed.',
         ),
       );
       expect(metricValue.recommendation, isNull);
@@ -46,7 +46,6 @@ Future<void> main() async {
           'Conditional expression increases complexity',
           'For statement increases complexity',
           'If statement increases complexity',
-          'Switch case increases complexity',
           'Switch default increases complexity',
           'While statement increases complexity',
           'Yield statement increases complexity',

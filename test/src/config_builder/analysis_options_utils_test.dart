@@ -45,7 +45,7 @@ const _merged = {
 };
 
 void main() {
-  group('', () {
+  group('analysis_options_utils', () {
     test('isIterableOfStrings checks type of provided object', () {
       expect(isIterableOfStrings(null), isFalse);
       expect(isIterableOfStrings(Object()), isFalse);
