@@ -18,3 +18,5 @@ jobs:
           version: 3.13.8
       - name: Install dependencies
         run: dart pub get
+      - name: Run Tests
+        run: dart test
