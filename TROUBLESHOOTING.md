@@ -20,4 +20,3 @@ If the plugin is not working as you'd expect it to work, please consider going t
     then a `Analyzer Server Diagnostics` webpage will be opened.
 
     To check that the plugin is active, open the `Plugins` tab and ensure that there is no errors.
-
