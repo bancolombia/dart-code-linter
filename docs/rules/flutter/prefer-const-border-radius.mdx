@@ -1,5 +1,5 @@
 # prefer-const-border-radius
-added in: 1.6.0<span style={{color: 'blue'}}>performance</span>
+added in: 1.0.0<span style={{color: 'blue'}}>performance</span>
 
 `BorderRadius.circular` constructor calls const `BorderRadius.all` constructor under the hood. This rule allows to replace `BorderRadius.circular(value)` with const `BorderRadius.all(Radius.circular(value))` if radius is a constant value.
 
