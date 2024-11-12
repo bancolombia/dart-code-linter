@@ -1,0 +1,25 @@
+# no-blank-line-before-single-return
+added in: 1.2.0 <span style={{color: 'green'}}>style</span>
+
+Disallows empty blank lines before a return inside a code block that only contains a return statement.
+
+## Example
+### Bad:
+```dart
+  // LINT
+  if ( ... ) {
+
+    return;
+  }
+```
+### Good:
+```dart
+  if ( ... ) {
+    return;
+  }
+
+  if ( ... ) {
+    // TODO(developername): need to implement.
+    return;
+  }
+```
