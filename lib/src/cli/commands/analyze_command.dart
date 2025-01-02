@@ -89,16 +89,12 @@ class AnalyzeCommand extends BaseCommand {
   void _checkSeverity(Iterable<LintFileReport> lintAnalyzerResult) {
     if (hasIssueWithSeverity(lintAnalyzerResult, Severity.error)) {
       exit(3);
-    } else if ((argResults[FlagNames.fatalWarnings] as bool) &&
-        hasIssueWithSeverity(lintAnalyzerResult, Severity.warning)) {
-      final fatalWarningsThreshold =
-          argResults[FlagNames.fatalWarningsThreshold] as String?;
-
-      if (fatalWarningsThreshold == null ||
-          howManyIssueWithSeverity(lintAnalyzerResult, Severity.warning) >
-              num.parse(fatalWarningsThreshold)) {
-        exit(2);
-      }
+    } else {
+      checkFatalThreshold(
+          argResults[FlagNames.fatalWarnings] as bool,
+          Severity.warning,
+          argResults[FlagNames.fatalWarningsThreshold] as String?,
+          lintAnalyzerResult);
     }
 
     final maximumAllowedLevel = MetricValueLevel.fromString(
@@ -110,25 +106,24 @@ class AnalyzeCommand extends BaseCommand {
       exit(2);
     }
 
-    if ((argResults[FlagNames.fatalPerformance] as bool) &&
-        hasIssueWithSeverity(lintAnalyzerResult, Severity.performance)) {
-      final fatalPerformanceThreshold =
-          argResults[FlagNames.fatalPerformanceThreshold] as String?;
+    checkFatalThreshold(
+        argResults[FlagNames.fatalPerformance] as bool,
+        Severity.performance,
+        argResults[FlagNames.fatalPerformanceThreshold] as String?,
+        lintAnalyzerResult);
+    checkFatalThreshold(
+        argResults[FlagNames.fatalStyle] as bool,
+        Severity.style,
+        argResults[FlagNames.fatalStyleThreshold] as String?,
+        lintAnalyzerResult);
+  }
 
-      if (fatalPerformanceThreshold == null ||
-          howManyIssueWithSeverity(lintAnalyzerResult, Severity.performance) >
-              num.parse(fatalPerformanceThreshold)) {
-        exit(1);
-      }
-    }
-    if ((argResults[FlagNames.fatalStyle] as bool) &&
-        hasIssueWithSeverity(lintAnalyzerResult, Severity.style)) {
-      final fatalStyleThreshold =
-          argResults[FlagNames.fatalStyleThreshold] as String?;
-
-      if (fatalStyleThreshold == null ||
-          howManyIssueWithSeverity(lintAnalyzerResult, Severity.style) >
-              num.parse(fatalStyleThreshold)) {
+  void checkFatalThreshold(bool isFatal, Severity severity, String? threshold,
+      Iterable<LintFileReport> lintAnalyzerResult) {
+    if (isFatal && hasIssueWithSeverity(lintAnalyzerResult, severity)) {
+      if (threshold == null ||
+          howManyIssueWithSeverity(lintAnalyzerResult, severity) >
+              num.parse(threshold)) {
         exit(1);
       }
     }

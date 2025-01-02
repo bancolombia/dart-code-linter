@@ -49,6 +49,9 @@ const _usage = 'Collect code metrics, rules and anti-patterns violations.\n'
     '    --[no-]fatal-performance                     Treat performance level issues as fatal.\n'
     '    --[no-]fatal-warnings                        Treat warning level issues as fatal.\n'
     '                                                 (defaults to on)\n'
+    '    --fatal-warnings-threshold=<all>             Number of warnings to treat as fatal.\n'
+    '    --fatal-performance-threshold=<all>          Number of performance issues to treat as fatal.\n'
+    '    --fatal-style-threshold=<all>                Number of style issues to treat as fatal.\n'
     '\n'
     'Run "metrics help" to see global options.';
 
