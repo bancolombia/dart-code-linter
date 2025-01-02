@@ -125,6 +125,13 @@ void main() {
       expect(maxMetricViolationLevel([]), MetricValueLevel.none);
     });
 
+    test('howManyIssueWithSeverity ', () {
+      expect(howManyIssueWithSeverity(fileRecords, Severity.error), 1);
+      expect(howManyIssueWithSeverity(fileRecords, Severity.warning), 0);
+      expect(howManyIssueWithSeverity(fileRecords, Severity.performance), 0);
+      expect(howManyIssueWithSeverity(fileRecords, Severity.style), 1);
+      expect(howManyIssueWithSeverity(fileRecords, Severity.none), 0);
+    });
     test(
       'hasIssueWithSeverity returns true if found issue with required severity',
       () {

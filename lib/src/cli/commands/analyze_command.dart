@@ -91,7 +91,14 @@ class AnalyzeCommand extends BaseCommand {
       exit(3);
     } else if ((argResults[FlagNames.fatalWarnings] as bool) &&
         hasIssueWithSeverity(lintAnalyzerResult, Severity.warning)) {
-      exit(2);
+      final fatalWarningsThreshold =
+          argResults[FlagNames.fatalWarningsThreshold] as String?;
+
+      if (fatalWarningsThreshold == null ||
+          howManyIssueWithSeverity(lintAnalyzerResult, Severity.warning) >
+              num.parse(fatalWarningsThreshold)) {
+        exit(2);
+      }
     }
 
     final maximumAllowedLevel = MetricValueLevel.fromString(
@@ -103,11 +110,27 @@ class AnalyzeCommand extends BaseCommand {
       exit(2);
     }
 
-    if (((argResults[FlagNames.fatalPerformance] as bool) &&
-            hasIssueWithSeverity(lintAnalyzerResult, Severity.performance)) ||
-        ((argResults[FlagNames.fatalStyle] as bool) &&
-            hasIssueWithSeverity(lintAnalyzerResult, Severity.style))) {
-      exit(1);
+    if ((argResults[FlagNames.fatalPerformance] as bool) &&
+        hasIssueWithSeverity(lintAnalyzerResult, Severity.performance)) {
+      final fatalPerformanceThreshold =
+          argResults[FlagNames.fatalPerformanceThreshold] as String?;
+
+      if (fatalPerformanceThreshold == null ||
+          howManyIssueWithSeverity(lintAnalyzerResult, Severity.performance) >
+              num.parse(fatalPerformanceThreshold)) {
+        exit(1);
+      }
+    }
+    if ((argResults[FlagNames.fatalStyle] as bool) &&
+        hasIssueWithSeverity(lintAnalyzerResult, Severity.style)) {
+      final fatalStyleThreshold =
+          argResults[FlagNames.fatalStyleThreshold] as String?;
+
+      if (fatalStyleThreshold == null ||
+          howManyIssueWithSeverity(lintAnalyzerResult, Severity.style) >
+              num.parse(fatalStyleThreshold)) {
+        exit(1);
+      }
     }
   }
 
@@ -194,6 +217,24 @@ class AnalyzeCommand extends BaseCommand {
         FlagNames.fatalWarnings,
         help: 'Treat warning level issues as fatal.',
         defaultsTo: true,
+      )
+      ..addOption(
+        FlagNames.fatalWarningsThreshold,
+        help: 'Number of warnings to treat as fatal.',
+        valueHelp: 'all',
+        defaultsTo: null,
+      )
+      ..addOption(
+        FlagNames.fatalPerformanceThreshold,
+        help: 'Number of performance issues to treat as fatal.',
+        valueHelp: 'all',
+        defaultsTo: null,
+      )
+      ..addOption(
+        FlagNames.fatalStyleThreshold,
+        help: 'Number of style issues to treat as fatal.',
+        valueHelp: 'all',
+        defaultsTo: null,
       );
   }
 }
