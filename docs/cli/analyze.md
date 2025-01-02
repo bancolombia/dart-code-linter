@@ -15,42 +15,39 @@ Full command description:
 
 ```sh
 Usage: dcl analyze [arguments] <directories>
--h, --help                                       Print this usage information.
-
-
--r, --reporter=<console>                         The format of the output of the analysis.
-                                                 [console (default), checkstyle, codeclimate, github, gitlab, json]
-    --json-path=<path/to/file.json>              Path to the JSON file with the output of the analysis.
-
-
--c, --print-config                               Print resolved config.
-
-
-    --root-folder=<./>                           Root folder.
-                                                 (defaults to current directory)
-    --sdk-path=<directory-path>                  Dart SDK directory path.
-                                                 If the project has a `.fvm/flutter_sdk` symlink, it will be used if the SDK is not found. 
-    --exclude=<{**/*.g.dart,**/*.freezed.dart}>  File paths in Glob syntax to be exclude.
-                                                 (defaults to "{**/*.g.dart,**/*.freezed.dart}")
-
-
-    --no-congratulate                            Don't show output even when there are no issues.
-
-
-    --[no-]verbose                               Show verbose logs.
-
-
-    --ci-key                                     The license key to run on CI server.
-    --email                                      The email used to purchase the license.
-
-
-    --no-analytics                               Disable sending anonymous usage statistics.
-
-
-    --[no-]fatal-style                           Treat style level issues as fatal.
-    --[no-]fatal-performance                     Treat performance level issues as fatal.
-    --[no-]fatal-warnings                        Treat warning level issues as fatal.
-                                                 (defaults to on)
+    -h, --help                                       Print this usage information
+    -r, --reporter=<console>                         The format of the output of the analysis
+                                                     [console (default), console-verbose, checkstyle, codeclimate, github, gitlab, html, json]
+    -o, --output-directory=<OUTPUT>                  Write HTML output to OUTPUT
+                                                     (defaults to "metrics")
+        --json-path=<path/to/file.json>              Path to the JSON file with the output of the analysis
+        --cyclomatic-complexity=<20>                 Cyclomatic Complexity threshold
+        --halstead-volume=<150>                      Halstead Volume threshold
+        --lines-of-code=<100>                        Lines of Code threshold
+        --maximum-nesting-level=<5>                  Maximum Nesting Level threshold
+        --number-of-methods=<10>                     Number of Methods threshold
+        --number-of-parameters=<4>                   Number of Parameters threshold
+        --source-lines-of-code=<50>                  Source lines of Code threshold
+        --weight-of-class=<0.33>                     Weight Of a Class threshold
+        --maintainability-index=<50>                 Maintainability Index threshold
+        --technical-debt=<0>                         Technical Debt threshold
+    -c, --print-config                               Print resolved config
+        --root-folder=<./>                           Root folder
+                                                     (defaults to current directory)
+        --sdk-path=<directory-path>                  Dart SDK directory path. Should be provided only when you run the application as compiled executable(https://dart.dev/tools/dart-compile#exe) and automatic Dart SDK path detection fails
+        --exclude=<{/**.g.dart,/**.freezed.dart}>    File paths in Glob syntax to be exclude
+                                                     (defaults to "{/**.g.dart,/**.freezed.dart}")
+        --no-congratulate                            Don't show output even when there are no issues.
+        --[no-]verbose                               Show verbose logs
+        --set-exit-on-violation-level=<warning>      Set exit code 2 if code violations same or higher level than selected are detected
+                                                     [noted, warning, alarm]
+        --[no-]fatal-style                           Treat style level issues as fatal
+        --[no-]fatal-performance                     Treat performance level issues as fatal
+        --[no-]fatal-warnings                        Treat warning level issues as fatal
+                                                     (defaults to on)
+        --fatal-warnings-threshold=<all>             Number of warnings to treat as fatal
+        --fatal-performance-threshold=<all>          Number of performance issues to treat as fatal
+        --fatal-style-threshold=<all>                Number of style issues to treat as fatal
 ```
 
 ## Output example
