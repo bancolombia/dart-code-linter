@@ -1,1 +1,1 @@
-const packageVersion = '1.2.1';
+const packageVersion = '1.3.0';

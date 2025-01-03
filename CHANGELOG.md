@@ -1,4 +1,6 @@
 # Changelog
+## 1.3.0
+- Added `fatal-warnings-threshold` `fatal-performance-threshold` and `fatal-style-threshold` to set the failure threshold for analyze command
 ## 1.2.1
 - Fixed generating report file when find issues in the report
 ## 1.2.0

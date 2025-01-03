@@ -32,6 +32,9 @@ class FlagNames {
   static const fatalStyle = 'fatal-style';
   static const fatalPerformance = 'fatal-performance';
   static const fatalWarnings = 'fatal-warnings';
+  static const fatalWarningsThreshold = 'fatal-warnings-threshold';
+  static const fatalPerformanceThreshold = 'fatal-performance-threshold';
+  static const fatalStyleThreshold = 'fatal-style-threshold';
 
   static const l10nClassPattern = 'class-pattern';
 

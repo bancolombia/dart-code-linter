@@ -26,6 +26,20 @@ bool hasIssueWithSeverity(
         record.issues.any((issue) => issue.severity == severity) ||
         record.antiPatternCases.any((issue) => issue.severity == severity));
 
+num howManyIssueWithSeverity(
+  Iterable<LintFileReport> records,
+  Severity severity,
+) =>
+    records.fold(
+      0,
+      (prevValue, fileReport) =>
+          prevValue +
+          (fileReport.issues.fold(
+              0, (p, issue) => p + (issue.severity == severity ? 1 : 0))) +
+          (fileReport.antiPatternCases
+              .fold(0, (p, anti) => p + (anti.severity == severity ? 1 : 0))),
+    );
+
 Iterable<String> scannedFolders(Iterable<LintFileReport> records) =>
     records.map((record) => p.split(record.relativePath).first).toSet().toList()
       ..sort();
