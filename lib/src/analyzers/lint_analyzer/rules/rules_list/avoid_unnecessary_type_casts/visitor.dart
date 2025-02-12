@@ -51,14 +51,14 @@ class _Visitor extends RecursiveAstVisitor<void> {
     DartType castedType,
   ) {
     // ignore: deprecated_member_use
-    if (objectType.element2 == castedType.element2) {
+    if (objectType.element == castedType.element) {
       return objectType;
     }
 
     if (objectType is InterfaceType) {
       return objectType.allSupertypes
           // ignore: deprecated_member_use
-          .firstWhereOrNull((value) => value.element2 == castedType.element2);
+          .firstWhereOrNull((value) => value.element == castedType.element);
     }
 
     return null;

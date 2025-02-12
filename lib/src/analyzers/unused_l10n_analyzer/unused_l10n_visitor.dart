@@ -120,7 +120,7 @@ class UnusedL10nVisitor extends RecursiveAstVisitor<void> {
 
     if (staticElement is VariableElement) {
       // ignore: deprecated_member_use
-      final classElement = staticElement.type.element2;
+      final classElement = staticElement.type.element;
       if (_classPattern.hasMatch(classElement?.name ?? '')) {
         _tryAddInvocation(classElement, name);
       }
@@ -128,7 +128,7 @@ class UnusedL10nVisitor extends RecursiveAstVisitor<void> {
       return;
     } else if (staticElement is PropertyAccessorElement) {
       // ignore: deprecated_member_use
-      final classElement = staticElement.type.returnType.element2;
+      final classElement = staticElement.type.returnType.element;
       if (_classPattern.hasMatch(classElement?.name ?? '')) {
         _tryAddInvocation(classElement, name);
       }
@@ -157,7 +157,7 @@ class UnusedL10nVisitor extends RecursiveAstVisitor<void> {
     for (final element in staticElement.accessors) {
       if (_classPattern.hasMatch(element.returnType.toString())) {
         // ignore: deprecated_member_use
-        final declaredElement = element.returnType.element2;
+        final declaredElement = element.returnType.element;
 
         _tryAddInvocation(declaredElement, name);
         break;
