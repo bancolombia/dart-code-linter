@@ -11,7 +11,7 @@ class Report {
   final SourceSpan location;
 
   /// The node that represents a dart code snippet in the AST structure.
-  final AstNode declaration;
+  final AstNode? declaration;
 
   /// Target entity metrics.
   final Iterable<MetricValue> metrics;
@@ -29,6 +29,6 @@ class Report {
   const Report({
     required this.location,
     required this.metrics,
-    required this.declaration,
+    this.declaration,
   });
 }
