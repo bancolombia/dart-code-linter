@@ -1,5 +1,5 @@
 # Changelog
-## 1.4.0
+## 2.0.0
 - Update `analyzer` to version ^6.0.0
 ## 1.3.0
 - Added `fatal-warnings-threshold` `fatal-performance-threshold` and `fatal-style-threshold` to set the failure threshold for analyze command
