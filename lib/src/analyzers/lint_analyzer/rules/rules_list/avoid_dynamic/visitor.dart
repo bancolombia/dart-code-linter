@@ -6,17 +6,38 @@ class _Visitor extends RecursiveAstVisitor<void> {
   Iterable<AstNode> get nodes => _nodes;
 
   @override
-  void visitSimpleIdentifier(SimpleIdentifier node) {
-    final parent = node.parent;
-    // ignore: deprecated_member_use
-    if (parent is NamedType &&
-        (parent.type?.isDynamic ?? false) &&
-        parent.name2.toString() == 'dynamic') {
+  void visitNamedType(NamedType node) {
+    if ((node.type?.isDynamic ?? false) && node.name2.toString() == 'dynamic') {
+      if (node is ExtensionDeclaration) {
+        return;
+      }
       final grandParent = node.parent?.parent;
-      if (grandParent != null && !_isWithinMap(grandParent)) {
-        _nodes.add(grandParent);
+      final parent = node.parent;
+
+      if (grandParent != null &&
+          parent != null &&
+          !_isWithinMap(grandParent) &&
+          !_isWithinMap(parent)) {
+        _nodes.add(node.parent ?? node);
       }
     }
+  }
+
+  @override
+  void visitClassDeclaration(ClassDeclaration node) {
+    if (node.extendsClause != null) {
+      NamedType? baseType = node.extendsClause?.superclass;
+      if (baseType is Identifier && baseType?.name2.toString() == 'dynamic') {
+        _nodes.add(node);
+      } else {
+        baseType?.typeArguments?.arguments.forEach((type) {
+          if (type is NamedType && type.name2.toString() == 'dynamic') {
+            _nodes.add(type.parent ?? type);
+          }
+        });
+      }
+    }
+    super.visitClassDeclaration(node);
   }
 
   bool _isWithinMap(AstNode grandParent) {

@@ -105,7 +105,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
     final typeArgElements = type.typeArguments
         .map((typeArg) {
           // ignore: deprecated_member_use
-          final element = typeArg.element2;
+          final element = typeArg.element;
 
           return element is ClassElement
               ? _TypedClassElement(typeArg, element)

@@ -39,6 +39,13 @@ class _Visitor extends GeneralizingAstVisitor<void> {
     super.visitDeclaration(node);
   }
 
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    _visitIdent(node, node.toString());
+
+    super.visitInstanceCreationExpression(node);
+  }
+
   void _visitIdent(AstNode node, String name) {
     final prevNode =
         _nodeBreadcrumb.isNotEmpty ? _nodeBreadcrumb.values.last : null;

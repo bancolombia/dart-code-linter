@@ -1,7 +1,5 @@
-import 'package:analyzer/dart/ast/ast.dart';
 import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
 import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/report.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:source_span/source_span.dart';
 import 'package:test/test.dart';
 
@@ -10,8 +8,6 @@ import '../../../../stubs_builders.dart';
 const metric1Id = 'metric-id1';
 const metric2Id = 'metric-id2';
 const metric3Id = 'metric-id3';
-
-class _DeclarationMock extends Mock implements Declaration {}
 
 void main() {
   group('Report', () {
@@ -46,7 +42,6 @@ void main() {
           Report(
             location: SourceSpanBase(SourceLocation(0), SourceLocation(0), ''),
             metrics: const [],
-            declaration: _DeclarationMock(),
           ).metricsLevel,
           equals(MetricValueLevel.none),
         );

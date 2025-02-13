@@ -32,7 +32,7 @@ void main() {
             'description': 'Please use NonStrangeClass.someMethod instead',
           },
           {
-            'ident': 'DateTime.now',
+            'ident': 'DateTime.now()',
             'description': 'Please use clock.now instead',
           },
         ],
@@ -52,10 +52,10 @@ void main() {
               '}',
           'strangeName',
           'StrangeClass.someMethod',
-          'DateTime.now',
-          'DateTime.now',
-          'DateTime.now',
-          'DateTime.now',
+          'DateTime.now()',
+          'DateTime.now()',
+          'DateTime.now()',
+          'DateTime.now()',
         ],
         messages: [
           'Please use myShowDialog (showDialog is banned)',
@@ -65,10 +65,10 @@ void main() {
           'Oops (AnotherStrangeName is banned)',
           'The name is too strange (strangeName is banned)',
           'Please use NonStrangeClass.someMethod instead (StrangeClass.someMethod is banned)',
-          'Please use clock.now instead (DateTime.now is banned)',
-          'Please use clock.now instead (DateTime.now is banned)',
-          'Please use clock.now instead (DateTime.now is banned)',
-          'Please use clock.now instead (DateTime.now is banned)',
+          'Please use clock.now instead (DateTime.now() is banned)',
+          'Please use clock.now instead (DateTime.now() is banned)',
+          'Please use clock.now instead (DateTime.now() is banned)',
+          'Please use clock.now instead (DateTime.now() is banned)',
         ],
       );
     });
