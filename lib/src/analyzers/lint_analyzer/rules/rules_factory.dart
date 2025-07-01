@@ -77,6 +77,7 @@ import 'rules_list/prefer_static_class/prefer_static_class_rule.dart';
 import 'rules_list/prefer_trailing_comma/prefer_trailing_comma_rule.dart';
 import 'rules_list/prefer_using_list_view/prefer_using_list_view_rule.dart';
 import 'rules_list/provide_correct_intl_args/provide_correct_intl_args_rule.dart';
+import 'rules_list/require_trailing_commas/require_trailing_commas_rule.dart';
 import 'rules_list/tag_name/tag_name_rule.dart';
 import 'rules_list/use_setstate_synchronously/use_setstate_synchronously_rule.dart';
 
@@ -170,11 +171,14 @@ final _implementedRules = <String, Rule Function(Map<String, Object>)>{
   PreferUsingListViewRule.ruleId: PreferUsingListViewRule.new,
   ProvideCorrectIntlArgsRule.ruleId: ProvideCorrectIntlArgsRule.new,
   TagNameRule.ruleId: TagNameRule.new,
+  RequireTrailingCommasRule.ruleId: RequireTrailingCommasRule.new,
 };
 
 Iterable<String> get allRuleIds => _implementedRules.keys;
 
 Iterable<Rule> getRulesById(Map<String, Map<String, Object>> rulesConfig) =>
-    List.unmodifiable(_implementedRules.keys
-        .where((id) => rulesConfig.keys.contains(id))
-        .map<Rule>((id) => _implementedRules[id]!(rulesConfig[id]!)));
+    List.unmodifiable(
+      _implementedRules.keys
+          .where((id) => rulesConfig.keys.contains(id))
+          .map<Rule>((id) => _implementedRules[id]!(rulesConfig[id]!)),
+    );
