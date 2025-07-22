@@ -26,7 +26,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   void _handleInvalidArguments(ArgumentList arguments) {
     for (final argument in arguments.arguments) {
       final argumentType = argument.staticType;
-      final parameterType = argument.staticParameterElement?.type;
+      final parameterType = argument.correspondingParameter?.type;
       if (argumentType is FunctionType && parameterType is FunctionType) {
         if (argumentType.returnType.isDartAsyncFuture &&
             !_hasValidFutureType(parameterType.returnType)) {
@@ -39,7 +39,6 @@ class _Visitor extends RecursiveAstVisitor<void> {
   bool _hasValidFutureType(DartType type) =>
       type.isDartAsyncFuture ||
       type.isDartAsyncFutureOr ||
-      // ignore: deprecated_member_use
-      type.isDynamic ||
+      type is DynamicType ||
       type.isDartCoreObject;
 }
