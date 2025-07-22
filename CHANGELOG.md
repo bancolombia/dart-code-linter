@@ -1,6 +1,6 @@
 # Changelog
 ## 3.0.0-beta.1
-- [Breaking] Update dart sdk constraints to `>=3.8.0 <4.0.0`.
+- [Breaking] Update dart sdk constraints to `>=3.4.0 <4.0.0`.
 - Update `analyzer` to version ^7.4.4
 ## 2.0.0
 - Update `analyzer` to version ^6.0.0
