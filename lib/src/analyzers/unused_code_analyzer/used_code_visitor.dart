@@ -153,7 +153,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
   void _recordIfExtensionMember(Element? element) {
     if (element != null) {
-      final enclosingElement = element.enclosingElement;
+      final enclosingElement = element.enclosingElement3;
       if (enclosingElement is ExtensionElement) {
         _recordUsedExtension(enclosingElement);
       }
@@ -161,7 +161,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   }
 
   bool _recordConditionalElement(Element element) {
-    final elementPath = element.enclosingElement?.source?.fullName;
+    final elementPath = element.enclosingElement3?.source?.fullName;
     if (elementPath == null) {
       return false;
     }
@@ -215,7 +215,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    final enclosingElement = element.enclosingElement;
+    final enclosingElement = element.enclosingElement3;
     if (enclosingElement is CompilationUnitElement) {
       _recordUsedElement(element);
     } else if (enclosingElement is ExtensionElement) {
