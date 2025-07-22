@@ -23,7 +23,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   void visitComment(Comment node) {
     super.visitComment(node);
 
-    if (node.isDocumentation) {
+    if (isDocumentationComment(node)) {
       final isValid = node.tokens.length == 1
           ? _hasValidSingleLine(node.tokens.first, _CommentType.doc)
           : _hasValidMultiline(node.tokens, _CommentType.doc);
@@ -31,6 +31,12 @@ class _Visitor extends RecursiveAstVisitor<void> {
         _comments.add(_DocCommentInfo(node));
       }
     }
+  }
+
+  bool isDocumentationComment(Comment comment) {
+    final lexeme = comment.tokens.first.lexeme;
+
+    return lexeme.startsWith('///') || lexeme.startsWith('/**');
   }
 
   void checkRegularComments(AstNode node) {
