@@ -4,8 +4,10 @@ Checks unused `*.dart` files.
 
 To execute the command, run:
 ```sh
-$ dart run dart_code_linter:metrics check-unused-files
+dart run dart_code_linter:metrics check-unused-files lib/
 ```
+Where lib could be replaced with the directory to analyze.
+
 Full command description:
 ```sh
 Usage: metrics check-unused-files [arguments...] <directories>
