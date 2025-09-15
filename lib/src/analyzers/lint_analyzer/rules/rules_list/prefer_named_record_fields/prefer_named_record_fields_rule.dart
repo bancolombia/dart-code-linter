@@ -148,12 +148,10 @@ class PreferNamedRecordFieldsRule extends DartRule {
       }
     }
 
-    // Fallback a nombres genéricos
     return 'field${index + 1}';
   }
 
   String _generateFieldNameFromExpression(AstNode expression, int index) {
-    // Intentar inferir un nombre del contexto de la expresión
     if (expression is StringLiteral) {
       return 'text';
     } else if (expression is IntegerLiteral) {
@@ -167,14 +165,12 @@ class PreferNamedRecordFieldsRule extends DartRule {
     } else if (expression is SetOrMapLiteral) {
       return 'data';
     } else if (expression is Identifier) {
-      // Usar el nombre de la variable si es disponible
       final name = expression.name;
       if (name.length > 1) {
         return name;
       }
     }
 
-    // Fallback a nombres genéricos
     return 'field${index + 1}';
   }
 }
