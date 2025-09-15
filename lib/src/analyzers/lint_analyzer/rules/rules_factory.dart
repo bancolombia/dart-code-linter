@@ -70,6 +70,7 @@ import 'rules_list/prefer_iterable_of/prefer_iterable_of_rule.dart';
 import 'rules_list/prefer_last/prefer_last_rule.dart';
 import 'rules_list/prefer_match_file_name/prefer_match_file_name_rule.dart';
 import 'rules_list/prefer_moving_to_variable/prefer_moving_to_variable_rule.dart';
+import 'rules_list/prefer_named_record_fields/prefer_named_record_fields_rule.dart';
 import 'rules_list/prefer_provide_intl_description/prefer_provide_intl_description_rule.dart';
 import 'rules_list/prefer_single_quotes/prefer_single_qoutes.dart';
 import 'rules_list/prefer_single_widget_per_file/prefer_single_widget_per_file_rule.dart';
@@ -163,6 +164,7 @@ final _implementedRules = <String, Rule Function(Map<String, Object>)>{
   PreferLastRule.ruleId: PreferLastRule.new,
   PreferMatchFileNameRule.ruleId: PreferMatchFileNameRule.new,
   PreferMovingToVariableRule.ruleId: PreferMovingToVariableRule.new,
+  PreferNamedRecordFieldsRule.ruleId: PreferNamedRecordFieldsRule.new,
   PreferProvideIntlDescriptionRule.ruleId: PreferProvideIntlDescriptionRule.new,
   PreferSingleWidgetPerFileRule.ruleId: PreferSingleWidgetPerFileRule.new,
   PreferStaticClassRule.ruleId: PreferStaticClassRule.new,
