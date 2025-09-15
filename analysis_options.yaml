@@ -81,6 +81,7 @@ dart_code_linter:
     - prefer-moving-to-variable:
         exclude:
           - test/**
+    - prefer-named-record-fields
     - prefer-trailing-comma
 
 linter:
