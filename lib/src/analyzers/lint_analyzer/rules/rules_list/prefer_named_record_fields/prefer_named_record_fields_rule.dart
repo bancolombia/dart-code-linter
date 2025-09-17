@@ -118,7 +118,7 @@ class PreferNamedRecordFieldsRule extends DartRule {
 
   String _generateFieldName(TypeAnnotation? type, int index) {
     if (type != null) {
-      final typeName = type.toSource().toLowerCase();
+      var typeName = type.toSource().toLowerCase();
 
       switch (typeName) {
         case 'string':
@@ -142,6 +142,10 @@ class PreferNamedRecordFieldsRule extends DartRule {
           } else if (typeName.startsWith('map<')) {
             return 'data';
           } else if (typeName.length > 3) {
+            if (typeName.endsWith('?')) {
+              typeName = typeName.substring(0, typeName.length - 1);
+            }
+
             return typeName.substring(0, 1).toLowerCase() +
                 typeName.substring(1);
           }

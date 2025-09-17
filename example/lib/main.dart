@@ -42,7 +42,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
@@ -54,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
               'You have pushed the button this many times:',
             ),
             Text(
-              '$_counter',
+              '$_counter +' + size.width.toString(),
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             UnusedCodeWidget(),
@@ -71,5 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () => _incrementCounter(context),
         tooltip: 'Increment',
         child: const Icon(Icons.add),
-      ));
+      ),
+    );
+  }
 }

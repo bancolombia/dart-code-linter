@@ -82,6 +82,7 @@ dart_code_linter:
         exclude:
           - test/**
     - prefer-named-record-fields
+    - prefer-media-query-direct-access
     - prefer-trailing-comma
 
 linter:
