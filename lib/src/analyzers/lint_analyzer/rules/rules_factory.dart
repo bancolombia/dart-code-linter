@@ -69,6 +69,7 @@ import 'rules_list/prefer_intl_name/prefer_intl_name_rule.dart';
 import 'rules_list/prefer_iterable_of/prefer_iterable_of_rule.dart';
 import 'rules_list/prefer_last/prefer_last_rule.dart';
 import 'rules_list/prefer_match_file_name/prefer_match_file_name_rule.dart';
+import 'rules_list/prefer_media_query_direct_access/prefer_media_query_direct_access_rule.dart';
 import 'rules_list/prefer_moving_to_variable/prefer_moving_to_variable_rule.dart';
 import 'rules_list/prefer_named_record_fields/prefer_named_record_fields_rule.dart';
 import 'rules_list/prefer_provide_intl_description/prefer_provide_intl_description_rule.dart';
@@ -163,6 +164,7 @@ final _implementedRules = <String, Rule Function(Map<String, Object>)>{
   PreferIterableOfRule.ruleId: PreferIterableOfRule.new,
   PreferLastRule.ruleId: PreferLastRule.new,
   PreferMatchFileNameRule.ruleId: PreferMatchFileNameRule.new,
+  PreferMediaQueryDirectAccessRule.ruleId: PreferMediaQueryDirectAccessRule.new,
   PreferMovingToVariableRule.ruleId: PreferMovingToVariableRule.new,
   PreferNamedRecordFieldsRule.ruleId: PreferNamedRecordFieldsRule.new,
   PreferProvideIntlDescriptionRule.ruleId: PreferProvideIntlDescriptionRule.new,

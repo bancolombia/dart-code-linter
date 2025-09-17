@@ -59,6 +59,7 @@ dart_code_linter:
     - prefer-single-quotes
     - no-equal-then-else
     - prefer-async-await
+    - prefer-media-query-direct-access
     - prefer-correct-type-name:
         max-length: 44
     - prefer-match-file-name:
