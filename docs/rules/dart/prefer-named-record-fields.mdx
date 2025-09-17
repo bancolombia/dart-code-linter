@@ -1,0 +1,76 @@
+# prefer-named-record-fields
+added in: 3.1.0 <span style={{color: 'green'}}>style</span>
+
+Recommends using named fields in records instead of positional fields when it improves code readability.
+
+Records in Dart can have positional fields (accessed by `$1`, `$2`, etc.) and named fields (accessed by their name). Using named fields makes code more readable and self-documenting, especially when the record has multiple fields or when the purpose of each field is not obvious.
+
+:::note
+This rule helps improve code readability and maintainability by making the purpose of each field in a record more explicit.
+:::
+
+## Config
+
+```yaml
+dart_code_linter:
+  ...
+  rules:
+    ...
+    - prefer-named-record-fields
+```
+
+## Example
+### Bad:
+```dart
+// Record with multiple unclear positional fields
+(String, int, bool) getUserInfo() {
+  return ('John', 25, true); // What does each field represent?
+}
+
+void processUser() {
+  final user = getUserInfo();
+  print('Name: ${user.$1}'); // Not clear what $1 is
+  print('Age: ${user.$2}');  // Not clear what $2 is
+  print('Active: ${user.$3}'); // Not clear what $3 is
+}
+
+// Record with positional fields where names would be helpful
+(double, double) getCoordinates() {
+  return (10.5, 20.3); // Which is x and which is y?
+}
+```
+
+### Good:
+```dart
+// Record with named fields that document their purpose
+({String name, int age, bool isActive}) getUserInfo() {
+  return (name: 'John', age: 25, isActive: true);
+}
+
+void processUser() {
+  final user = getUserInfo();
+  print('Name: ${user.name}');       // Clear and self-documenting
+  print('Age: ${user.age}');         // Clear and self-documenting
+  print('Active: ${user.isActive}'); // Clear and self-documenting
+}
+
+// Record with named fields for coordinates
+({double x, double y}) getCoordinates() {
+  return (x: 10.5, y: 20.3); // Clear what each value represents
+}
+
+// It's fine to use positional fields when the meaning is obvious
+(int, int) getDimensions() {
+  return (800, 600); // Width and height are obvious in context
+}
+
+// It's fine for simple records with a single field
+(String) getName() {
+  return ('John');
+}
+```
+
+## Exceptions
+- Records with a single positional field generally don't need names
+- Records where the order and meaning of fields is obvious from context
+- Records that follow established conventions where order is part of the contract (like x,y coordinates or mathematical tuples)
