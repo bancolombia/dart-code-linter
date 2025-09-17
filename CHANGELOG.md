@@ -1,4 +1,7 @@
 # Changelog
+## 3.1.0-beta.2
+- Fixed DCL version in analyzer_plugin.
+
 ## 3.1.0-beta.1
 - Add rule `prefer-named-record-fields`.
 
