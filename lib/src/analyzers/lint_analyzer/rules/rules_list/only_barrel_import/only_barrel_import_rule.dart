@@ -47,7 +47,7 @@ class OnlyBarrelImportRule extends DartRule {
               ),
               message: _warningMessage,
               verboseMessage:
-                  'We use only barrel imports for external modules so these modules can define some internal private APIs and hide them from the public API. This is a good practice to keep the codebase clean and maintainable.',
+                  'If you define some barrel files, you should only import them instead of parts of the module. This is a good practice to keep the codebase clean and maintainable.',
               replacements: [
                 _createReplacement(importDirective),
                 _createReplacementWithValidImport(importDirective),
