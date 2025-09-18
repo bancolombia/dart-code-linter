@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.0-beta.4
+- Add rule `use-design-system-items`.
+- Add rule `only-barrel-import`.
+- Allow to specify more than one suggestion for each rule.
+
 ## 3.1.0-beta.3
 - Add rule `prefer-media-query-direct-access`.
 
