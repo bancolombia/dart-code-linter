@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.0
+- Add rule `prefer-media-query-direct-access`.
+- Add rule `prefer-named-record-fields`.
+
 ## 3.1.0-beta.3
 - Add rule `prefer-media-query-direct-access`.
 

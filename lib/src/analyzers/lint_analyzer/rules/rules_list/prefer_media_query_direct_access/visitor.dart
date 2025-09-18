@@ -1,37 +1,51 @@
 part of 'prefer_media_query_direct_access_rule.dart';
 
 class _Visitor extends RecursiveAstVisitor<void> {
-  final _mediaQueryUsages = <MethodInvocation>[];
+  final _mediaQueryUsages = <PropertyAccess>[];
 
-  Iterable<MethodInvocation> get mediaQueryUsages => _mediaQueryUsages;
+  Iterable<PropertyAccess> get mediaQueryUsages => _mediaQueryUsages;
 
   @override
-  void visitMethodInvocation(MethodInvocation node) {
-    super.visitMethodInvocation(node);
+  void visitPropertyAccess(PropertyAccess node) {
+    super.visitPropertyAccess(node);
 
-    if (_isMediaQueryUsage(node)) {
+    if (_isMediaQueryPropertyAccess(node)) {
       _mediaQueryUsages.add(node);
     }
   }
 
-  bool _isMediaQueryUsage(MethodInvocation node) {
+  bool _isMediaQueryPropertyAccess(PropertyAccess node) {
     final target = node.target;
-    final methodName = node.methodName.name;
+    final propertyName = node.propertyName.name;
 
-    return target is SimpleIdentifier &&
-        target.name == 'MediaQuery' &&
-        (methodName == 'of' ||
-            methodName == 'size' ||
-            methodName == 'padding' ||
-            methodName == 'viewInsets' ||
-            methodName == 'viewPadding' ||
-            methodName == 'orientation' ||
-            methodName == 'devicePixelRatio' ||
-            methodName == 'textScaleFactor' ||
-            methodName == 'platformBrightness' ||
-            methodName == 'accessibleNavigation' ||
-            methodName == 'invertColors' ||
-            methodName == 'highContrast' ||
-            methodName == 'disableAnimations');
+    if (target is MethodInvocation &&
+        target.target is SimpleIdentifier &&
+        (target.target as SimpleIdentifier).name == 'MediaQuery' &&
+        target.methodName.name == 'of') {
+      return _hasDirectAccessMethod(propertyName);
+    }
+
+    return false;
+  }
+
+  bool _hasDirectAccessMethod(String propertyName) {
+    const availableProperties = {
+      'size',
+      'padding',
+      'viewInsets',
+      'viewPadding',
+      'orientation',
+      'devicePixelRatio',
+      'textScaleFactor',
+      'platformBrightness',
+      'systemGestureInsets',
+      'accessibleNavigation',
+      'invertColors',
+      'highContrast',
+      'disableAnimations',
+      'boldText',
+    };
+
+    return availableProperties.contains(propertyName);
   }
 }
