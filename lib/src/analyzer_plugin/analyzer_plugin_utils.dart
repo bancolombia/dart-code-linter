@@ -41,7 +41,7 @@ plugin.AnalysisErrorFixes codeIssueToAnalysisErrorFixes(
       if (issue.suggestions != null && unitResult != null)
         ...issue.suggestions!
             .mapIndexed((index, suggestion) => plugin.PrioritizedSourceChange(
-                  index,
+                  index + 1,
                   plugin.SourceChange(suggestion.comment, edits: [
                     plugin.SourceFileEdit(
                       fileWithIssue,
