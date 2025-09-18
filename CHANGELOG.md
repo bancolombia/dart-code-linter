@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.1.1
+- Changed `prefer-media-query-direct-access` to `FlutterRule`.
+
 ## 3.1.0
 - Add rule `prefer-media-query-direct-access`.
 - Add rule `prefer-named-record-fields`.
