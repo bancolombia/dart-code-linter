@@ -41,12 +41,12 @@ class PreferLastRule extends DartRule {
               rule: this,
               location: nodeLocation(node: expression, source: source),
               message: _warningMessage,
-              replacement: _createReplacement(expression),
+              replacements: _createReplacement(expression),
             ))
         .toList(growable: false);
   }
 
-  Replacement _createReplacement(Expression expression) {
+  List<Replacement> _createReplacement(Expression expression) {
     String replacement;
 
     if (expression is MethodInvocation) {
@@ -59,9 +59,11 @@ class PreferLastRule extends DartRule {
       replacement = '.last';
     }
 
-    return Replacement(
-      comment: _replaceComment,
-      replacement: replacement,
-    );
+    return [
+      Replacement(
+        comment: _replaceComment,
+        replacement: replacement,
+      ),
+    ];
   }
 }

@@ -24,15 +24,15 @@ class Issue {
   /// issue or `null` if there is no information.
   final String? verboseMessage;
 
-  /// The suggested relevant change or `null` if there is no change.
-  final Replacement? suggestion;
+  /// The suggested relevant changes or `null` if there is no change.
+  final List<Replacement>? suggestions;
 
   /// Initialize a newly created [Issue].
   ///
   /// The issue is associated with the given [location]. The issue will have the
   /// given [ruleId], [documentation], [severity] and [message] they will be
   /// used to classify and navigate issues in IDE or in reporters.
-  /// If [verboseMessage] or [suggestion] are provided, they will be used to
+  /// If [verboseMessage] or [suggestions] are provided, they will be used to
   /// complete and improve the information for the end user.
   const Issue({
     required this.ruleId,
@@ -41,6 +41,6 @@ class Issue {
     required this.severity,
     required this.message,
     this.verboseMessage,
-    this.suggestion,
+    this.suggestions,
   });
 }

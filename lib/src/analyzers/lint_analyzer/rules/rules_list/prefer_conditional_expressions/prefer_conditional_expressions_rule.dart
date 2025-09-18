@@ -55,18 +55,18 @@ class PreferConditionalExpressionsRule extends DartRule {
             rule: this,
             location: nodeLocation(node: info.statement, source: source),
             message: _warningMessage,
-            replacement: _createReplacement(info),
+            replacements: _createReplacement(info),
           ),
         )
         .toList(growable: false);
   }
 
-  Replacement? _createReplacement(_StatementInfo info) {
+  List<Replacement>? _createReplacement(_StatementInfo info) {
     final correction = _createCorrection(info);
 
     return correction == null
         ? null
-        : Replacement(comment: _correctionMessage, replacement: correction);
+        : [Replacement(comment: _correctionMessage, replacement: correction)];
   }
 
   String? _createCorrection(_StatementInfo info) {

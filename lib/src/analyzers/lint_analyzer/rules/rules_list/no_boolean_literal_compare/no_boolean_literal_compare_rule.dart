@@ -69,10 +69,12 @@ class NoBooleanLiteralCompareRule extends DartRule {
         rule: this,
         location: nodeLocation(node: expression, source: source),
         message: _warning,
-        replacement: Replacement(
-          comment: useDirect ? _useItDirectly : _negate,
-          replacement: useDirect ? correction : '!$correction',
-        ),
+        replacements: [
+          Replacement(
+            comment: useDirect ? _useItDirectly : _negate,
+            replacement: useDirect ? correction : '!$correction',
+          ),
+        ],
       ));
     }
 

@@ -48,13 +48,15 @@ class PreferCorrectEdgeInsetsConstructorRule extends FlutterRule {
                 source: source,
               ),
               message: _issueMessage,
-              replacement: _createReplacement(expression.value),
+              replacements: _createReplacement(expression.value),
             ))
         .toList(growable: false);
   }
 
-  Replacement? _createReplacement(String expression) => Replacement(
-        comment: 'Prefer use $expression',
-        replacement: expression,
-      );
+  List<Replacement>? _createReplacement(String expression) => [
+        Replacement(
+          comment: 'Prefer use $expression',
+          replacement: expression,
+        ),
+      ];
 }

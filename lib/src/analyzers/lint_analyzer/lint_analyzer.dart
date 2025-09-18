@@ -223,14 +223,16 @@ class LintAnalyzer {
     final fixedIssues = <Issue>[];
 
     for (final issue in result.issues) {
-      final fix = issue.suggestion;
+      final fix = issue.suggestions;
 
       if (fix != null) {
-        fixedContent = fixedContent.replaceRange(
-          issue.location.start.offset,
-          issue.location.end.offset,
-          fix.replacement,
-        );
+        for (final suggestion in fix) {
+          fixedContent = fixedContent.replaceRange(
+            issue.location.start.offset,
+            issue.location.end.offset,
+            suggestion.replacement,
+          );
+        }
 
         fixedIssues.add(issue);
       }

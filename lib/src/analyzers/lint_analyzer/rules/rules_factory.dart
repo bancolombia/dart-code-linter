@@ -73,7 +73,7 @@ import 'rules_list/prefer_media_query_direct_access/prefer_media_query_direct_ac
 import 'rules_list/prefer_moving_to_variable/prefer_moving_to_variable_rule.dart';
 import 'rules_list/prefer_named_record_fields/prefer_named_record_fields_rule.dart';
 import 'rules_list/prefer_provide_intl_description/prefer_provide_intl_description_rule.dart';
-import 'rules_list/prefer_single_quotes/prefer_single_qoutes.dart';
+import 'rules_list/prefer_single_quotes/prefer_single_quotes_rule.dart';
 import 'rules_list/prefer_single_widget_per_file/prefer_single_widget_per_file_rule.dart';
 import 'rules_list/prefer_static_class/prefer_static_class_rule.dart';
 import 'rules_list/prefer_trailing_comma/prefer_trailing_comma_rule.dart';

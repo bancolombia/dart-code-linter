@@ -55,10 +55,12 @@ class ArgumentsOrderingRule extends DartRule {
             rule: this,
             location: nodeLocation(node: issue.argumentList, source: source),
             message: _warningMessage,
-            replacement: Replacement(
-              comment: _replaceComment,
-              replacement: issue.replacement,
-            ),
+            replacements: [
+              Replacement(
+                comment: _replaceComment,
+                replacement: issue.replacement,
+              ),
+            ],
           ),
         )
         .toList(growable: false);

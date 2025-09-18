@@ -83,7 +83,7 @@ class DoubleLiteralFormatRule extends DartRule {
           location: nodeLocation(node: literal, source: source),
           message: message,
           verboseMessage: replacement?.comment,
-          replacement: replacement,
+          replacements: replacement != null ? [replacement] : null,
         ));
       }
     }

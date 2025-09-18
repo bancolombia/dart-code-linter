@@ -34,17 +34,19 @@ class PreferMediaQueryDirectAccessRule extends DartRule {
           rule: this,
           location: nodeLocation(node: node, source: source),
           message: warningMessage,
-          replacement: _createReplacement(node),
+          replacements: _createReplacement(node),
         ));
   }
 
-  Replacement _createReplacement(MethodInvocation node) {
+  List<Replacement> _createReplacement(MethodInvocation node) {
     final propertyName = node.methodName.name;
     final replacement = '.${propertyName}Of';
 
-    return Replacement(
-      comment: replaceComment,
-      replacement: replacement,
-    );
+    return [
+      Replacement(
+        comment: replaceComment,
+        replacement: replacement,
+      ),
+    ];
   }
 }

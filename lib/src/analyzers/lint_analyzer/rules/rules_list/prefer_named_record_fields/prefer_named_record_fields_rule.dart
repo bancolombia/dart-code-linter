@@ -38,31 +38,35 @@ class PreferNamedRecordFieldsRule extends DartRule {
             rule: this,
             location: nodeLocation(node: recordType, source: source),
             message: warningMessage,
-            replacement: _createReplacementForRecordType(recordType),
+            replacements: _createReplacementForRecordType(recordType),
           )),
       ...visitor.recordLiterals.map((recordLiteral) => createIssue(
             rule: this,
             location: nodeLocation(node: recordLiteral, source: source),
             message: warningMessage,
-            replacement: _createReplacementForRecordLiteral(recordLiteral),
+            replacements: _createReplacementForRecordLiteral(recordLiteral),
           )),
     ].toList(growable: false);
   }
 
-  Replacement _createReplacementForRecordType(RecordTypeAnnotation recordType) {
+  List<Replacement> _createReplacementForRecordType(
+    RecordTypeAnnotation recordType,
+  ) {
     final positionalFields = recordType.positionalFields;
 
     if (positionalFields.isEmpty) {
-      return const Replacement(
-        comment: replaceComment,
-        replacement: '',
-      );
+      return const [
+        Replacement(
+          comment: replaceComment,
+          replacement: '',
+        ),
+      ];
     }
 
     final namedFields = <String>[];
-    for (var i = 0; i < positionalFields.length; i++) {
-      final field = positionalFields[i];
-      final fieldName = _generateFieldName(field.type, i);
+    for (var idx = 0; idx < positionalFields.length; idx++) {
+      final field = positionalFields[idx];
+      final fieldName = _generateFieldName(field.type, idx);
       namedFields.add('${field.type} $fieldName');
     }
 
@@ -74,28 +78,34 @@ class PreferNamedRecordFieldsRule extends DartRule {
         ? '({$namedFieldsStr, ${existingNamed.toSource()}})'
         : '({$namedFieldsStr})';
 
-    return Replacement(
-      comment: replaceComment,
-      replacement: replacement,
-    );
+    return [
+      Replacement(
+        comment: replaceComment,
+        replacement: replacement,
+      ),
+    ];
   }
 
-  Replacement _createReplacementForRecordLiteral(RecordLiteral recordLiteral) {
+  List<Replacement> _createReplacementForRecordLiteral(
+    RecordLiteral recordLiteral,
+  ) {
     final positionalFields = recordLiteral.fields
         .where((field) => field is! NamedExpression)
         .toList();
 
     if (positionalFields.isEmpty) {
-      return const Replacement(
-        comment: replaceComment,
-        replacement: '',
-      );
+      return const [
+        Replacement(
+          comment: replaceComment,
+          replacement: '',
+        ),
+      ];
     }
 
     final namedFields = <String>[];
-    for (var i = 0; i < positionalFields.length; i++) {
-      final field = positionalFields[i];
-      final fieldName = _generateFieldNameFromExpression(field, i);
+    for (var idx = 0; idx < positionalFields.length; idx++) {
+      final field = positionalFields[idx];
+      final fieldName = _generateFieldNameFromExpression(field, idx);
       namedFields.add('$fieldName: ${field.toSource()}');
     }
 
@@ -110,10 +120,12 @@ class PreferNamedRecordFieldsRule extends DartRule {
         ? '($namedFieldsStr, $existingNamed)'
         : '($namedFieldsStr)';
 
-    return Replacement(
-      comment: replaceComment,
-      replacement: replacement,
-    );
+    return [
+      Replacement(
+        comment: replaceComment,
+        replacement: replacement,
+      ),
+    ];
   }
 
   String _generateFieldName(TypeAnnotation? type, int index) {

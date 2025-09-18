@@ -51,10 +51,12 @@ void main() {
             severity: Severity.none,
             message: issueMessage,
             verboseMessage: issueRecommendationMessage,
-            suggestion: const Replacement(
-              comment: suggestionMessage,
-              replacement: suggestionCode,
-            ),
+            suggestions: [
+              const Replacement(
+                comment: suggestionMessage,
+                replacement: suggestionCode,
+              ),
+            ],
           ),
           resolvedUnitResult,
         );

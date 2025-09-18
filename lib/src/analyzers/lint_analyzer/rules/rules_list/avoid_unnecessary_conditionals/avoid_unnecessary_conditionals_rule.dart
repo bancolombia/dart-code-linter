@@ -40,15 +40,15 @@ class AvoidUnnecessaryConditionalsRule extends DartRule {
               rule: this,
               location: nodeLocation(node: info.expression, source: source),
               message: _warning,
-              replacement: _createReplacement(info),
+              replacements: _createReplacement(info),
             ))
         .toList(growable: false);
   }
 
-  Replacement? _createReplacement(_ConditionalInfo info) {
+  List<Replacement>? _createReplacement(_ConditionalInfo info) {
     final condition = info.expression.condition;
     final correction = '${info.isInverted ? "!" : ""}$condition';
 
-    return Replacement(comment: _correctionMessage, replacement: correction);
+    return [Replacement(comment: _correctionMessage, replacement: correction)];
   }
 }

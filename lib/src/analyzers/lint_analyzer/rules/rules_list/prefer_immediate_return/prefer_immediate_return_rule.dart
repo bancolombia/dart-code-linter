@@ -50,10 +50,12 @@ class PreferImmediateReturnRule extends DartRule {
             source: source,
           ),
           message: _warningMessage,
-          replacement: Replacement(
-            comment: _replaceComment,
-            replacement: 'return ${issue.variableDeclaration.initializer};',
-          ),
+          replacements: [
+            Replacement(
+              comment: _replaceComment,
+              replacement: 'return ${issue.variableDeclaration.initializer};',
+            ),
+          ],
         );
       },
     ).toList(growable: false);
