@@ -1,9 +1,12 @@
 # Changelog
 
-## 3.1.1
+## 3.1.2
 - Add rule `use-design-system-items`.
 - Add rule `only-barrel-import`.
 - Allow to specify more than one suggestion for each rule.
+
+## 3.1.1
+- Changed `prefer-media-query-direct-access` to `FlutterRule`.
 
 ## 3.1.0
 - Add rule `prefer-media-query-direct-access`.

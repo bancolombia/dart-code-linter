@@ -5,12 +5,12 @@ import '../../../../../../lint_analyzer.dart';
 import '../../../../../utils/node_utils.dart';
 import '../../../lint_utils.dart';
 import '../../../models/internal_resolved_unit_result.dart';
-import '../../models/dart_rule.dart';
+import '../../models/flutter_rule.dart';
 import '../../rule_utils.dart';
 
 part 'visitor.dart';
 
-class PreferMediaQueryDirectAccessRule extends DartRule {
+class PreferMediaQueryDirectAccessRule extends FlutterRule {
   static const ruleId = 'prefer-media-query-direct-access';
   static const warningMessage = '''
       Prefer using this function over getting the attribute directly from the MediaQueryData returned from of, 
