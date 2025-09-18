@@ -8,6 +8,11 @@ const _examplePath = 'prefer_media_query_direct_access/examples/example.dart';
 
 void main() {
   group('PreferMediaQueryDirectAccessRule', () {
+    const message = '''
+      Prefer using this function over getting the attribute directly from the MediaQueryData returned from of, 
+      because using this function will only rebuild the context when this specific attribute changes, 
+      not when any attribute changes.''';
+
     test('initialization', () async {
       final unit = await RuleTestHelper.resolveFromFile(_examplePath);
       final issues = PreferMediaQueryDirectAccessRule().check(unit);
@@ -15,7 +20,7 @@ void main() {
       RuleTestHelper.verifyInitialization(
         issues: issues,
         ruleId: 'prefer-media-query-direct-access',
-        severity: Severity.style,
+        severity: Severity.performance,
       );
     });
 
@@ -23,14 +28,13 @@ void main() {
       final unit = await RuleTestHelper.resolveFromFile(_examplePath);
       final issues = PreferMediaQueryDirectAccessRule().check(unit);
 
-      // Verify that we found the expected number of MediaQuery.of(context).property issues
-      expect(issues.length, greaterThan(20)); // Should find many issues
+      expect(issues.length, greaterThan(20));
 
       for (final issue in issues) {
         expect(
           issue.message,
           equals(
-            'Prefer direct access to MediaQuery properties for better code readability.',
+            message,
           ),
         );
         expect(issue.ruleId, equals('prefer-media-query-direct-access'));
@@ -45,7 +49,7 @@ void main() {
       expect(
         issues.first.message,
         equals(
-          'Prefer direct access to MediaQuery properties for better code readability.',
+          message,
         ),
       );
     });
