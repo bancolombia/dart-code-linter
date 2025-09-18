@@ -12,15 +12,17 @@ part 'visitor.dart';
 
 class PreferMediaQueryDirectAccessRule extends DartRule {
   static const ruleId = 'prefer-media-query-direct-access';
-  static const warningMessage =
-      'Prefer direct access to MediaQuery properties for better code readability.';
+  static const warningMessage = '''
+      Prefer using this function over getting the attribute directly from the MediaQueryData returned from of, 
+      because using this function will only rebuild the context when this specific attribute changes, 
+      not when any attribute changes.''';
   static const replaceComment =
       'Consider accessing MediaQuery properties directly.';
 
   PreferMediaQueryDirectAccessRule([Map<String, Object> config = const {}])
       : super(
           id: ruleId,
-          severity: readSeverity(config, Severity.style),
+          severity: readSeverity(config, Severity.performance),
           excludes: readExcludes(config),
           includes: readIncludes(config),
         );
@@ -38,9 +40,12 @@ class PreferMediaQueryDirectAccessRule extends DartRule {
         ));
   }
 
-  List<Replacement> _createReplacement(MethodInvocation node) {
-    final propertyName = node.methodName.name;
-    final replacement = '.${propertyName}Of';
+  List<Replacement> _createReplacement(PropertyAccess node) {
+    final propertyName = node.propertyName.name;
+    final target = node.target as MethodInvocation;
+    final context = target.argumentList.arguments.first;
+
+    final replacement = 'MediaQuery.${propertyName}Of($context)';
 
     return [
       Replacement(
