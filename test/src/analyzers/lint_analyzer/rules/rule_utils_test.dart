@@ -53,7 +53,8 @@ void main() {
         expect(issue.severity, equals(severity));
         expect(issue.message, equals(message));
         expect(issue.verboseMessage, equals(verboseMessage));
-        expect(issue.suggestions, equals(replacement));
+        expect(issue.suggestions?.first, equals(replacement));
+        expect(issue.suggestions?.length, equals(1));
       },
     );
 
