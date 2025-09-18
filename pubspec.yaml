@@ -13,7 +13,7 @@ platforms:
   macos:
 
 dependencies:
-  analyzer: ^7.4.1
+  analyzer: ">=7.4.1 <9.0.0"
   analyzer_plugin: ^0.13.0
   ansicolor: ^2.0.1
   args: ^2.0.0
