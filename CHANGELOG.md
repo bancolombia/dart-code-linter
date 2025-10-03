@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.1.2
+## 3.2.0
 - Add rule `use-design-system-items`.
 - Add rule `only-barrel-import`.
 - Allow to specify more than one suggestion for each rule.

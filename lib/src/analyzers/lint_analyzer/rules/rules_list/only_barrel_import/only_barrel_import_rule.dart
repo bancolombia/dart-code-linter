@@ -60,6 +60,7 @@ class OnlyBarrelImportRule extends DartRule {
   Replacement _createReplacement(ImportDirective _) => const Replacement(
         comment: 'Remove the invalid import.',
         replacement: '',
+        priority: 1,
       );
 
   // Creates a quick fix to replae the invalid import with a valid one
@@ -74,6 +75,7 @@ class OnlyBarrelImportRule extends DartRule {
     return Replacement(
       comment: 'Replace with the corresponding barrel import.',
       replacement: validImport,
+      priority: 2,
     );
   }
 }

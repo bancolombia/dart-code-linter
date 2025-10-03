@@ -7,6 +7,9 @@ import '../../../models/internal_resolved_unit_result.dart';
 import '../../models/dart_rule.dart';
 import '../../rule_utils.dart';
 
+part 'visitor.dart';
+part 'config_parser.dart';
+
 class UseDesignSystemItemRule extends DartRule {
   static const String ruleId = 'use-design-system-item';
 
@@ -36,83 +39,4 @@ class UseDesignSystemItemRule extends DartRule {
 
     return visitor.issues;
   }
-}
-
-class _Visitor extends RecursiveAstVisitor<void> {
-  final Map<String, _ReplacementSuggestion> _configurations;
-  final List<Issue> issues = [];
-  final UseDesignSystemItemRule rule;
-  final InternalResolvedUnitResult source;
-
-  _Visitor(this._configurations, this.rule, this.source);
-
-  @override
-  void visitInstanceCreationExpression(InstanceCreationExpression node) {
-    super.visitInstanceCreationExpression(node);
-
-    final widgetName = node.constructorName.type.element2?.displayName;
-    if (widgetName == null || !_configurations.containsKey(widgetName)) {
-      return;
-    }
-
-    final suggestion = _configurations[widgetName];
-    if (suggestion == null) {
-      return;
-    }
-
-    final libraryUri = node.constructorName.element?.library2.toString() ?? '';
-    if (libraryUri.isEmpty || !libraryUri.contains(suggestion.fromPackage)) {
-      return;
-    }
-
-    issues.add(
-      createIssue(
-        rule: rule,
-        location: nodeLocation(node: node, source: source),
-        message:
-            '${suggestion.insteadOf} from ${suggestion.fromPackage} is not allowed. Use ${suggestion.designSystemWidget} from the Design System instead.',
-      ),
-    );
-  }
-}
-
-class _ConfigParser {
-  static Map<String, _ReplacementSuggestion> parseConfig(
-    Map<String, Object> config,
-  ) {
-    final result = <String, _ReplacementSuggestion>{};
-
-    config.forEach((key, value) {
-      if (value is List) {
-        for (final item in value) {
-          if (item is Map<String, Object>) {
-            final insteadOf = item['instead_of'] as String?;
-            final fromPackage = item['from_package'] as String?;
-
-            if (insteadOf != null && fromPackage != null) {
-              result[insteadOf] = _ReplacementSuggestion(
-                designSystemWidget: key,
-                insteadOf: insteadOf,
-                fromPackage: fromPackage,
-              );
-            }
-          }
-        }
-      }
-    });
-
-    return result;
-  }
-}
-
-class _ReplacementSuggestion {
-  final String designSystemWidget;
-  final String insteadOf;
-  final String fromPackage;
-
-  _ReplacementSuggestion({
-    required this.designSystemWidget,
-    required this.insteadOf,
-    required this.fromPackage,
-  });
 }

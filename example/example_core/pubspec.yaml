@@ -1,5 +1,5 @@
-name: flutter_example
-description: Example app with DCL setup.
+name: example_core
+description: Example core internal module.
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
@@ -12,13 +12,11 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  example_core:
-    path: ./example_core
 
 dev_dependencies:
   #dart_code_linter: <USE-THE-LATEST-VERSION>
   dart_code_linter:
-    path: ../
+    path: ../../
 
 flutter:
   uses-material-design: true

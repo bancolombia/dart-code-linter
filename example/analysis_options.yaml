@@ -38,7 +38,7 @@ dart_code_linter:
   #     unit-type: "hours"
 
   # Dart Code Linter provides custom configurable rules.
-  # The rules have a `kebab-case` naming instead of 
+  # The rules have a `kebab-case` naming instead of
   # `snake_case` intentionally in order for you to identify,
   # whether the rule is from Dart Code Metrics or the standard analyzer.
   # All rules share basic configuration like `exclude` section,
@@ -66,3 +66,6 @@ dart_code_linter:
         exclude:
           - test/**
     - prefer-trailing-comma
+    - only-barrel-import:
+        barrels:
+          - example_core
