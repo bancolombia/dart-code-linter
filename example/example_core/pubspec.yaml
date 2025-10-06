@@ -1,0 +1,22 @@
+name: example_core
+description: Example core internal module.
+
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  #dart_code_linter: <USE-THE-LATEST-VERSION>
+  dart_code_linter:
+    path: ../../
+
+flutter:
+  uses-material-design: true

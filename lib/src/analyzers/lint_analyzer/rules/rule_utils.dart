@@ -6,13 +6,13 @@ import 'models/rule.dart';
 
 /// Creates a new [Issue] found by [rule] in the [location] with [message] or
 /// with [verboseMessage] describing the problem and with information how to fix
-/// this one ([replacement]).
+/// this one ([replacements]).
 Issue createIssue({
   required Rule rule,
   required SourceSpan location,
   required String message,
   String? verboseMessage,
-  Replacement? replacement,
+  List<Replacement>? replacements,
 }) =>
     Issue(
       ruleId: rule.id,
@@ -21,7 +21,7 @@ Issue createIssue({
       severity: rule.severity,
       message: message,
       verboseMessage: verboseMessage,
-      suggestion: replacement,
+      suggestions: replacements,
     );
 
 /// Returns a url of a page containing documentation associated with [rule]

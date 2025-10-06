@@ -46,6 +46,15 @@ dart_code_linter:
     - test/resources/*
     - test/*
   rules:
+    - use-design-system-item:
+        BaseScreen:
+          - instead_of: Scaffold
+            from_package: flutter
+    - only-barrel-import:
+        barrels:
+          - core
+          - ui
+          - common
     - avoid-collection-methods-with-unrelated-types
     - avoid-dynamic:
         exclude:

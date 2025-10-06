@@ -38,25 +38,29 @@ class PreferSingleQuotesRule extends DartRule {
               rule: this,
               location: nodeLocation(node: expression, source: source),
               message: _warningMessage,
-              replacement: _createReplacement(expression),
+              replacements: _createReplacement(expression),
             ))
         .toList(growable: false);
   }
 
-  Replacement _createReplacement(Expression expression) {
+  List<Replacement> _createReplacement(Expression expression) {
     if (expression is StringLiteral) {
       final originalString = expression.stringValue ?? '';
       final singleQuotedString = "'$originalString'";
 
-      return Replacement(
-        comment: _replaceComment,
-        replacement: singleQuotedString,
-      );
+      return [
+        Replacement(
+          comment: _replaceComment,
+          replacement: singleQuotedString,
+        ),
+      ];
     }
 
-    return Replacement(
-      comment: _replaceComment,
-      replacement: expression.toSource(),
-    );
+    return [
+      Replacement(
+        comment: _replaceComment,
+        replacement: expression.toSource(),
+      ),
+    ];
   }
 }

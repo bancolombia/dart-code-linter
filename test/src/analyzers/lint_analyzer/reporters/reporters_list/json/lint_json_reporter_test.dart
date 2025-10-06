@@ -73,10 +73,12 @@ void main() {
             'severity': 'warning',
             'message': 'simple message',
             'verboseMessage': 'verbose message',
-            'suggestion': {
-              'comment': 'replacement comment',
-              'replacement': 'function body',
-            },
+            'suggestions': [
+              {
+                'comment': 'replacement comment',
+                'replacement': 'function body',
+              }
+            ]
           },
         ]),
       );

@@ -62,12 +62,12 @@ void main() {
 
       // Check that suggestions are provided
       for (final issue in issues) {
-        expect(issue.suggestion, isNotNull);
+        expect(issue.suggestions, isNotNull);
         expect(
-          issue.suggestion!.comment,
+          issue.suggestions!.first.comment,
           equals('Consider accessing MediaQuery properties directly.'),
         );
-        expect(issue.suggestion!.replacement, contains('Of'));
+        expect(issue.suggestions!.first.replacement, contains('Of'));
       }
     });
 

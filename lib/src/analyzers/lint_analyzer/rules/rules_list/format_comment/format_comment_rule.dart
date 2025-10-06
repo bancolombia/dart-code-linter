@@ -63,7 +63,7 @@ class FormatCommentRule extends DartRule {
           rule: this,
           location: nodeLocation(node: comment.comment, source: source),
           message: _warning,
-          replacement: _docCommentReplacement(comment.comment),
+          replacements: _docCommentReplacement(comment.comment),
         ));
       }
       if (comment is _RegularCommentInfo) {
@@ -73,7 +73,7 @@ class FormatCommentRule extends DartRule {
                     rule: this,
                     location: nodeLocation(node: token, source: source),
                     message: _warning,
-                    replacement: _regularCommentReplacement(
+                    replacements: _regularCommentReplacement(
                       token,
                       comment.tokens.length == 1,
                     ),
@@ -86,30 +86,34 @@ class FormatCommentRule extends DartRule {
     return issues;
   }
 
-  Replacement? _docCommentReplacement(Comment comment) {
+  List<Replacement>? _docCommentReplacement(Comment comment) {
     if (comment.tokens.length == 1) {
       final commentToken = comment.tokens.first;
       final text = commentToken.toString();
       final commentText = formatComment(text.substring(3, text.length));
 
-      return Replacement(
-        comment: 'Format comment.',
-        replacement: '/// $commentText',
-      );
+      return [
+        Replacement(
+          comment: 'Format comment.',
+          replacement: '/// $commentText',
+        ),
+      ];
     }
 
     return null;
   }
 
-  Replacement? _regularCommentReplacement(Token token, bool isSingle) {
+  List<Replacement>? _regularCommentReplacement(Token token, bool isSingle) {
     if (isSingle) {
       final text = token.toString();
       final commentText = formatComment(text.substring(2, text.length));
 
-      return Replacement(
-        comment: 'Format comment.',
-        replacement: '// $commentText',
-      );
+      return [
+        Replacement(
+          comment: 'Format comment.',
+          replacement: '// $commentText',
+        ),
+      ];
     }
 
     return null;

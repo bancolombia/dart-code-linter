@@ -1,5 +1,5 @@
 name: dart_code_linter
-version: 3.1.1
+version: 3.2.0
 description: Dart Code Linter is a software analytics tool that helps developers analyse and improve software quality. Dart Code Linter is based on a fork of Dart Code Metrics.
 repository: https://github.com/bancolombia/dart-code-linter
 issue_tracker: https://github.com/bancolombia/dart-code-linter/issues
@@ -19,7 +19,7 @@ dependencies:
   args: ^2.0.0
   collection: ^1.16.0
   crypto: ^3.0.0
-  file: '>=6.0.0 <8.0.0'
+  file: ">=6.0.0 <8.0.0"
   glob: ^2.0.1
   html: ^0.15.0
   http: ^1.1.0

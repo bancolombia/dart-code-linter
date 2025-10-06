@@ -51,6 +51,7 @@ import 'rules_list/no_equal_arguments/no_equal_arguments_rule.dart';
 import 'rules_list/no_equal_then_else/no_equal_then_else_rule.dart';
 import 'rules_list/no_magic_number/no_magic_number_rule.dart';
 import 'rules_list/no_object_declaration/no_object_declaration_rule.dart';
+import 'rules_list/only_barrel_import/only_barrel_import_rule.dart';
 import 'rules_list/prefer_async_await/prefer_async_await_rule.dart';
 import 'rules_list/prefer_commenting_analyzer_ignores/prefer_commenting_analyzer_ignores.dart';
 import 'rules_list/prefer_conditional_expressions/prefer_conditional_expressions_rule.dart';
@@ -73,13 +74,14 @@ import 'rules_list/prefer_media_query_direct_access/prefer_media_query_direct_ac
 import 'rules_list/prefer_moving_to_variable/prefer_moving_to_variable_rule.dart';
 import 'rules_list/prefer_named_record_fields/prefer_named_record_fields_rule.dart';
 import 'rules_list/prefer_provide_intl_description/prefer_provide_intl_description_rule.dart';
-import 'rules_list/prefer_single_quotes/prefer_single_qoutes.dart';
+import 'rules_list/prefer_single_quotes/prefer_single_quotes_rule.dart';
 import 'rules_list/prefer_single_widget_per_file/prefer_single_widget_per_file_rule.dart';
 import 'rules_list/prefer_static_class/prefer_static_class_rule.dart';
 import 'rules_list/prefer_trailing_comma/prefer_trailing_comma_rule.dart';
 import 'rules_list/prefer_using_list_view/prefer_using_list_view_rule.dart';
 import 'rules_list/provide_correct_intl_args/provide_correct_intl_args_rule.dart';
 import 'rules_list/tag_name/tag_name_rule.dart';
+import 'rules_list/use_design_system/use_design_system_item_rule.dart';
 import 'rules_list/use_setstate_synchronously/use_setstate_synchronously_rule.dart';
 
 final _implementedRules = <String, Rule Function(Map<String, Object>)>{
@@ -145,6 +147,7 @@ final _implementedRules = <String, Rule Function(Map<String, Object>)>{
   NoEqualThenElseRule.ruleId: NoEqualThenElseRule.new,
   NoMagicNumberRule.ruleId: NoMagicNumberRule.new,
   NoObjectDeclarationRule.ruleId: NoObjectDeclarationRule.new,
+  OnlyBarrelImportRule.ruleId: OnlyBarrelImportRule.new,
   PreferAsyncAwaitRule.ruleId: PreferAsyncAwaitRule.new,
   PreferCommentingAnalyzerIgnores.ruleId: PreferCommentingAnalyzerIgnores.new,
   PreferConditionalExpressionsRule.ruleId: PreferConditionalExpressionsRule.new,
@@ -174,6 +177,7 @@ final _implementedRules = <String, Rule Function(Map<String, Object>)>{
   PreferUsingListViewRule.ruleId: PreferUsingListViewRule.new,
   ProvideCorrectIntlArgsRule.ruleId: ProvideCorrectIntlArgsRule.new,
   TagNameRule.ruleId: TagNameRule.new,
+  UseDesignSystemItemRule.ruleId: UseDesignSystemItemRule.new,
 };
 
 Iterable<String> get allRuleIds => _implementedRules.keys;

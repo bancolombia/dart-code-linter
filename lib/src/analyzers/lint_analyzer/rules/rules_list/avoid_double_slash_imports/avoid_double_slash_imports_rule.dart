@@ -40,19 +40,21 @@ class AvoidDoubleSlashImportsRule extends DartRule {
             rule: this,
             location: nodeLocation(node: node, source: source),
             message: _warning,
-            replacement: _createReplacement(node),
+            replacements: _createReplacement(node),
           ),
         )
         .toList(growable: false);
   }
 
-  Replacement _createReplacement(UriBasedDirective directive) {
+  List<Replacement> _createReplacement(UriBasedDirective directive) {
     final updatedDirective =
         directive.toString().replaceAll('//', '/').replaceAll(r'\\', r'\');
 
-    return Replacement(
-      comment: _correctionMessage,
-      replacement: updatedDirective,
-    );
+    return [
+      Replacement(
+        comment: _correctionMessage,
+        replacement: updatedDirective,
+      ),
+    ];
   }
 }

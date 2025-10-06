@@ -157,7 +157,7 @@ void main() {
           "'methodExpression'",
         ],
         messages: issues.map((issue) =>
-            'Incorrect Intl name, should be ${issue.suggestion!.replacement}.'),
+            'Incorrect Intl name, should be ${issue.suggestions!.first.replacement}.'),
         replacements: [
           "'SomeButtonClassI18n_staticFinalFieldInClassTitle'",
           "'SomeButtonClassI18n_staticFieldInClassTitle'",

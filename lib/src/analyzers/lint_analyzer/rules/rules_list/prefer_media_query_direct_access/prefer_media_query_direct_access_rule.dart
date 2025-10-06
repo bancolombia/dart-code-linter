@@ -36,20 +36,22 @@ class PreferMediaQueryDirectAccessRule extends FlutterRule {
           rule: this,
           location: nodeLocation(node: node, source: source),
           message: warningMessage,
-          replacement: _createReplacement(node),
+          replacements: _createReplacement(node),
         ));
   }
 
-  Replacement _createReplacement(PropertyAccess node) {
+  List<Replacement> _createReplacement(PropertyAccess node) {
     final propertyName = node.propertyName.name;
     final target = node.target as MethodInvocation;
     final context = target.argumentList.arguments.first;
 
     final replacement = 'MediaQuery.${propertyName}Of($context)';
 
-    return Replacement(
-      comment: replaceComment,
-      replacement: replacement,
-    );
+    return [
+      Replacement(
+        comment: replaceComment,
+        replacement: replacement,
+      ),
+    ];
   }
 }

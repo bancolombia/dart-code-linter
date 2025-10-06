@@ -41,11 +41,13 @@ class BinaryExpressionOperandOrderRule extends DartRule {
               rule: this,
               location: nodeLocation(node: lit, source: source),
               message: _warningMessage,
-              replacement: Replacement(
-                comment: _correctionComment,
-                replacement:
-                    '${lit.rightOperand} ${lit.operator} ${lit.leftOperand}',
-              ),
+              replacements: [
+                Replacement(
+                  comment: _correctionComment,
+                  replacement:
+                      '${lit.rightOperand} ${lit.operator} ${lit.leftOperand}',
+                ),
+              ],
             ))
         .toList(growable: false);
   }

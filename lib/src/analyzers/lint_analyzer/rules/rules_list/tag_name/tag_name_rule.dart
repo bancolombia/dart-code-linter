@@ -55,7 +55,7 @@ class TagNameRule extends DartRule {
                 source: source,
               ),
               message: _warning,
-              replacement: node.replacement,
+              replacements: [node.replacement],
             ))
         .toList(growable: false);
   }

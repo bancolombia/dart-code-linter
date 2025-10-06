@@ -95,10 +95,12 @@ void main() {
                 'issue',
               ),
               message: 'first issue message',
-              suggestion: const Replacement(
-                comment: 'correction comment',
-                replacement: 'correction',
-              ),
+              suggestions: [
+                const Replacement(
+                  comment: 'correction comment',
+                  replacement: 'correction',
+                ),
+              ],
             ),
             Issue(
               ruleId: 'ruleId2',
@@ -115,10 +117,12 @@ void main() {
                 'issue2',
               ),
               message: 'second issue message',
-              suggestion: const Replacement(
-                comment: 'correction comment',
-                replacement: 'correction',
-              ),
+              suggestions: [
+                const Replacement(
+                  comment: 'correction comment',
+                  replacement: 'correction',
+                ),
+              ],
             ),
           ],
           antiPatternCases: const [],

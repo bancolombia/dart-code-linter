@@ -12,10 +12,12 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
+  example_core:
+    path: ./example_core
 
 dev_dependencies:
   #dart_code_linter: <USE-THE-LATEST-VERSION>
-  dart_code_linter: 
+  dart_code_linter:
     path: ../
 
 flutter:

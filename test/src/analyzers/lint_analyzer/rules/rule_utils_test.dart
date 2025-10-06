@@ -44,7 +44,7 @@ void main() {
           location: codeLocation,
           message: message,
           verboseMessage: verboseMessage,
-          replacement: replacement,
+          replacements: [replacement],
         );
 
         expect(issue.ruleId, equals(id));
@@ -53,7 +53,8 @@ void main() {
         expect(issue.severity, equals(severity));
         expect(issue.message, equals(message));
         expect(issue.verboseMessage, equals(verboseMessage));
-        expect(issue.suggestion, equals(replacement));
+        expect(issue.suggestions?.first, equals(replacement));
+        expect(issue.suggestions?.length, equals(1));
       },
     );
 

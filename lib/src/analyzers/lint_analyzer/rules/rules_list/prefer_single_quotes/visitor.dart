@@ -1,4 +1,4 @@
-part of 'prefer_single_qoutes.dart';
+part of 'prefer_single_quotes_rule.dart';
 
 class _Visitor extends RecursiveAstVisitor<void> {
   final _expressions = <Expression>[];
