@@ -70,7 +70,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
           removedListeners,
           disposedListeners,
           target.name,
-          target.staticElement,
+          target.element,
         );
       }
     }
@@ -84,7 +84,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   ) {
     for (final addedListener in addedListeners) {
       final target = addedListener.realTarget;
-      final widgetType = widgetParameter.declaredElement?.type;
+      final widgetType = widgetParameter.declaredFragment?.element.type;
 
       if (target is PrefixedIdentifier &&
           _isRootWidget(target.prefix.staticType, widgetType)) {
@@ -101,7 +101,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
           removedListeners,
           disposedListeners,
           targetName,
-          target.staticElement,
+          target.element,
         );
       } else if (target is Identifier) {
         _compareInvocation(
@@ -109,7 +109,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
           removedListeners,
           disposedListeners,
           target.name,
-          target.staticElement,
+          target.element,
         );
       }
     }
@@ -120,19 +120,33 @@ class _Visitor extends RecursiveAstVisitor<void> {
     Iterable<MethodInvocation> removedListeners,
     Iterable<MethodInvocation> disposedListeners,
     String? targetName,
-    Element? staticElement,
+    Element2? element,
   ) {
     final removedListener = removedListeners
-        .where((invocation) =>
-            _haveSameTargets(invocation, targetName, staticElement))
+        .where(
+          (invocation) => _haveSameTargets(
+            invocation,
+            targetName,
+            element,
+          ),
+        )
         .toList();
 
-    final haveNotSameCallbacks = !removedListener
-        .any((listener) => _haveSameCallbacks(addedListener, listener));
+    final haveNotSameCallbacks = !removedListener.any(
+      (listener) => _haveSameCallbacks(
+        addedListener,
+        listener,
+      ),
+    );
 
     final disposedListener = disposedListeners
-        .where((invocation) =>
-            _haveSameTargets(invocation, targetName, staticElement))
+        .where(
+          (invocation) => _haveSameTargets(
+            invocation,
+            targetName,
+            element,
+          ),
+        )
         .toList();
 
     if ((removedListener.isEmpty || haveNotSameCallbacks) &&
@@ -149,15 +163,14 @@ class _Visitor extends RecursiveAstVisitor<void> {
   bool _haveSameTargets(
     MethodInvocation removedListener,
     String? targetName,
-    Element? staticElement,
+    Element2? element,
   ) {
     final removedTarget = removedListener.realTarget;
 
     return removedTarget is Identifier &&
         removedTarget.name == targetName &&
-        (removedTarget.staticElement == staticElement ||
-            removedTarget.staticElement?.declaration ==
-                staticElement?.declaration);
+        (removedTarget.element == element ||
+            removedTarget.element?.firstFragment == element?.firstFragment);
   }
 
   bool _haveSameCallbacks(
@@ -170,13 +183,11 @@ class _Visitor extends RecursiveAstVisitor<void> {
     return addedCallback is Identifier &&
         removedCallback is Identifier &&
         addedCallback.name == removedCallback.name &&
-        addedCallback.staticElement == removedCallback.staticElement;
+        addedCallback.element == removedCallback.element;
   }
 
   bool _isRootWidget(DartType? type, DartType? rootType) =>
-      type != null &&
-      type.getDisplayString(withNullability: false) ==
-          rootType?.getDisplayString(withNullability: false);
+      type != null && type.getDisplayString() == rootType?.getDisplayString();
 }
 
 class _ListenableVisitor extends RecursiveAstVisitor<void> {

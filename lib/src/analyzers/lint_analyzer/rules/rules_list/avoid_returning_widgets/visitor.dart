@@ -53,7 +53,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
     node.visitChildren(declarationsVisitor);
 
     final names = declarationsVisitor.declarations
-        .map((declaration) => declaration.declaredElement?.name)
+        .map((declaration) => declaration.declaredFragment?.name)
         .whereType<String>()
         .toSet();
 
@@ -88,7 +88,7 @@ class _InvocationsVisitor extends RecursiveAstVisitor<void> {
     final grandParent = node.parent?.parent;
     if (grandParent is FunctionExpression &&
         grandParent.parent is! NamedExpression) {
-      return grandParent.staticParameterElement?.declaration.name == 'builder';
+      return grandParent.declaredFragment?.element.name == 'builder';
     }
 
     final expression = node.thisOrAncestorOfType<NamedExpression>();

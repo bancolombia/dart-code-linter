@@ -50,7 +50,7 @@ class LongParameterList extends Pattern {
                           metricValue.metricsId ==
                               NumberOfParametersMetric.metricId &&
                           metricValue.value >
-                              _numberOfParametersMetricThreshold!)
+                              _numberOfParametersMetricThreshold)
                       .map(
                         (metricValue) => createIssue(
                           pattern: this,

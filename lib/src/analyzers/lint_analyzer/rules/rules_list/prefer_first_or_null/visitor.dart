@@ -23,13 +23,15 @@ class _Visitor extends RecursiveAstVisitor<void> {
     super.visitMethodInvocation(node);
 
     if (isIterableOrSubclass(node.realTarget?.staticType)) {
-      if (node.methodName.name == 'elementAt') {
+      final name = node.methodName.name;
+
+      if (name == 'elementAt') {
         final arg = node.argumentList.arguments.first;
 
         if (arg is IntegerLiteral && arg.value == 0) {
           _expressions.add(node);
         }
-      } else if (node.methodName.name == 'first') {
+      } else if (name == 'first') {
         _expressions.add(node);
       }
     }

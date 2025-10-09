@@ -19,25 +19,25 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
     _checkOrder(
       node.argumentList,
-      node.constructorName.staticElement?.parameters ?? [],
+      node.constructorName.element!.formalParameters,
     );
   }
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
     super.visitMethodInvocation(node);
-    final staticElement = node.methodName.staticElement;
-    if (staticElement is FunctionElement) {
+    final element = node.methodName.element;
+    if (element is TopLevelFunctionElement) {
       _checkOrder(
         node.argumentList,
-        staticElement.parameters,
+        element.formalParameters,
       );
     }
   }
 
   void _checkOrder(
     ArgumentList argumentList,
-    List<ParameterElement> parameters,
+    List<FormalParameterElement> parameters,
   ) {
     final sortedArguments = argumentList.arguments.sorted((a, b) {
       if (a is! NamedExpression && b is! NamedExpression) {
@@ -86,7 +86,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   static int _parameterIndex(
-    List<ParameterElement> parameters,
+    List<FormalParameterElement> parameters,
     NamedExpression argumentExpression,
   ) =>
       parameters.indexWhere(

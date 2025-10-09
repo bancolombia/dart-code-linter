@@ -60,7 +60,6 @@ class _Visitor extends GeneralizingAstVisitor<void> {
   }
 
   Set<String> _getParentFields(DartType? classType) {
-    // ignore: deprecated_member_use
     final element = classType?.element;
     if (element is! ClassElement) {
       return {};
@@ -74,7 +73,7 @@ class _Visitor extends GeneralizingAstVisitor<void> {
               !field.isPrivate &&
               field.name != 'hashCode',
         )
-        .map((field) => field.name)
+        .map((field) => field.name ?? '')
         .toSet();
   }
 
@@ -84,13 +83,12 @@ class _Visitor extends GeneralizingAstVisitor<void> {
   bool _isSubclassOfEquatable(DartType? type) =>
       type is InterfaceType && type.allSupertypes.any(_isEquatable);
 
-  bool _isEquatable(DartType? type) =>
-      type?.getDisplayString(withNullability: false) == 'Equatable';
+  bool _isEquatable(DartType? type) => type?.getDisplayString() == 'Equatable';
 
   bool _isEquatableMixin(DartType? type) =>
       // ignore: deprecated_member_use
       type?.element is MixinElement &&
-      type?.getDisplayString(withNullability: false) == 'EquatableMixin';
+      type?.getDisplayString() == 'EquatableMixin';
 
   bool _isSubclassOfEquatableMixin(DartType? type) {
     // ignore: deprecated_member_use

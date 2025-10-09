@@ -63,7 +63,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
     for (final parameter in parameters) {
       final name = parameter.name;
       if (name != null &&
-          !allIdentifierElements.contains(parameter.declaredElement)) {
+          !allIdentifierElements
+              .contains(parameter.declaredFragment?.element)) {
         result.add(parameter);
       }
     }
@@ -95,7 +96,7 @@ class _IdentifiersVisitor extends RecursiveAstVisitor<void> {
   void visitSimpleIdentifier(SimpleIdentifier node) {
     super.visitSimpleIdentifier(node);
 
-    final element = node.staticElement;
+    final element = node.element;
     if (element != null) {
       elements.add(element);
     }
@@ -112,7 +113,7 @@ class _InvocationsVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
     if (node.name == methodName &&
-        node.staticElement is MethodElement &&
+        node.element is MethodElement &&
         node.parent is ArgumentList) {
       hasTearOffInvocations = true;
     }

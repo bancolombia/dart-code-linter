@@ -56,7 +56,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
     if (last.endToken.next?.type != TokenType.COMMA &&
         (!_isLastItemMultiLine(last, leftBracket, rightBracket) &&
                 _getLineNumber(leftBracket) != _getLineNumber(rightBracket) ||
-            _breakpoint != null && nodes.length >= _breakpoint!)) {
+            _breakpoint != null && nodes.length >= _breakpoint)) {
       _nodes.add(last);
     }
   }
