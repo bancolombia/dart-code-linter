@@ -165,7 +165,7 @@ class UnusedCodeAnalyzer {
 
       for (final element in elements) {
         if (_isUnused(codeUsages, path, element)) {
-          final unit = element.thisOrAncestorOfType<CompilationUnitElement>();
+          final unit = element.firstFragment.libraryFragment;
           if (unit != null) {
             issues.add(_createUnusedCodeIssue(element as ElementImpl, unit));
           }
@@ -197,7 +197,7 @@ class UnusedCodeAnalyzer {
     }
 
     final usedLibrary = left.library;
-    final declaredSource = right?.librarySource;
+    final declaredSource = right?.firstFragment.libraryFragment?.source;
 
     // This is a hack to fix incorrect libraries resolution.
     // Should be removed after new analyzer version is available.
@@ -205,8 +205,8 @@ class UnusedCodeAnalyzer {
     return usedLibrary != null &&
         declaredSource != null &&
         left.name == right?.name &&
-        usedLibrary.units
-            .map((unit) => unit.source.fullName)
+        usedLibrary.fragments
+            .map((fragment) => fragment.source.fullName)
             .contains(declaredSource.fullName);
   }
 
@@ -224,13 +224,13 @@ class UnusedCodeAnalyzer {
 
   UnusedCodeIssue _createUnusedCodeIssue(
     ElementImpl element,
-    CompilationUnitElement unit,
+    LibraryFragment unit,
   ) {
-    final offset = element.codeOffset!;
+    final offset = element.firstFragment.codeOffset!;
     final lineInfo = unit.lineInfo;
     final offsetLocation = lineInfo.getLocation(offset);
 
-    final sourceUrl = element.source!.uri;
+    final sourceUrl = element.firstFragment.libraryFragment?.source.uri;
 
     return UnusedCodeIssue(
       declarationName: element.displayName,

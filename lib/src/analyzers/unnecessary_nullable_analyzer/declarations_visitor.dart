@@ -72,7 +72,7 @@ class DeclarationsVisitor extends RecursiveAstVisitor<void> {
 
   bool _hasNullableParameters(Iterable<FormalParameter> parameters) =>
       parameters.any((parameter) {
-        final type = parameter.declaredElement?.type;
+        final type = parameter.declaredFragment?.element.type;
 
         return type != null &&
                 (isNullableType(type) &&
@@ -86,7 +86,7 @@ class DeclarationsVisitor extends RecursiveAstVisitor<void> {
     Declaration node,
     Iterable<FormalParameter> parameters,
   ) {
-    final element = node.declaredElement;
+    final element = node.declaredFragment?.element;
 
     if (element != null) {
       declarations[element] = parameters;

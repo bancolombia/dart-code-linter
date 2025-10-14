@@ -22,7 +22,10 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
         return (uri is DirectiveUriWithSource) ? uri.source.fullName : null;
       }).nonNulls;
-      final mainImport = node.element?.importedLibrary?.source.fullName;
+      final uri = node.libraryImport?.uri;
+
+      final mainImport =
+          uri is DirectiveUriWithLibrary ? uri.source.fullName : null;
 
       final allPaths = {if (mainImport != null) mainImport, ...paths};
 
@@ -40,7 +43,9 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   void visitExportDirective(ExportDirective node) {
     super.visitExportDirective(node);
 
-    final path = node.element?.exportedLibrary?.source.fullName;
+    final uri = node.libraryExport?.uri;
+
+    final path = uri is DirectiveUriWithLibrary ? uri.source.fullName : null;
     if (path != null) {
       fileElementsUsage.exports.add(path);
     }
@@ -55,21 +60,21 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitBinaryExpression(BinaryExpression node) {
-    _recordIfExtensionMember(node.staticElement);
+    _recordIfExtensionMember(node.element);
 
     super.visitBinaryExpression(node);
   }
 
   @override
   void visitFunctionExpressionInvocation(FunctionExpressionInvocation node) {
-    _recordIfExtensionMember(node.staticElement);
+    _recordIfExtensionMember(node.element);
 
     super.visitFunctionExpressionInvocation(node);
   }
 
   @override
   void visitIndexExpression(IndexExpression node) {
-    _recordIfExtensionMember(node.staticElement);
+    _recordIfExtensionMember(node.element);
 
     super.visitIndexExpression(node);
   }
@@ -84,14 +89,14 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitPrefixExpression(PrefixExpression node) {
     _recordAssignmentTarget(node, node.operand);
-    _recordIfExtensionMember(node.staticElement);
+    _recordIfExtensionMember(node.element);
 
     super.visitPrefixExpression(node);
   }
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
-    _visitIdentifier(node, node.staticElement);
+    _visitIdentifier(node, node.element);
   }
 
   @override
@@ -153,7 +158,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
   void _recordIfExtensionMember(Element? element) {
     if (element != null) {
-      final enclosingElement = element.enclosingElement3;
+      final enclosingElement = element.enclosingElement;
       if (enclosingElement is ExtensionElement) {
         _recordUsedExtension(enclosingElement);
       }
@@ -161,7 +166,8 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   }
 
   bool _recordConditionalElement(Element element) {
-    final elementPath = element.enclosingElement3?.source?.fullName;
+    final elementPath = element
+        .enclosingElement?.firstFragment.libraryFragment?.source.fullName;
     if (elementPath == null) {
       return false;
     }
@@ -215,8 +221,8 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    final enclosingElement = element.enclosingElement3;
-    if (enclosingElement is CompilationUnitElement) {
+    final enclosingElement = element.enclosingElement;
+    if (enclosingElement is LibraryFragment) {
       _recordUsedElement(element);
     } else if (enclosingElement is ExtensionElement) {
       _recordUsedExtension(enclosingElement);
