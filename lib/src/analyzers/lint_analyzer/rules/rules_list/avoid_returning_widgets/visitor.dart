@@ -88,7 +88,7 @@ class _InvocationsVisitor extends RecursiveAstVisitor<void> {
     final grandParent = node.parent?.parent;
     if (grandParent is FunctionExpression &&
         grandParent.parent is! NamedExpression) {
-      return grandParent.declaredFragment?.element.name == 'builder';
+      return grandParent.declaredFragment?.enclosingFragment?.name == 'build';
     }
 
     final expression = node.thisOrAncestorOfType<NamedExpression>();
