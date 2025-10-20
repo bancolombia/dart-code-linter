@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.0-alpha.2
+- Update `analyzer` constraint to ^8.2.0
+
 ## 3.2.0-alpha.1
 - Add rule `use-design-system-items`.
 - Add rule `only-barrel-import`.

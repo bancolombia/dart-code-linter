@@ -4,13 +4,13 @@ import '../../../../../../lint_analyzer.dart';
 import '../../../../../utils/node_utils.dart';
 import '../../../lint_utils.dart';
 import '../../../models/internal_resolved_unit_result.dart';
-import '../../models/dart_rule.dart';
+import '../../models/flutter_rule.dart';
 import '../../rule_utils.dart';
 
 part 'visitor.dart';
 part 'config_parser.dart';
 
-class UseDesignSystemItemRule extends DartRule {
+class UseDesignSystemItemRule extends FlutterRule {
   static const String ruleId = 'use-design-system-item';
 
   final Map<String, _ReplacementSuggestion> _configurations;
