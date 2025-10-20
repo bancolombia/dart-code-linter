@@ -1,0 +1,52 @@
+# only-barrel-imports
+
+added in: 3.2.0 <span style={{color: 'red'}}>error</span>
+
+Enforces the use of barrel imports for external packages instead of importing individual files from the package.
+
+A "barrel" import is a single import that exposes the main functionality of a package, typically following the pattern `package:package_name/package_name.dart`. This rule helps maintain clean and consistent imports by discouraging deep imports into package internals.
+
+
+## Config
+
+```yaml
+rules:
+    only-barrel-imports: 
+        severity: style,
+        barrels: ["package:flutter/flutter.dart", "package:equatable/equatable.dart"]
+```
+
+### Config option `barrels`
+
+**Type**: `List<String>`
+
+**Default**: `[]`
+
+List of allowed barrel imports. When specified, the rule will only flag imports that don't use these predefined barrel patterns.
+
+## Example
+
+### ❌ Bad
+
+```dart
+// Importing individual files from external packages
+import 'package:flutter/src/widgets/framework.dart'; // ❌ Should use package:flutter/flutter.dart
+import 'package:flutter/src/material/app.dart'; // ❌ Should use package:flutter/flutter.dart  
+import 'package:equatable/src/equatable_mixin.dart'; // ❌ Should use package:equatable/equatable.dart
+import 'package:http/src/client.dart'; // ❌ Should use package:http/http.dart
+```
+
+### ✅ Good
+
+```dart
+// Using barrel imports for external packages
+import 'package:flutter/flutter.dart';
+import 'package:flutter/material.dart'; // Also acceptable for Flutter
+import 'package:equatable/equatable.dart';
+import 'package:http/http.dart';
+
+// Internal project imports are always allowed
+import '../models/user.dart';
+import 'package:my_project/src/utils/helpers.dart';
+```
+

@@ -1,0 +1,102 @@
+# use-design-system-item
+added in: 3.2.0 <span style={{color: 'orange'}}>warning</span>
+
+Enforces the use of Design System widgets instead of standard framework widgets from external packages.
+
+This rule helps maintain consistency across your application by ensuring that all UI components come from your Design System rather than using widgets directly from Flutter or other packages. This is particularly useful for large teams or applications that need to maintain a consistent look and feel.
+
+## Config
+
+The rule requires configuration to specify which widgets should be replaced and with what. Each configuration entry maps a widget to avoid to its Design System replacement.
+
+```yaml
+dart_code_linter:
+  rules:
+    - use-design-system-item:
+        configurations:
+          - design-system-widget: DSButton
+            instead-of: ElevatedButton
+            from-package: package:flutter/material.dart
+          - design-system-widget: DSText
+            instead-of: Text
+            from-package: package:flutter/widgets.dart
+          - design-system-widget: DSCard
+            instead-of: Card
+            from-package: package:flutter/material.dart
+```
+
+### Config options
+
+- **`design-system-widget`** (required): The name of the widget from your Design System that should be used
+- **`instead-of`** (required): The name of the framework widget that should be avoided
+- **`from-package`** (required): The package URI that contains the widget to avoid (e.g., `package:flutter/material.dart`)
+
+## Example
+
+### ❌ Bad:
+
+```dart
+import 'package:flutter/material.dart';
+
+class MyScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          // LINT: Text from package:flutter/widgets.dart is not allowed. Use DSText from the Design System instead.
+          Text('Hello World'),
+          
+          // LINT: ElevatedButton from package:flutter/material.dart is not allowed. Use DSButton from the Design System instead.
+          ElevatedButton(
+            onPressed: () {},
+            child: Text('Click me'),
+          ),
+          
+          // LINT: Card from package:flutter/material.dart is not allowed. Use DSCard from the Design System instead.
+          Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Card content'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+### ✅ Good:
+
+```dart
+import 'package:my_app/design_system/ds_button.dart';
+import 'package:my_app/design_system/ds_card.dart';
+import 'package:my_app/design_system/ds_text.dart';
+
+class MyScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          // Using Design System widgets
+          DSText('Hello World'),
+          
+          DSButton(
+            onPressed: () {},
+            text: 'Click me',
+          ),
+          
+          DSCard(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: DSText('Card content'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
