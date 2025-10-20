@@ -1,9 +1,10 @@
 # Changelog
 
-## 3.2.0
+## 3.2.0-alpha.1
 - Add rule `use-design-system-items`.
 - Add rule `only-barrel-import`.
 - Allow to specify more than one suggestion for each rule.
+- Bump `analyzer` to ^8.0.0
 
 ## 3.1.1
 - Changed `prefer-media-query-direct-access` to `FlutterRule`.
