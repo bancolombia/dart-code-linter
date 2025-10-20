@@ -82,7 +82,7 @@ class _SettersVisitor extends GeneralizingAstVisitor<void> {
 
   bool _usesParameter(Expression expression) =>
       expression is SimpleIdentifier &&
-      expression.staticElement is ParameterElement;
+      expression.element is FormalParameterElement;
 }
 
 class _ReturnVisitor extends RecursiveAstVisitor<void> {

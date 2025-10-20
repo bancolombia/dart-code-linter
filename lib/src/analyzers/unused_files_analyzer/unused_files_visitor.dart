@@ -49,15 +49,19 @@ class UnusedFilesVisitor extends GeneralizingAstVisitor<void> {
 
   String? _getAbsolutePath(UriBasedDirective node) {
     if (node is ImportDirective) {
-      return node.element?.importedLibrary?.source.fullName;
+      final uri = node.libraryImport?.uri;
+
+      return uri is DirectiveUriWithLibrary ? uri.source.fullName : null;
     }
 
     if (node is ExportDirective) {
-      return node.element?.exportedLibrary?.source.fullName;
+      final uri = node.libraryExport?.uri;
+
+      return uri is DirectiveUriWithLibrary ? uri.source.fullName : null;
     }
 
     if (node is PartDirective) {
-      final uri = node.element?.uri;
+      final uri = node.partInclude?.uri;
       if (uri is DirectiveUriWithSource) {
         return uri.source.fullName;
       }

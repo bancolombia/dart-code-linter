@@ -46,7 +46,7 @@ class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
   }
 
   void _getTopLevelElement(Declaration node) {
-    final element = node.declaredElement;
+    final element = node.declaredFragment?.element;
 
     if (element != null) {
       topLevelElements.add(element);

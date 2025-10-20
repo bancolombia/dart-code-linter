@@ -20,9 +20,9 @@ class _Visitor extends RecursiveAstVisitor<void> {
       if (element is MapLiteralEntry) {
         final key = element.key;
         if (key is PrefixedIdentifier) {
-          final staticElement = key.prefix.staticElement;
-          if (staticElement is EnumElement) {
-            enumElement ??= staticElement;
+          final element = key.prefix.element;
+          if (element is EnumElement) {
+            enumElement ??= element;
             usages.add(key.identifier.name);
           }
         }

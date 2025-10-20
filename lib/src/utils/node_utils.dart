@@ -44,7 +44,7 @@ bool isOverride(List<Annotation> metadata) => metadata.any(
     );
 
 bool haveSameParameterType(Expression left, Expression right) =>
-    left.staticParameterElement?.type == right.staticParameterElement?.type;
+    left.staticType == right.staticType;
 
 bool isEntrypoint(String name, NodeList<Annotation> metadata) =>
     name == 'main' ||

@@ -14,7 +14,7 @@ class InvocationsVisitor extends RecursiveAstVisitor<void> {
   void visitExportDirective(ExportDirective node) {
     super.visitExportDirective(node);
 
-    final uri = node.element?.uri;
+    final uri = node.libraryExport?.uri;
     if (uri is DirectiveUriWithSource) {
       invocationsUsages.exports.add(uri.source.fullName);
     }
@@ -25,7 +25,7 @@ class InvocationsVisitor extends RecursiveAstVisitor<void> {
     super.visitPropertyAccess(node);
 
     if (node.propertyName.staticType is FunctionType) {
-      _recordUsedElement(node.propertyName.staticElement, null);
+      _recordUsedElement(node.propertyName.element, null);
     }
   }
 
@@ -34,7 +34,7 @@ class InvocationsVisitor extends RecursiveAstVisitor<void> {
     super.visitPrefixedIdentifier(node);
 
     if (node.identifier.staticType is FunctionType) {
-      _recordUsedElement(node.identifier.staticElement, null);
+      _recordUsedElement(node.identifier.element, null);
     }
   }
 
@@ -42,21 +42,21 @@ class InvocationsVisitor extends RecursiveAstVisitor<void> {
   void visitMethodInvocation(MethodInvocation node) {
     super.visitMethodInvocation(node);
 
-    _recordUsedElement(node.methodName.staticElement, node.argumentList);
+    _recordUsedElement(node.methodName.element, node.argumentList);
   }
 
   @override
   void visitFunctionExpressionInvocation(FunctionExpressionInvocation node) {
     super.visitFunctionExpressionInvocation(node);
 
-    _recordUsedElement(node.staticElement, node.argumentList);
+    _recordUsedElement(node.element, node.argumentList);
   }
 
   @override
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
     super.visitInstanceCreationExpression(node);
 
-    _recordUsedElement(node.constructorName.staticElement, node.argumentList);
+    _recordUsedElement(node.constructorName.element, node.argumentList);
   }
 
   /// Records use of a not prefixed [element].

@@ -13,6 +13,8 @@ class FileElementsUsage {
 
   final Map<Set<String>, Set<Element>> conditionalElements = {};
 
+  final Set<String> conditionalFiles = {};
+
   /// The map of referenced prefix elements and the elements that they prefix.
   final Map<PrefixElement, List<Element>> prefixMap = {};
 
@@ -21,6 +23,7 @@ class FileElementsUsage {
     usedExtensions.addAll(other.usedExtensions);
     exports.addAll(other.exports);
     conditionalElements.addAll(other.conditionalElements);
+    conditionalFiles.addAll(other.conditionalFiles);
     prefixMap.addAll(other.prefixMap);
   }
 }

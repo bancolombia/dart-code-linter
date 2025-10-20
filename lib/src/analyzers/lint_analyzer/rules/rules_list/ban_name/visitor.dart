@@ -31,7 +31,7 @@ class _Visitor extends GeneralizingAstVisitor<void> {
 
   @override
   void visitDeclaration(Declaration node) {
-    final name = node.declaredElement?.displayName;
+    final name = node.declaredFragment?.name;
     if (name != null) {
       _visitIdent(node, name);
     }

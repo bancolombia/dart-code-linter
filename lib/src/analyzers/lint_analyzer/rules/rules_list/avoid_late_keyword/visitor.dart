@@ -28,6 +28,6 @@ class _Visitor extends RecursiveAstVisitor<void> {
       allowInitialized && node.initializer != null;
 
   bool _hasIgnoredType(VariableDeclaration node) => ignoredTypes.contains(
-        node.declaredElement?.type.getDisplayString(withNullability: false),
+        node.declaredFragment?.element.type.getDisplayString(),
       );
 }

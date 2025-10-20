@@ -20,7 +20,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   void _checkField(FieldDeclaration node, VariableDeclaration fieldVariable) {
     final fieldName = fieldVariable.name.lexeme;
-    final fieldType = fieldVariable.declaredElement?.type;
+    final fieldType = fieldVariable.declaredFragment?.element.type;
 
     if (!(fieldType != null &&
         fieldType.isDartCoreString &&

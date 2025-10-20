@@ -25,7 +25,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
       (expression is PropertyAccess &&
           _hasUnusedResult(expression.staticType)) ||
       (expression is PrefixedIdentifier &&
-          expression.staticElement?.kind == ElementKind.GETTER &&
+          expression.element?.kind == ElementKind.GETTER &&
           _hasUnusedResult(expression.staticType));
 
   bool _isAwaitWithUnusedResult(Expression expression) =>
