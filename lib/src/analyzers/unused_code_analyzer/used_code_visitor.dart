@@ -17,23 +17,41 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitImportDirective(ImportDirective node) {
     if (node.configurations.isNotEmpty) {
-      final paths = node.configurations.map((config) {
-        final uri = config.resolvedUri;
+      final configPaths = node.configurations
+          .map((config) {
+            final uri = config.resolvedUri;
 
-        return (uri is DirectiveUriWithSource) ? uri.source.fullName : null;
-      }).nonNulls;
-      final uri = node.libraryImport?.uri;
+            return (uri is DirectiveUriWithSource) ? uri.source.fullName : null;
+          })
+          .nonNulls
+          .toSet();
 
-      final mainImport =
-          uri is DirectiveUriWithLibrary ? uri.source.fullName : null;
+      final mainUriString = node.uri.stringValue;
+      final compilationUnit = node.root as CompilationUnit;
+      final declaredFragment = compilationUnit.declaredFragment;
+      final currentSource = declaredFragment?.source;
 
-      final allPaths = {if (mainImport != null) mainImport, ...paths};
+      String? mainImport;
+      if (currentSource != null && mainUriString != null) {
+        try {
+          mainImport = currentSource.uri.resolve(mainUriString).toFilePath();
+        } catch (_) {
+          final uri = node.libraryImport?.uri;
+          if (uri is DirectiveUriWithLibrary) {
+            mainImport = uri.library.firstFragment.source.fullName;
+          }
+        }
+      }
+
+      final allPaths = {if (mainImport != null) mainImport, ...configPaths};
 
       fileElementsUsage.conditionalElements.update(
         allPaths,
         (conditionalElements) => conditionalElements,
         ifAbsent: () => {},
       );
+
+      fileElementsUsage.conditionalFiles.addAll(configPaths);
     }
 
     super.visitImportDirective(node);
@@ -45,7 +63,9 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
     final uri = node.libraryExport?.uri;
 
-    final path = uri is DirectiveUriWithLibrary ? uri.source.fullName : null;
+    final path = uri is DirectiveUriWithLibrary
+        ? uri.library.firstFragment.source.fullName
+        : null;
     if (path != null) {
       fileElementsUsage.exports.add(path);
     }
@@ -165,23 +185,19 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     }
   }
 
-  bool _recordConditionalElement(Element element) {
+  void _recordConditionalElement(Element element) {
     final elementPath = element
         .enclosingElement?.firstFragment.libraryFragment?.source.fullName;
     if (elementPath == null) {
-      return false;
+      return;
     }
 
     final entries = fileElementsUsage.conditionalElements.entries;
     for (final conditionalElement in entries) {
       if (conditionalElement.key.contains(elementPath)) {
         conditionalElement.value.add(element);
-
-        return true;
       }
     }
-
-    return false;
   }
 
   /// Records use of a not prefixed [element].
@@ -217,12 +233,12 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     }
 
     // Record elements that are imported with conditional imports
-    if (_recordConditionalElement(element)) {
-      return;
-    }
+    _recordConditionalElement(element);
 
     final enclosingElement = element.enclosingElement;
-    if (enclosingElement is LibraryFragment) {
+
+    if (enclosingElement is LibraryElement ||
+        enclosingElement is LibraryFragment) {
       _recordUsedElement(element);
     } else if (enclosingElement is ExtensionElement) {
       _recordUsedExtension(enclosingElement);
