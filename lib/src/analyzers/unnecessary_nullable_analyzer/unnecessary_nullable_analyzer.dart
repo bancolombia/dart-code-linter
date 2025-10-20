@@ -298,9 +298,9 @@ class UnnecessaryNullableAnalyzer {
   ) {
     final libraryFragment = element.firstFragment.libraryFragment;
 
-    final offset = element.firstFragment.codeOffset;
+    final offset = element.firstFragment.codeOffset!;
     final lineInfo = libraryFragment?.lineInfo;
-    final offsetLocation = lineInfo?.getLocation(offset!);
+    final offsetLocation = lineInfo?.getLocation(offset);
 
     final sourceUrl = libraryFragment?.source.uri;
 
@@ -309,7 +309,7 @@ class UnnecessaryNullableAnalyzer {
       declarationType: element.kind.displayName,
       parameters: parameters.map((parameter) => parameter.toString()),
       location: SourceLocation(
-        offset!,
+        offset,
         sourceUrl: sourceUrl,
         line: offsetLocation?.lineNumber,
         column: offsetLocation?.columnNumber,
