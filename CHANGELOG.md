@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.2.0
+- Update `analyzer` constraint to ^8.2.0. Only works with `dart >= 3.9.0`.
+- Add rule `use-design-system-items`.
+- Add rule `only-barrel-import`.
+- Allow to specify more than one suggestion for each rule.
+
 ## 3.2.0-alpha.2
 - Update `analyzer` constraint to ^8.2.0
 
