@@ -15,11 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
-      - name: Setup Flutter SDK
-        uses: flutter-actions/setup-flutter@v3
+      - name: Setup Flutter
+        uses: bancolombia/flutter-setup-action@v1.1
         with:
-          channel: stable
-          version: 3.32.0
+          channel: 'stable'
+          flutter-version: '3.35.0'
       - name: Install dependencies
         run: dart pub get
       - name: Publish to pub.dev
