@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.1
+- Update homepage in `pubspec.yaml`.
+
 ## 3.2.0
 - Update `analyzer` constraint to ^8.2.0. Only works with `dart >= 3.9.0`.
 - Add rule `use-design-system-items`.
