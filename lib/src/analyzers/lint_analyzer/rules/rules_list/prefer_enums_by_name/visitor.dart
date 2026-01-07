@@ -20,7 +20,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   bool _isEnum(SimpleIdentifier prefix) =>
-      prefix.staticElement?.kind == ElementKind.ENUM;
+      prefix.element?.kind == ElementKind.ENUM;
 
   bool _hasValuesTarget(SimpleIdentifier identifier) =>
       identifier.name == 'values';

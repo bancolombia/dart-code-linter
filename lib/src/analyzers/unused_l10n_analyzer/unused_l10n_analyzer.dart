@@ -162,12 +162,9 @@ class UnusedL10nAnalyzer {
     String rootFolder, {
     String? overriddenClassName,
   }) {
-    final unit = classElement.thisOrAncestorOfType<CompilationUnitElement>();
-    if (unit == null) {
-      return null;
-    }
+    final unit = classElement.firstFragment.libraryFragment;
 
-    final lineInfo = unit.lineInfo;
+    final lineInfo = unit.element.firstFragment.lineInfo;
     // ignore: unnecessary_null_comparison
     if (lineInfo == null) {
       return null;
@@ -188,7 +185,7 @@ class UnusedL10nAnalyzer {
       return UnusedL10nFileReport(
         path: filePath,
         relativePath: relativePath,
-        className: overriddenClassName ?? classElement.name,
+        className: overriddenClassName ?? classElement.name!,
         issues: issues,
       );
     }
@@ -199,9 +196,9 @@ class UnusedL10nAnalyzer {
   Iterable<UnusedL10nIssue> _getUnusedAccessors(
     InterfaceElement classElement,
     Iterable<String> usages,
-    CompilationUnitElement unit,
+    LibraryFragment unit,
   ) {
-    final unusedAccessors = classElement.accessors
+    final unusedAccessors = classElement.fields
         .where((field) => !field.isPrivate && !usages.contains(field.name))
         .map((field) => field.isSynthetic ? field.nonSynthetic : field);
 
@@ -213,7 +210,7 @@ class UnusedL10nAnalyzer {
   Iterable<UnusedL10nIssue> _getUnusedMethods(
     InterfaceElement classElement,
     Iterable<String> usages,
-    CompilationUnitElement unit,
+    LibraryFragment unit,
   ) {
     final unusedMethods = classElement.methods
         .where((method) => !method.isPrivate && !usages.contains(method.name))
@@ -226,16 +223,16 @@ class UnusedL10nAnalyzer {
 
   UnusedL10nIssue _createL10nIssue(
     ElementImpl element,
-    CompilationUnitElement unit,
+    LibraryFragment unit,
   ) {
-    final offset = element.codeOffset!;
+    final offset = element.firstFragment.codeOffset!;
     final lineInfo = unit.lineInfo;
     final offsetLocation = lineInfo.getLocation(offset);
 
-    final sourceUrl = element.source!.uri;
+    final sourceUrl = unit.source.uri;
 
     final name = element is MethodElement
-        ? '${element.displayName}(${(element as MethodElement).parameters.join(', ')})'
+        ? '${element.displayName}(${(element as MethodElement).formalParameters.join(', ')})'
         : element.displayName;
 
     return UnusedL10nIssue(

@@ -2,7 +2,7 @@
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 
 import '../../../../../utils/node_utils.dart';
 import '../../../lint_utils.dart';
@@ -39,20 +39,22 @@ class AvoidBorderAllRule extends FlutterRule {
               rule: this,
               location: nodeLocation(node: expression, source: source),
               message: _issueMessage,
-              replacement: _createReplacement(expression),
+              replacements: _createReplacement(expression),
             ))
         .toList(growable: false);
   }
 
-  Replacement? _createReplacement(InstanceCreationExpression expression) {
+  List<Replacement>? _createReplacement(InstanceCreationExpression expression) {
     final value = expression.argumentList.arguments
         .map((arg) => '$arg')
         .join(', ')
         .trim();
 
-    return Replacement(
-      comment: _replaceComment,
-      replacement: 'const Border.fromBorderSide(BorderSide($value))',
-    );
+    return [
+      Replacement(
+        comment: _replaceComment,
+        replacement: 'const Border.fromBorderSide(BorderSide($value))',
+      ),
+    ];
   }
 }

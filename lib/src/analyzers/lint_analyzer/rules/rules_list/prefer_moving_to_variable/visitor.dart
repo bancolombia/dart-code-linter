@@ -46,7 +46,7 @@ class _BlockVisitor extends RecursiveAstVisitor<void> {
     }
 
     if (target is PrefixedIdentifier) {
-      final element = target.identifier.staticElement;
+      final element = target.identifier.element;
       if (element is EnumElement || element is ClassElement) {
         return;
       }
@@ -62,8 +62,7 @@ class _BlockVisitor extends RecursiveAstVisitor<void> {
   void visitMethodInvocation(MethodInvocation node) {
     if (node.parent is CascadeExpression ||
         node.parent is VariableDeclaration ||
-        // ignore: deprecated_member_use
-        (node.staticType?.isVoid ?? false)) {
+        (node.staticType is VoidType)) {
       return;
     }
 
@@ -171,7 +170,7 @@ class _BlockVisitor extends RecursiveAstVisitor<void> {
             argument is NamedExpression ? argument.expression : argument;
 
         if (expression is SimpleIdentifier) {
-          final element = expression.staticElement;
+          final element = expression.element;
 
           return element is VariableElement &&
               !element.isConst &&

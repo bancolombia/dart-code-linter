@@ -25,7 +25,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
       (expression is PropertyAccess &&
           _hasUnusedResult(expression.staticType)) ||
       (expression is PrefixedIdentifier &&
-          expression.staticElement?.kind == ElementKind.GETTER &&
+          expression.element?.kind == ElementKind.GETTER &&
           _hasUnusedResult(expression.staticType));
 
   bool _isAwaitWithUnusedResult(Expression expression) =>
@@ -39,7 +39,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   bool _isEmptyType(DartType type) =>
       // ignore: deprecated_member_use
-      type.isBottom || type.isDartCoreNull || type.isVoid;
+      type.isBottom || type.isDartCoreNull || type is VoidType;
 
   bool _isEmptyFutureType(DartType type) =>
       type is InterfaceType &&

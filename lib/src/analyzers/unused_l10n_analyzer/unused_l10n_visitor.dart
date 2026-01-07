@@ -92,13 +92,13 @@ class UnusedL10nVisitor extends RecursiveAstVisitor<void> {
       target is SimpleIdentifier &&
       (_classPattern.hasMatch(target.name) ||
           _classPattern.hasMatch(
-            target.staticType?.getDisplayString(withNullability: false) ?? '',
+            target.staticType?.getDisplayString() ?? '',
           ));
 
   bool _matchConstructorOf(Expression? target) =>
       target is InstanceCreationExpression &&
       _classPattern.hasMatch(
-        target.staticType?.getDisplayString(withNullability: false) ?? '',
+        target.staticType?.getDisplayString() ?? '',
       ) &&
       target.constructorName.name?.name == 'of';
 
@@ -107,16 +107,16 @@ class UnusedL10nVisitor extends RecursiveAstVisitor<void> {
 
   bool _matchExtension(Expression? target) =>
       target is PrefixedIdentifier &&
-      target.staticElement?.enclosingElement is ExtensionElement;
+      target.element?.enclosingElement is ExtensionElement;
 
   bool _matchStaticGetter(Expression? target) =>
       target is PrefixedIdentifier &&
       _classPattern.hasMatch(
-        target.staticType?.getDisplayString(withNullability: false) ?? '',
+        target.staticType?.getDisplayString() ?? '',
       );
 
   void _addMemberInvocation(SimpleIdentifier target, String name) {
-    final staticElement = target.staticElement;
+    final staticElement = target.element;
 
     if (staticElement is VariableElement) {
       // ignore: deprecated_member_use
@@ -145,19 +145,18 @@ class UnusedL10nVisitor extends RecursiveAstVisitor<void> {
   ) {
     final staticElement =
         // ignore: deprecated_member_use
-        target.constructorName.staticElement?.enclosingElement;
+        target.constructorName.element?.enclosingElement;
 
     _tryAddInvocation(staticElement, name);
   }
 
   void _addMemberInvocationOnAccessor(SimpleIdentifier target, String name) {
-    final staticElement =
-        target.staticElement?.enclosingElement as ExtensionElement;
+    final staticElement = target.element?.enclosingElement as ExtensionElement;
 
-    for (final element in staticElement.accessors) {
-      if (_classPattern.hasMatch(element.returnType.toString())) {
+    for (final element in staticElement.fields) {
+      if (_classPattern.hasMatch(element.getExtendedDisplayName())) {
         // ignore: deprecated_member_use
-        final declaredElement = element.returnType.element;
+        final declaredElement = element.type.element;
 
         _tryAddInvocation(declaredElement, name);
         break;

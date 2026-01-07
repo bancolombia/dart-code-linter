@@ -126,10 +126,12 @@ final _issueReport1 = Issue(
   severity: Severity.warning,
   message: 'simple message',
   verboseMessage: 'verbose message',
-  suggestion: const Replacement(
-    comment: 'replacement comment',
-    replacement: 'function body',
-  ),
+  suggestions: [
+    const Replacement(
+      comment: 'replacement comment',
+      replacement: 'function body',
+    ),
+  ],
 );
 
 final _issueReport2 = Issue(

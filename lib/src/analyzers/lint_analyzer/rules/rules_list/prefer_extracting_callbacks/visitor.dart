@@ -72,7 +72,9 @@ class _InstanceCreationVisitor extends RecursiveAstVisitor<void> {
   }
 
   bool _isFlutterBuilder(FunctionExpression expression) {
-    if (!isWidgetOrSubclass(expression.declaredElement?.returnType)) {
+    if (!isWidgetOrSubclass(
+      expression.declaredFragment?.element.returnType,
+    )) {
       return false;
     }
 
@@ -80,7 +82,9 @@ class _InstanceCreationVisitor extends RecursiveAstVisitor<void> {
 
     return formalParameters == null ||
         formalParameters.isNotEmpty &&
-            isBuildContext(formalParameters.first.declaredElement?.type);
+            isBuildContext(
+              formalParameters.first.declaredFragment?.element.type,
+            );
   }
 
   bool _isNotIgnored(Expression argument) =>

@@ -82,7 +82,7 @@ class LintJsonReporter extends JsonReporter<LintFileReport, LintReportParams> {
 
   List<Map<String, Object>> _issueToJson(Iterable<Issue> issues) =>
       issues.map((issue) {
-        final suggestion = issue.suggestion;
+        final suggestions = issue.suggestions;
         final verboseMessage = issue.verboseMessage;
 
         return {
@@ -93,7 +93,8 @@ class LintJsonReporter extends JsonReporter<LintFileReport, LintReportParams> {
           'message': issue.message,
           if (verboseMessage != null && verboseMessage.isNotEmpty)
             'verboseMessage': verboseMessage,
-          if (suggestion != null) 'suggestion': _reportReplacement(suggestion),
+          if (suggestions != null)
+            'suggestions': suggestions.map(_reportReplacement).toList(),
         };
       }).toList();
 

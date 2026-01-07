@@ -83,7 +83,7 @@ class RuleTestHelper {
 
     if (replacements != null) {
       expect(
-        issues.map((issue) => issue.suggestion?.replacement),
+        issues.map((issue) => issue.suggestions?.first.replacement),
         equals(replacements),
         reason: 'incorrect replacement',
       );
@@ -91,7 +91,7 @@ class RuleTestHelper {
 
     if (replacementComments != null) {
       expect(
-        issues.map((issue) => issue.suggestion?.comment),
+        issues.map((issue) => issue.suggestions?.first.comment),
         equals(replacementComments),
         reason: 'incorrect replacement comment',
       );

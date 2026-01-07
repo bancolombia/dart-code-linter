@@ -13,7 +13,7 @@ Dart Code Linter (DCL) is a powerful toolkit designed to enhance your developmen
 ## Installation
 
 ```sh
-$ dart pub add --dev dart_code_linter
+dart pub add --dev dart_code_linter
 ```
 
 ## Basic configuration

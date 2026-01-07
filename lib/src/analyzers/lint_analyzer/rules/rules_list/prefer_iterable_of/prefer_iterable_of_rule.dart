@@ -42,10 +42,12 @@ class PreferIterableOfRule extends DartRule {
               rule: this,
               location: nodeLocation(node: expression, source: source),
               message: _warningMessage,
-              replacement: Replacement(
-                comment: _replaceComment,
-                replacement: expression.toString().replaceAll('.from', '.of'),
-              ),
+              replacements: [
+                Replacement(
+                  comment: _replaceComment,
+                  replacement: expression.toString().replaceAll('.from', '.of'),
+                ),
+              ],
             ))
         .toList(growable: false);
   }

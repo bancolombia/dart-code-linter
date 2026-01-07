@@ -54,10 +54,12 @@ class PreferIntlNameRule extends IntlRule {
           rule: this,
           location: nodeLocation(node: issue.node, source: source),
           message: '$_notCorrectNameFailure $correction.',
-          replacement: Replacement(
-            comment: _notCorrectNameCorrectionComment,
-            replacement: correction,
-          ),
+          replacements: [
+            Replacement(
+              comment: _notCorrectNameCorrectionComment,
+              replacement: correction,
+            ),
+          ],
         );
       }),
       ...visitor.issues

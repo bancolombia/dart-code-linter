@@ -38,10 +38,12 @@ class AvoidExpandedAsSpacerRule extends FlutterRule {
               rule: this,
               location: nodeLocation(node: expression, source: source),
               message: _issueMessage,
-              replacement: const Replacement(
-                comment: _replaceComment,
-                replacement: 'const Spacer()',
-              ),
+              replacements: [
+                const Replacement(
+                  comment: _replaceComment,
+                  replacement: 'const Spacer()',
+                ),
+              ],
             ))
         .toList(growable: false);
   }

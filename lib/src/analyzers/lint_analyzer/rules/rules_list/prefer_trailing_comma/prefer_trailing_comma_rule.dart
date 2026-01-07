@@ -54,11 +54,13 @@ class PreferTrailingCommaRule extends DartRule {
             rule: this,
             location: nodeLocation(node: node, source: source),
             message: _warningMessage,
-            replacement: Replacement(
-              comment: _correctionMessage,
-              replacement:
-                  '${source.content.substring(node.offset, node.end)},',
-            ),
+            replacements: [
+              Replacement(
+                comment: _correctionMessage,
+                replacement:
+                    '${source.content.substring(node.offset, node.end)},',
+              ),
+            ],
           ),
         )
         .toList(growable: false);

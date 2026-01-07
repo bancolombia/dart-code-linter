@@ -3,6 +3,7 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:collection/collection.dart';
 
 import '../../../../../utils/node_utils.dart';
@@ -55,10 +56,12 @@ class ArgumentsOrderingRule extends DartRule {
             rule: this,
             location: nodeLocation(node: issue.argumentList, source: source),
             message: _warningMessage,
-            replacement: Replacement(
-              comment: _replaceComment,
-              replacement: issue.replacement,
-            ),
+            replacements: [
+              Replacement(
+                comment: _replaceComment,
+                replacement: issue.replacement,
+              ),
+            ],
           ),
         )
         .toList(growable: false);

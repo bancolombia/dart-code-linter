@@ -32,6 +32,7 @@ dart_code_linter:
     - prefer-conditional-expressions
     - prefer-immediate-return
     - prefer-moving-to-variable
+    - prefer-named-record-fields
     - format-comment:
         only-doc-comments: true
     - member-ordering:

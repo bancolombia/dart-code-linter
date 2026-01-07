@@ -42,12 +42,12 @@ class CorrectGameInstantiatingRule extends FlameRule {
               rule: this,
               location: nodeLocation(node: info.node, source: source),
               message: _warningMessage,
-              replacement: _createReplacement(info),
+              replacements: _createReplacement(info),
             ))
         .toList(growable: false);
   }
 
-  Replacement? _createReplacement(_InstantiationInfo info) {
+  List<Replacement>? _createReplacement(_InstantiationInfo info) {
     if (info.isStateless) {
       final arguments = info.node.argumentList.arguments.map((arg) {
         if (arg is NamedExpression && arg.name.label.name == 'game') {
@@ -64,10 +64,12 @@ class CorrectGameInstantiatingRule extends FlameRule {
         return arg.toSource();
       });
 
-      return Replacement(
-        replacement: 'GameWidget.controlled$arguments;',
-        comment: _correctionMessage,
-      );
+      return [
+        Replacement(
+          replacement: 'GameWidget.controlled$arguments;',
+          comment: _correctionMessage,
+        ),
+      ];
     }
 
     return null;

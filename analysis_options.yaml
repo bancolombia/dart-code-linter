@@ -46,6 +46,15 @@ dart_code_linter:
     - test/resources/*
     - test/*
   rules:
+    - use-design-system-item:
+        BaseScreen:
+          - instead_of: Scaffold
+            from_package: flutter
+    - only-barrel-import:
+        barrels:
+          - core
+          - ui
+          - common
     - avoid-collection-methods-with-unrelated-types
     - avoid-dynamic:
         exclude:
@@ -81,6 +90,8 @@ dart_code_linter:
     - prefer-moving-to-variable:
         exclude:
           - test/**
+    - prefer-named-record-fields
+    - prefer-media-query-direct-access
     - prefer-trailing-comma
 
 linter:
@@ -143,7 +154,6 @@ linter:
     - omit_local_variable_types
     #    - one_member_abstracts
     - only_throw_errors
-    - package_api_docs
     - parameter_assignments
     - prefer_asserts_in_initializer_lists
     - prefer_asserts_with_message
@@ -185,7 +195,6 @@ linter:
     - unnecessary_parenthesis
     - unnecessary_raw_strings
     - unnecessary_statements
-    - unsafe_html
     #    - use_build_context_synchronously
     #    - use_decorated_box
     #    - use_full_hex_values_for_flutter_colors

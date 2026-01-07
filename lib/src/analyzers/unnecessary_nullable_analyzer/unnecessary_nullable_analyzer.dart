@@ -4,6 +4,7 @@ import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 // ignore: implementation_imports
 import 'package:analyzer/src/dart/element/element.dart';
 import 'package:collection/collection.dart';
@@ -209,7 +210,7 @@ class UnnecessaryNullableAnalyzer {
     Iterable<FormalParameter> parameters,
   ) {
     final usages = invocationsUsage.elements[element];
-    final unit = element.thisOrAncestorOfType<CompilationUnitElement>();
+    final unit = element.firstFragment.libraryFragment?.element;
     if (usages == null || unit == null) {
       return null;
     }
@@ -244,7 +245,7 @@ class UnnecessaryNullableAnalyzer {
       (parameter) =>
           !_shouldIgnoreWidgetKey(parameter) &&
           !markedParameters.contains(parameter) &&
-          isNullableType(parameter.declaredElement?.type),
+          isNullableType(parameter.declaredFragment?.element.type),
     );
 
     if (unnecessaryNullable.isEmpty) {
@@ -253,7 +254,6 @@ class UnnecessaryNullableAnalyzer {
 
     return _createUnnecessaryNullableIssue(
       element as ElementImpl,
-      unit,
       unnecessaryNullable,
     );
   }
@@ -287,21 +287,22 @@ class UnnecessaryNullableAnalyzer {
     final isNullable = argument is NullLiteral ||
         (staticType != null &&
             // ignore: deprecated_member_use
-            (staticType.isDynamic || isNullableType(staticType)));
+            (staticType is DynamicType || isNullableType(staticType)));
 
     return isNullable;
   }
 
   UnnecessaryNullableIssue _createUnnecessaryNullableIssue(
     ElementImpl element,
-    CompilationUnitElement unit,
     Iterable<FormalParameter> parameters,
   ) {
-    final offset = element.codeOffset!;
-    final lineInfo = unit.lineInfo;
-    final offsetLocation = lineInfo.getLocation(offset);
+    final libraryFragment = element.firstFragment.libraryFragment;
 
-    final sourceUrl = element.source!.uri;
+    final offset = element.firstFragment.codeOffset!;
+    final lineInfo = libraryFragment?.lineInfo;
+    final offsetLocation = lineInfo?.getLocation(offset);
+
+    final sourceUrl = libraryFragment?.source.uri;
 
     return UnnecessaryNullableIssue(
       declarationName: element.displayName,
@@ -310,8 +311,8 @@ class UnnecessaryNullableAnalyzer {
       location: SourceLocation(
         offset,
         sourceUrl: sourceUrl,
-        line: offsetLocation.lineNumber,
-        column: offsetLocation.columnNumber,
+        line: offsetLocation?.lineNumber,
+        column: offsetLocation?.columnNumber,
       ),
     );
   }
@@ -321,7 +322,9 @@ class UnnecessaryNullableAnalyzer {
 
     if (closestDeclaration is ConstructorDeclaration) {
       return parameter.name?.lexeme == 'key' &&
-          isWidgetOrSubclass(closestDeclaration.declaredElement?.returnType);
+          isWidgetOrSubclass(
+            closestDeclaration.declaredFragment?.element.returnType,
+          );
     }
 
     return false;

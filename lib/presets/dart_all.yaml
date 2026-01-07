@@ -47,6 +47,7 @@ dart_code_linter:
     - prefer-last
     - prefer-match-file-name
     - prefer-moving-to-variable
+    - prefer-named-record-fields
     - prefer-static-class
     - prefer-trailing-comma
     - tag-name
@@ -96,6 +97,7 @@ dart_code_linter:
     - avoid-long-records
     - match-positional-field-names-on-assignment
     - avoid-redundant-positional-field-name
+    - prefer-named-record-fields
     - avoid-nested-switch-expressions
     - avoid-bottom-type-in-patterns
     - avoid-explicit-pattern-field-name

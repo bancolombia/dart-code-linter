@@ -1,4 +1,42 @@
 # Changelog
+
+## 3.2.1
+- Update homepage in `pubspec.yaml`.
+
+## 3.2.0
+- Update `analyzer` constraint to ^8.2.0. Only works with `dart >= 3.9.0`.
+- Add rule `use-design-system-items`.
+- Add rule `only-barrel-import`.
+- Allow to specify more than one suggestion for each rule.
+
+## 3.2.0-alpha.2
+- Update `analyzer` constraint to ^8.2.0
+
+## 3.2.0-alpha.1
+- Add rule `use-design-system-items`.
+- Add rule `only-barrel-import`.
+- Allow to specify more than one suggestion for each rule.
+- Bump `analyzer` to ^8.0.0
+
+## 3.1.1
+- Changed `prefer-media-query-direct-access` to `FlutterRule`.
+
+## 3.1.0
+- Add rule `prefer-media-query-direct-access`.
+- Add rule `prefer-named-record-fields`.
+
+## 3.1.0-beta.3
+- Add rule `prefer-media-query-direct-access`.
+
+## 3.1.0-beta.2
+- Fixed DCL version in analyzer_plugin.
+
+## 3.1.0-beta.1
+- Add rule `prefer-named-record-fields`.
+
+## 3.0.0-beta.1
+- [Breaking] Update dart sdk constraints to `>=3.4.0 <4.0.0`.
+- Update `analyzer` to version ^7.4.4
 ## 2.0.0
 - Update `analyzer` to version ^6.0.0
 ## 1.3.0
