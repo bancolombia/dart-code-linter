@@ -91,6 +91,17 @@ Rules that marked with 🛠 have auto-fixes available through the IDE context me
 
 ![VS Code example](https://github.com/bancolombia/dart-code-linter/blob/trunk/assets/quick-fixes.png)
 
+## Compatibility
+
+As DCL depends on the Dart `analyzer` package. The following table shows the compatible versions:
+
+| DCL Version | Analyzer Version | Dart SDK |
+|-------------|------------------|----------|
+|>=3.2.0      | ^8.0.0           | >=3.4.0 <4.0.0|
+|>=3.0.0 <3.2.0| ^7.4.1          | >=3.4.0 <4.0.0|
+|>=2.0.0      | ^6.0.0          | >=3.0.0 <4.0.0|
+
+
 
 ### CLI
 
