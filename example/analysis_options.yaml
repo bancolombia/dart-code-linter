@@ -67,5 +67,6 @@ dart_code_linter:
           - test/**
     - prefer-trailing-comma
     - only-barrel-import:
+        severity: none
         barrels:
           - example_core
