@@ -15,7 +15,7 @@ platforms:
 
 dependencies:
   analyzer: ">=9.0.0 <10.0.0"
-  analyzer_plugin: ^0.13.0
+  analyzer_plugin: 0.13.11
   ansicolor: ^2.0.1
   args: ^2.0.0
   collection: ^1.16.0
@@ -43,6 +43,7 @@ dev_dependencies:
   # internal package, used only in tests data
   test_lints:
     path: ./test/resources/test_lints
+
 
 executables:
   metrics:
