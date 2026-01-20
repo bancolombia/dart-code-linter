@@ -45,7 +45,7 @@ class _Visitor extends RecursiveAstVisitor<List<_MemberInfo>> {
           closestGroup,
           declaration.fields.variables.first.name.lexeme,
           declaration.fields.type?.type
-                  ?.getDisplayString(withNullability: false) ??
+                  ?.getDisplayString() ??
               '_',
           isFlutterWidget,
         ),
@@ -88,7 +88,7 @@ class _Visitor extends RecursiveAstVisitor<List<_MemberInfo>> {
             closestGroup,
             declaration.name.lexeme,
             declaration.returnType?.type
-                    ?.getDisplayString(withNullability: false) ??
+                    ?.getDisplayString() ??
                 '_',
             isFlutterWidget,
           ),
@@ -105,7 +105,7 @@ class _Visitor extends RecursiveAstVisitor<List<_MemberInfo>> {
             closestGroup,
             declaration.name.lexeme,
             declaration.returnType?.type
-                    ?.getDisplayString(withNullability: false) ??
+                    ?.getDisplayString() ??
                 '_',
             isFlutterWidget,
           ),

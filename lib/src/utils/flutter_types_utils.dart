@@ -33,28 +33,28 @@ bool isSubclassOfListenable(DartType? type) =>
     type is InterfaceType && type.allSupertypes.any(_isListenable);
 
 bool isListViewWidget(DartType? type) =>
-    type?.getDisplayString(withNullability: false) == 'ListView';
+    type?.getDisplayString() == 'ListView';
 
 bool isSingleChildScrollViewWidget(DartType? type) =>
-    type?.getDisplayString(withNullability: false) == 'SingleChildScrollView';
+    type?.getDisplayString() == 'SingleChildScrollView';
 
 bool isColumnWidget(DartType? type) =>
-    type?.getDisplayString(withNullability: false) == 'Column';
+    type?.getDisplayString() == 'Column';
 
 bool isRowWidget(DartType? type) =>
-    type?.getDisplayString(withNullability: false) == 'Row';
+    type?.getDisplayString() == 'Row';
 
 bool isPaddingWidget(DartType? type) =>
-    type?.getDisplayString(withNullability: false) == 'Padding';
+    type?.getDisplayString() == 'Padding';
 
 bool isBuildContext(DartType? type) =>
-    type?.getDisplayString(withNullability: false) == 'BuildContext';
+    type?.getDisplayString() == 'BuildContext';
 
 bool isGameWidget(DartType? type) =>
-    type?.getDisplayString(withNullability: false) == 'GameWidget';
+    type?.getDisplayString() == 'GameWidget';
 
 bool _isWidget(DartType? type) =>
-    type?.getDisplayString(withNullability: false) == 'Widget';
+    type?.getDisplayString() == 'Widget';
 
 bool _isSubclassOfWidget(DartType? type) =>
     type is InterfaceType && type.allSupertypes.any(_isWidget);
@@ -81,28 +81,28 @@ bool _isFuture(DartType type) =>
     isWidgetOrSubclass(type.typeArguments.firstOrNull);
 
 bool _isListenable(DartType type) =>
-    type.getDisplayString(withNullability: false) == 'Listenable';
+    type.getDisplayString() == 'Listenable';
 
 bool _isRenderObject(DartType? type) =>
-    type?.getDisplayString(withNullability: false) == 'RenderObject';
+    type?.getDisplayString() == 'RenderObject';
 
 bool _isSubclassOfRenderObject(DartType? type) =>
     type is InterfaceType && type.allSupertypes.any(_isRenderObject);
 
 bool _isRenderObjectWidget(DartType? type) =>
-    type?.getDisplayString(withNullability: false) == 'RenderObjectWidget';
+    type?.getDisplayString() == 'RenderObjectWidget';
 
 bool _isSubclassOfRenderObjectWidget(DartType? type) =>
     type is InterfaceType && type.allSupertypes.any(_isRenderObjectWidget);
 
 bool _isRenderObjectElement(DartType? type) =>
-    type?.getDisplayString(withNullability: false) == 'RenderObjectElement';
+    type?.getDisplayString() == 'RenderObjectElement';
 
 bool _isSubclassOfRenderObjectElement(DartType? type) =>
     type is InterfaceType && type.allSupertypes.any(_isRenderObjectElement);
 
 bool _isMultiProvider(DartType? type) =>
-    type?.getDisplayString(withNullability: false) == 'MultiProvider';
+    type?.getDisplayString() == 'MultiProvider';
 
 bool _isSubclassOfInheritedProvider(DartType? type) =>
     type is InterfaceType && type.allSupertypes.any(_isInheritedProvider);
@@ -110,7 +110,7 @@ bool _isSubclassOfInheritedProvider(DartType? type) =>
 bool _isInheritedProvider(DartType? type) =>
     type != null &&
     type
-        .getDisplayString(withNullability: false)
+        .getDisplayString()
         .startsWith('InheritedProvider<');
 
 bool _isIterableInheritedProvider(DartType type) =>

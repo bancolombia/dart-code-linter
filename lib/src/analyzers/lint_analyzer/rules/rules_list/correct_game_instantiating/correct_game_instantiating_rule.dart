@@ -54,7 +54,7 @@ class CorrectGameInstantiatingRule extends FlameRule {
           final expression = arg.expression;
           if (expression is InstanceCreationExpression) {
             final name =
-                expression.staticType?.getDisplayString(withNullability: false);
+                expression.staticType?.getDisplayString();
             if (name != null) {
               return 'gameFactory: $name.new,';
             }

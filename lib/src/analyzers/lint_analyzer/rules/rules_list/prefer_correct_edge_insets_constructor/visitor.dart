@@ -17,9 +17,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   @override
   void visitInstanceCreationExpression(InstanceCreationExpression expression) {
     super.visitInstanceCreationExpression(expression);
-    final className = expression.staticType?.getDisplayString(
-      withNullability: true,
-    );
+    final className = expression.staticType?.getDisplayString();
     final constructorName = expression.constructorName.name?.name;
 
     if (className == _className || className == _classNameDirection) {
