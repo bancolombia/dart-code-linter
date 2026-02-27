@@ -7,7 +7,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitNamedType(NamedType node) {
-    if ((node.type is DynamicType) && node.name2.toString() == 'dynamic') {
+    if ((node.type is DynamicType) && node.name.lexeme == 'dynamic') {
       if (node is ExtensionDeclaration) {
         return;
       }
@@ -27,11 +27,11 @@ class _Visitor extends RecursiveAstVisitor<void> {
   void visitClassDeclaration(ClassDeclaration node) {
     if (node.extendsClause != null) {
       final baseType = node.extendsClause?.superclass;
-      if (baseType is Identifier && baseType?.name2.toString() == 'dynamic') {
+      if (baseType is Identifier && baseType?.name.lexeme == 'dynamic') {
         _nodes.add(node);
       } else {
         baseType?.typeArguments?.arguments.forEach((type) {
-          if (type is NamedType && type.name2.toString() == 'dynamic') {
+          if (type is NamedType && type.name.lexeme == 'dynamic') {
             _nodes.add(type.parent ?? type);
           }
         });

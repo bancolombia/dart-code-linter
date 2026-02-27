@@ -12,7 +12,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
     super.visitInstanceCreationExpression(node);
 
-    final widgetName = node.constructorName.type.element2?.displayName;
+    final widgetName = node.constructorName.type.element?.displayName;
     if (widgetName == null || !_configurations.containsKey(widgetName)) {
       return;
     }
@@ -22,7 +22,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    final libraryUri = node.constructorName.element?.library2.toString() ?? '';
+    // ignore: deprecated_member_use
+    final libraryUri = node.constructorName.element?.library.toString() ?? '';
     if (libraryUri.isEmpty || !libraryUri.contains(suggestion.fromPackage)) {
       return;
     }

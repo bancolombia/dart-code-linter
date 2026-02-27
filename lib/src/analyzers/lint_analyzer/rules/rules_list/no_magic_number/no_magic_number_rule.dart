@@ -100,7 +100,7 @@ class NoMagicNumberRule extends DartRule {
       l.thisOrAncestorMatching(
         (a) =>
             a is InstanceCreationExpression &&
-            a.staticType?.getDisplayString(withNullability: false) ==
+            a.staticType?.getDisplayString() ==
                 'DateTime',
       ) ==
       null;

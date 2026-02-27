@@ -120,7 +120,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
     Iterable<MethodInvocation> removedListeners,
     Iterable<MethodInvocation> disposedListeners,
     String? targetName,
-    Element2? element,
+    Element? element,
   ) {
     final removedListener = removedListeners
         .where(
@@ -163,14 +163,13 @@ class _Visitor extends RecursiveAstVisitor<void> {
   bool _haveSameTargets(
     MethodInvocation removedListener,
     String? targetName,
-    Element2? element,
+    Element? element,
   ) {
     final removedTarget = removedListener.realTarget;
 
     return removedTarget is Identifier &&
         removedTarget.name == targetName &&
-        (removedTarget.element == element ||
-            removedTarget.element?.firstFragment == element?.firstFragment);
+        removedTarget.element == element;
   }
 
   bool _haveSameCallbacks(

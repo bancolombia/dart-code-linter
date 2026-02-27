@@ -14,8 +14,8 @@ platforms:
   macos:
 
 dependencies:
-  analyzer: ^8.2.0
-  analyzer_plugin: ^0.13.0
+  analyzer: ">=9.0.0 <10.0.0"
+  analyzer_plugin: ^0.13.11
   ansicolor: ^2.0.1
   args: ^2.0.0
   collection: ^1.16.0
