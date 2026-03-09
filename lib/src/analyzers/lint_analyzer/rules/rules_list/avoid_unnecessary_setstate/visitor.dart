@@ -24,7 +24,10 @@ class _Visitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    final declarations = node.members.whereType<MethodDeclaration>().toList();
+    final body = node.body;
+    if (body is! BlockClassBody) return;
+
+    final declarations = body.members.whereType<MethodDeclaration>().toList();
     final classMethodsNames =
         declarations.map((declaration) => declaration.name.lexeme).toSet();
     final bodies = declarations.map((declaration) => declaration.body).toList();

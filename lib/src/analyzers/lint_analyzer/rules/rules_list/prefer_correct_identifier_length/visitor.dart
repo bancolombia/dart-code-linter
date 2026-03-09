@@ -22,7 +22,7 @@ class _Visitor extends ScopeVisitor {
   void visitEnumDeclaration(EnumDeclaration node) {
     super.visitEnumDeclaration(node);
 
-    for (final node in node.constants) {
+    for (final node in node.body.constants) {
       if (!validator.isValid(node.name.lexeme)) {
         _declarationNodes.add(node.name);
       }

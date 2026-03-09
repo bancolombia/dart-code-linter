@@ -18,7 +18,7 @@ class _Visitor extends SimpleAstVisitor<void> {
     final classType = node.extendsClause?.superclass.type;
     if (isWidgetOrSubclass(classType) &&
         (!_ignorePrivateWidgets ||
-            !Identifier.isPrivateName(node.name.lexeme))) {
+            !Identifier.isPrivateName(node.namePart.typeName.lexeme))) {
       _nodes.add(node);
     }
   }

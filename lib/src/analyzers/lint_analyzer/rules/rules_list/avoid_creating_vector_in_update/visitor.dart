@@ -14,7 +14,10 @@ class _Visitor extends SimpleAstVisitor<void> {
       return;
     }
 
-    final updateMethod = node.members.firstWhereOrNull((member) =>
+    final body = node.body;
+    if (body is! BlockClassBody) return;
+
+    final updateMethod = body.members.firstWhereOrNull((member) =>
         member is MethodDeclaration &&
         member.name.lexeme == 'update' &&
         isOverride(member.metadata));

@@ -9,7 +9,9 @@ class _Visitor extends RecursiveAstVisitor<void> {
   void visitMethodDeclaration(MethodDeclaration node) {
     super.visitMethodDeclaration(node);
 
-    final parent = node.parent;
+    final classBody = node.parent;
+    final parent =
+        classBody is ClassBody ? classBody.parent : classBody;
     final body = node.body;
 
     if (parent is! ClassDeclaration || body is! BlockFunctionBody) {
@@ -156,7 +158,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   MethodDeclaration? _getDisposeMethodDeclaration(ClassDeclaration parent) =>
-      parent.members.firstWhereOrNull((member) =>
+      (parent.body as BlockClassBody).members.firstWhereOrNull((member) =>
               member is MethodDeclaration && member.name.lexeme == 'dispose')
           as MethodDeclaration?;
 
@@ -169,7 +171,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
     return removedTarget is Identifier &&
         removedTarget.name == targetName &&
-        removedTarget.element == element;
+        removedTarget.element?.baseElement == element?.baseElement;
   }
 
   bool _haveSameCallbacks(
@@ -182,7 +184,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
     return addedCallback is Identifier &&
         removedCallback is Identifier &&
         addedCallback.name == removedCallback.name &&
-        addedCallback.element == removedCallback.element;
+        addedCallback.element?.baseElement == removedCallback.element?.baseElement;
   }
 
   bool _isRootWidget(DartType? type, DartType? rootType) =>
