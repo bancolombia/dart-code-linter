@@ -4,6 +4,7 @@ import '../../../../utils/node_utils.dart';
 import '../../lint_utils.dart';
 import '../../metrics/metric_utils.dart';
 import '../../metrics/metrics_list/number_of_parameters/number_of_parameters_metric.dart';
+import '../../metrics/models/metric_value_level.dart';
 import '../../models/function_type.dart';
 import '../../models/internal_resolved_unit_result.dart';
 import '../../models/issue.dart';
@@ -50,7 +51,8 @@ class LongParameterList extends Pattern {
                           metricValue.metricsId ==
                               NumberOfParametersMetric.metricId &&
                           metricValue.value >
-                              _numberOfParametersMetricThreshold)
+                              _numberOfParametersMetricThreshold &&
+                          metricValue.level > MetricValueLevel.none)
                       .map(
                         (metricValue) => createIssue(
                           pattern: this,

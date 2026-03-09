@@ -44,9 +44,7 @@ class _Visitor extends RecursiveAstVisitor<List<_MemberInfo>> {
         memberOrder: _getOrder(
           closestGroup,
           declaration.fields.variables.first.name.lexeme,
-          declaration.fields.type?.type
-                  ?.getDisplayString() ??
-              '_',
+          declaration.fields.type?.type?.getDisplayString() ?? '_',
           isFlutterWidget,
         ),
       ));
@@ -87,9 +85,7 @@ class _Visitor extends RecursiveAstVisitor<List<_MemberInfo>> {
           memberOrder: _getOrder(
             closestGroup,
             declaration.name.lexeme,
-            declaration.returnType?.type
-                    ?.getDisplayString() ??
-                '_',
+            declaration.returnType?.type?.getDisplayString() ?? '_',
             isFlutterWidget,
           ),
         ));
@@ -104,9 +100,7 @@ class _Visitor extends RecursiveAstVisitor<List<_MemberInfo>> {
           memberOrder: _getOrder(
             closestGroup,
             declaration.name.lexeme,
-            declaration.returnType?.type
-                    ?.getDisplayString() ??
-                '_',
+            declaration.returnType?.type?.getDisplayString() ?? '_',
             isFlutterWidget,
           ),
         ));

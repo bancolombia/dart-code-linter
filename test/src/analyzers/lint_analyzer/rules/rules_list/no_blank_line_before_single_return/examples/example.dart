@@ -75,25 +75,21 @@ int simpleFunction() {
   }
 
   if (a > 5) {
-    
     return a - 1;
   }
 
   if (a > 5) {
-    
     // one line comment
     return a - 1;
   }
 
   if (a > 5) {
-    
     // one line comment
     // one line comment
     return a - 1;
   }
 
   if (a > 5) {
-    
     /*
     * Multi line comment
     * */
@@ -107,14 +103,12 @@ int simpleFunction() {
   }
 
   if (a > 5) {
-    
     // one line comment
 
     return a - 1;
   }
 
   if (a > 5) {
-    
     /*
     * Multi line comment
     * */

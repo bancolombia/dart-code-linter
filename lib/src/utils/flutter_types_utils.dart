@@ -32,29 +32,23 @@ bool isWidgetStateOrSubclass(DartType? type) =>
 bool isSubclassOfListenable(DartType? type) =>
     type is InterfaceType && type.allSupertypes.any(_isListenable);
 
-bool isListViewWidget(DartType? type) =>
-    type?.getDisplayString() == 'ListView';
+bool isListViewWidget(DartType? type) => type?.getDisplayString() == 'ListView';
 
 bool isSingleChildScrollViewWidget(DartType? type) =>
     type?.getDisplayString() == 'SingleChildScrollView';
 
-bool isColumnWidget(DartType? type) =>
-    type?.getDisplayString() == 'Column';
+bool isColumnWidget(DartType? type) => type?.getDisplayString() == 'Column';
 
-bool isRowWidget(DartType? type) =>
-    type?.getDisplayString() == 'Row';
+bool isRowWidget(DartType? type) => type?.getDisplayString() == 'Row';
 
-bool isPaddingWidget(DartType? type) =>
-    type?.getDisplayString() == 'Padding';
+bool isPaddingWidget(DartType? type) => type?.getDisplayString() == 'Padding';
 
 bool isBuildContext(DartType? type) =>
     type?.getDisplayString() == 'BuildContext';
 
-bool isGameWidget(DartType? type) =>
-    type?.getDisplayString() == 'GameWidget';
+bool isGameWidget(DartType? type) => type?.getDisplayString() == 'GameWidget';
 
-bool _isWidget(DartType? type) =>
-    type?.getDisplayString() == 'Widget';
+bool _isWidget(DartType? type) => type?.getDisplayString() == 'Widget';
 
 bool _isSubclassOfWidget(DartType? type) =>
     type is InterfaceType && type.allSupertypes.any(_isWidget);
@@ -80,8 +74,7 @@ bool _isFuture(DartType type) =>
     type is InterfaceType &&
     isWidgetOrSubclass(type.typeArguments.firstOrNull);
 
-bool _isListenable(DartType type) =>
-    type.getDisplayString() == 'Listenable';
+bool _isListenable(DartType type) => type.getDisplayString() == 'Listenable';
 
 bool _isRenderObject(DartType? type) =>
     type?.getDisplayString() == 'RenderObject';
@@ -108,10 +101,7 @@ bool _isSubclassOfInheritedProvider(DartType? type) =>
     type is InterfaceType && type.allSupertypes.any(_isInheritedProvider);
 
 bool _isInheritedProvider(DartType? type) =>
-    type != null &&
-    type
-        .getDisplayString()
-        .startsWith('InheritedProvider<');
+    type != null && type.getDisplayString().startsWith('InheritedProvider<');
 
 bool _isIterableInheritedProvider(DartType type) =>
     type.isDartCoreIterable &&
