@@ -64,13 +64,15 @@ class _Visitor extends RecursiveAstVisitor<void> {
   ) {
     for (final addedListener in addedListeners) {
       final target = addedListener.realTarget;
-      if (target is Identifier) {
+      final name = _targetName(target);
+      final element = _targetElement(target);
+      if (name != null) {
         _compareInvocation(
           addedListener,
           removedListeners,
           disposedListeners,
-          target.name,
-          target.element,
+          name,
+          element,
         );
       }
     }
@@ -166,10 +168,11 @@ class _Visitor extends RecursiveAstVisitor<void> {
     Element? element,
   ) {
     final removedTarget = removedListener.realTarget;
+    final removedName = _targetName(removedTarget);
+    final removedElement = _targetElement(removedTarget);
 
-    return removedTarget is Identifier &&
-        removedTarget.name == targetName &&
-        removedTarget.element == element;
+    return removedName == targetName &&
+        _hasSameBaseElement(removedElement, element);
   }
 
   bool _haveSameCallbacks(
@@ -182,8 +185,27 @@ class _Visitor extends RecursiveAstVisitor<void> {
     return addedCallback is Identifier &&
         removedCallback is Identifier &&
         addedCallback.name == removedCallback.name &&
-        addedCallback.element == removedCallback.element;
+        _hasSameBaseElement(addedCallback.element, removedCallback.element);
   }
+
+  String? _targetName(Expression? target) {
+    if (target is Identifier) return target.name;
+    if (target is PropertyAccess) {
+      return '${target.target?.toSource()}.${target.propertyName.name}';
+    }
+
+    return null;
+  }
+
+  Element? _targetElement(Expression? target) {
+    if (target is Identifier) return target.element;
+    if (target is PropertyAccess) return target.propertyName.element;
+
+    return null;
+  }
+
+  bool _hasSameBaseElement(Element? a, Element? b) =>
+      a?.baseElement == b?.baseElement;
 
   bool _isRootWidget(DartType? type, DartType? rootType) =>
       type != null && type.getDisplayString() == rootType?.getDisplayString();
