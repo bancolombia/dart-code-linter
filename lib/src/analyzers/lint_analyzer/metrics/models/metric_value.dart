@@ -47,4 +47,18 @@ class MetricValue<T extends num> {
     this.recommendation,
     this.context = const [],
   });
+
+  /// Returns a copy of this value with [level] overridden to [MetricValueLevel.none].
+  ///
+  /// Used when the metric is suppressed via an ignore comment.
+  MetricValue<T> suppressed() => MetricValue(
+        metricsId: metricsId,
+        documentation: documentation,
+        value: value,
+        unitType: unitType,
+        level: MetricValueLevel.none,
+        comment: comment,
+        recommendation: recommendation,
+        context: context,
+      );
 }

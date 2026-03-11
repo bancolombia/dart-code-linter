@@ -336,10 +336,12 @@ class LintAnalyzer {
       final visitor = ScopeVisitor();
       internalResult.unit.visitChildren(visitor);
 
-      final classMetrics = _checkClassMetrics(visitor, internalResult, config);
-      final fileMetrics = _checkFileMetrics(visitor, internalResult, config);
+      final classMetrics =
+          _checkClassMetrics(visitor, internalResult, config, ignores);
+      final fileMetrics =
+          _checkFileMetrics(visitor, internalResult, config, ignores);
       final functionMetrics =
-          _checkFunctionMetrics(visitor, internalResult, config);
+          _checkFunctionMetrics(visitor, internalResult, config, ignores);
       final antiPatterns = _checkOnAntiPatterns(
         ignores,
         internalResult,
@@ -421,6 +423,7 @@ class LintAnalyzer {
     ScopeVisitor visitor,
     InternalResolvedUnitResult source,
     LintAnalysisConfig config,
+    Suppression ignores,
   ) {
     final classRecords = <ScopedClassDeclaration, Report>{};
 
@@ -435,13 +438,16 @@ class LintAnalyzer {
           source,
           metrics,
         )) {
-          metrics.add(metric.compute(
+          final computed = metric.compute(
             classDeclaration.declaration,
             visitor.classes,
             visitor.functions,
             source,
             metrics,
-          ));
+          );
+          metrics.add(
+            ignores.isSuppressed(metric.id) ? computed.suppressed() : computed,
+          );
         }
       }
 
@@ -464,6 +470,7 @@ class LintAnalyzer {
     ScopeVisitor visitor,
     InternalResolvedUnitResult source,
     LintAnalysisConfig config,
+    Suppression ignores,
   ) {
     final metrics = <MetricValue>[];
 
@@ -475,13 +482,16 @@ class LintAnalyzer {
         source,
         metrics,
       )) {
-        metrics.add(metric.compute(
+        final computed = metric.compute(
           source.unit,
           visitor.classes,
           visitor.functions,
           source,
           metrics,
-        ));
+        );
+        metrics.add(
+          ignores.isSuppressed(metric.id) ? computed.suppressed() : computed,
+        );
       }
     }
 
@@ -496,6 +506,7 @@ class LintAnalyzer {
     ScopeVisitor visitor,
     InternalResolvedUnitResult source,
     LintAnalysisConfig config,
+    Suppression ignores,
   ) {
     final functionRecords = <ScopedFunctionDeclaration, Report>{};
 
@@ -510,13 +521,16 @@ class LintAnalyzer {
           source,
           metrics,
         )) {
-          metrics.add(metric.compute(
+          final computed = metric.compute(
             function.declaration,
             visitor.classes,
             visitor.functions,
             source,
             metrics,
-          ));
+          );
+          metrics.add(
+            ignores.isSuppressed(metric.id) ? computed.suppressed() : computed,
+          );
         }
       }
 
