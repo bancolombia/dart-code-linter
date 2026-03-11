@@ -23,6 +23,10 @@ const _providerExamplePath =
     'prefer_moving_to_variable/examples/provider_example.dart';
 const _whileExamplePath =
     'prefer_moving_to_variable/examples/while_example.dart';
+const _ignoredInvocationsExamplePath =
+    'prefer_moving_to_variable/examples/ignored_invocations_example.dart';
+const _ignoredTargetsExamplePath =
+    'prefer_moving_to_variable/examples/ignored_targets_example.dart';
 
 void main() {
   group('PreferMovingToVariableRule', () {
@@ -254,6 +258,108 @@ void main() {
     test('reports no issues for while', () async {
       final unit = await RuleTestHelper.resolveFromFile(_whileExamplePath);
       final issues = PreferMovingToVariableRule().check(unit);
+
+      RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    test('reports issues for ignored_invocations example without config',
+        () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_ignoredInvocationsExamplePath);
+      final issues = PreferMovingToVariableRule().check(unit);
+
+      RuleTestHelper.verifyIssues(
+        issues: issues,
+        locationTexts: ['16.h', '16.h', '8.r', '8.r'],
+        messages: List.filled(
+          4,
+          'Prefer moving repeated invocations to variable and use it instead.',
+        ),
+      );
+    });
+
+    test('reports no issues when invocations are ignored', () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_ignoredInvocationsExamplePath);
+      final issues = PreferMovingToVariableRule({
+        'ignored-invocations': ['h', 'r'],
+      }).check(unit);
+
+      RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    test('reports issues for ignored_targets example without config', () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_ignoredTargetsExamplePath);
+      final issues = PreferMovingToVariableRule().check(unit);
+
+      RuleTestHelper.verifyIssues(
+        issues: issues,
+        locationTexts: [
+          "AppTheme.of('compact')",
+          "AppTheme.of('compact')",
+          'ServiceLocator.instance.get<AuthService>()',
+          'ServiceLocator.instance.get<AuthService>()',
+        ],
+        messages: List.filled(
+          4,
+          'Prefer moving repeated invocations to variable and use it instead.',
+        ),
+      );
+    });
+
+    test(
+      'reports only service-locator issues when AppTheme target is ignored',
+      () async {
+        final unit =
+            await RuleTestHelper.resolveFromFile(_ignoredTargetsExamplePath);
+        final issues = PreferMovingToVariableRule({
+          'ignored-targets': ['AppTheme'],
+        }).check(unit);
+
+        RuleTestHelper.verifyIssues(
+          issues: issues,
+          locationTexts: [
+            'ServiceLocator.instance.get<AuthService>()',
+            'ServiceLocator.instance.get<AuthService>()',
+          ],
+          messages: List.filled(
+            2,
+            'Prefer moving repeated invocations to variable and use it instead.',
+          ),
+        );
+      },
+    );
+
+    test(
+      'reports only AppTheme issues when ServiceLocator target is ignored',
+      () async {
+        final unit =
+            await RuleTestHelper.resolveFromFile(_ignoredTargetsExamplePath);
+        final issues = PreferMovingToVariableRule({
+          'ignored-targets': ['ServiceLocator'],
+        }).check(unit);
+
+        RuleTestHelper.verifyIssues(
+          issues: issues,
+          locationTexts: [
+            "AppTheme.of('compact')",
+            "AppTheme.of('compact')",
+          ],
+          messages: List.filled(
+            2,
+            'Prefer moving repeated invocations to variable and use it instead.',
+          ),
+        );
+      },
+    );
+
+    test('reports no issues when all target classes are ignored', () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_ignoredTargetsExamplePath);
+      final issues = PreferMovingToVariableRule({
+        'ignored-targets': ['AppTheme', 'ServiceLocator'],
+      }).check(unit);
 
       RuleTestHelper.verifyNoIssues(issues);
     });
