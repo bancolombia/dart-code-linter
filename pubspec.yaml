@@ -44,8 +44,5 @@ dev_dependencies:
   test_lints:
     path: ./test/resources/test_lints
 
-dependency_overrides:
-  analyzer: ">=11.0.0 <12.0.0"
-
 executables:
   metrics:

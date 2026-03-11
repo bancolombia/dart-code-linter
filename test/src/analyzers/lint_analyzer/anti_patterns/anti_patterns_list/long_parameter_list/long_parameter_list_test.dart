@@ -68,4 +68,48 @@ void main() {
       ],
     );
   });
+
+  test(
+    'LongParameterList does not report violation when number-of-parameters metric is suppressed',
+    () async {
+      final unit = await AntiPatternTestHelper.resolveFromFile(_examplePath);
+
+      final scopeVisitor = ScopeVisitor();
+      unit.unit.visitChildren(scopeVisitor);
+
+      final declarations = scopeVisitor.functions.where((function) {
+        final declaration = function.declaration;
+        if (declaration is ConstructorDeclaration &&
+            declaration.body is EmptyFunctionBody) {
+          return false;
+        } else if (declaration is MethodDeclaration &&
+            declaration.body is EmptyFunctionBody) {
+          return false;
+        }
+
+        return true;
+      });
+
+      final issues = LongParameterList(
+        metricsThresholds: {NumberOfParametersMetric.metricId: 4},
+      ).check(unit, {}, {
+        declarations.last: Report(
+          location: nodeLocation(
+            node: declarations.last.declaration,
+            source: unit,
+          ),
+          metrics: [
+            buildMetricValueStub(
+              id: NumberOfParametersMetric.metricId,
+              value: 5, // exceeds threshold, but suppressed
+              level: MetricValueLevel.none, // set by MetricValue.suppressed()
+            ),
+          ],
+          declaration: declarations.last.declaration,
+        ),
+      });
+
+      expect(issues, isEmpty);
+    },
+  );
 }

@@ -73,6 +73,49 @@ void main() {
       );
     });
 
+    test(
+      'does not report violation when source-lines-of-code metric is suppressed',
+      () async {
+        final unit = await AntiPatternTestHelper.resolveFromFile(_examplePath);
+        final scopeVisitor = ScopeVisitor();
+        unit.unit.visitChildren(scopeVisitor);
+
+        final declarations = scopeVisitor.functions.where((function) {
+          final declaration = function.declaration;
+          if (declaration is ConstructorDeclaration &&
+              declaration.body is EmptyFunctionBody) {
+            return false;
+          } else if (declaration is MethodDeclaration &&
+              declaration.body is EmptyFunctionBody) {
+            return false;
+          }
+
+          return true;
+        });
+
+        final issues = LongMethod(
+          metricsThresholds: {SourceLinesOfCodeMetric.metricId: 25},
+        ).check(unit, {}, {
+          declarations.first: Report(
+            location: nodeLocation(
+              node: declarations.first.declaration,
+              source: unit,
+            ),
+            metrics: [
+              buildMetricValueStub(
+                id: SourceLinesOfCodeMetric.metricId,
+                value: 55, // exceeds threshold, but suppressed
+                level: MetricValueLevel.none, // set by MetricValue.suppressed()
+              ),
+            ],
+            declaration: declarations.first.declaration,
+          ),
+        });
+
+        expect(issues, isEmpty);
+      },
+    );
+
     test('skip widget build method', () async {
       final unit =
           await AntiPatternTestHelper.resolveFromFile(_widgetExamplePath);

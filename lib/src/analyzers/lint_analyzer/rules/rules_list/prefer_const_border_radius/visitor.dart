@@ -14,8 +14,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
     final arguments = expression.argumentList.arguments;
 
-    if (expression.staticType?.getDisplayString() ==
-            _borderRadiusClassName &&
+    if (expression.staticType?.getDisplayString() == _borderRadiusClassName &&
         expression.constructorName.name?.name == _borderRadiusConstructorName &&
         arguments.length == 1) {
       final arg = arguments.first;
