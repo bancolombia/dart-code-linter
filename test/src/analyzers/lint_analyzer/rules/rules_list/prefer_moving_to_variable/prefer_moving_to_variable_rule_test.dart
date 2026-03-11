@@ -23,6 +23,10 @@ const _providerExamplePath =
     'prefer_moving_to_variable/examples/provider_example.dart';
 const _whileExamplePath =
     'prefer_moving_to_variable/examples/while_example.dart';
+const _expressionBodyExamplePath =
+    'prefer_moving_to_variable/examples/expression_body_example.dart';
+const _expressionBodyCrossScopeExamplePath =
+    'prefer_moving_to_variable/examples/expression_body_cross_scope_example.dart';
 
 void main() {
   group('PreferMovingToVariableRule', () {
@@ -253,6 +257,40 @@ void main() {
 
     test('reports no issues for while', () async {
       final unit = await RuleTestHelper.resolveFromFile(_whileExamplePath);
+      final issues = PreferMovingToVariableRule().check(unit);
+
+      RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    test('reports issues in expression function bodies', () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_expressionBodyExamplePath);
+      final issues = PreferMovingToVariableRule().check(unit);
+
+      RuleTestHelper.verifyIssues(
+        issues: issues,
+        startLines: [12, 12, 22, 22],
+        startColumns: [7, 32, 5, 24],
+        locationTexts: [
+          'service.display.trim()',
+          'service.display.trim()',
+          's.display.trim()',
+          's.display.trim()',
+        ],
+        messages: [
+          'Prefer moving repeated invocations to variable and use it instead.',
+          'Prefer moving repeated invocations to variable and use it instead.',
+          'Prefer moving repeated invocations to variable and use it instead.',
+          'Prefer moving repeated invocations to variable and use it instead.',
+        ],
+      );
+    });
+
+    test('reports no issues across different expression function bodies',
+        () async {
+      final unit = await RuleTestHelper.resolveFromFile(
+        _expressionBodyCrossScopeExamplePath,
+      );
       final issues = PreferMovingToVariableRule().check(unit);
 
       RuleTestHelper.verifyNoIssues(issues);
