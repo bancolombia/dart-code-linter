@@ -38,8 +38,9 @@ abstract class IntlBaseVisitor extends GeneralizingAstVisitor<void> {
 
     final classNode = node.parent?.parent;
     final className = switch (classNode) {
-      ClassDeclaration() => classNode.namePart.typeName.lexeme,
-      EnumDeclaration() => classNode.namePart.typeName.lexeme,
+      ClassDeclaration(:final namePart) ||
+      EnumDeclaration(:final namePart) =>
+        namePart.typeName.lexeme,
       MixinDeclaration() => classNode.name.lexeme,
       ExtensionDeclaration() => classNode.name?.lexeme,
       _ => null,
@@ -124,9 +125,11 @@ abstract class IntlBaseVisitor extends GeneralizingAstVisitor<void> {
 
   String? _getClassName(MethodDeclaration node) {
     final classNode = node.parent?.parent;
+
     return switch (classNode) {
-      ClassDeclaration() => classNode.namePart.typeName.lexeme,
-      EnumDeclaration() => classNode.namePart.typeName.lexeme,
+      ClassDeclaration(:final namePart) ||
+      EnumDeclaration(:final namePart) =>
+        namePart.typeName.lexeme,
       MixinDeclaration() => classNode.name.lexeme,
       ExtensionDeclaration() => classNode.name?.lexeme,
       _ => null,
