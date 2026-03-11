@@ -37,15 +37,13 @@ abstract class IntlBaseVisitor extends GeneralizingAstVisitor<void> {
     }
 
     final classNode = node.parent?.parent;
-    final className = classNode is ClassDeclaration
-        ? classNode.namePart.typeName.lexeme
-        : classNode is EnumDeclaration
-            ? classNode.namePart.typeName.lexeme
-            : classNode is MixinDeclaration
-                ? classNode.name.lexeme
-                : classNode is ExtensionDeclaration
-                    ? classNode.name?.lexeme
-                    : null;
+    final className = switch (classNode) {
+      ClassDeclaration() => classNode.namePart.typeName.lexeme,
+      EnumDeclaration() => classNode.namePart.typeName.lexeme,
+      MixinDeclaration() => classNode.name.lexeme,
+      ExtensionDeclaration() => classNode.name?.lexeme,
+      _ => null,
+    };
 
     _checkVariables(className, node.fields);
 
@@ -126,16 +124,13 @@ abstract class IntlBaseVisitor extends GeneralizingAstVisitor<void> {
 
   String? _getClassName(MethodDeclaration node) {
     final classNode = node.parent?.parent;
-    if (classNode is ClassDeclaration) {
-      return classNode.namePart.typeName.lexeme;
-    } else if (classNode is EnumDeclaration) {
-      return classNode.namePart.typeName.lexeme;
-    } else if (classNode is MixinDeclaration) {
-      return classNode.name.lexeme;
-    } else if (classNode is ExtensionDeclaration) {
-      return classNode.name?.lexeme;
-    }
-    return null;
+    return switch (classNode) {
+      ClassDeclaration() => classNode.namePart.typeName.lexeme,
+      EnumDeclaration() => classNode.namePart.typeName.lexeme,
+      MixinDeclaration() => classNode.name.lexeme,
+      ExtensionDeclaration() => classNode.name?.lexeme,
+      _ => null,
+    };
   }
 
   MethodInvocation? _getMethodInvocation(FunctionBody body) {

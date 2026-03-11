@@ -28,7 +28,9 @@ class ScopedFunctionDeclaration {
               ? parent.namePart.typeName.lexeme
               : parent is EnumDeclaration
                   ? parent.namePart.typeName.lexeme
-                  : '');
+                  : parent is MixinDeclaration
+                      ? parent.name.lexeme
+                      : '');
     } else if (node is MethodDeclaration) {
       name = node.name.lexeme;
     }
