@@ -19,7 +19,9 @@ class _Visitor extends GeneralizingAstVisitor<void> {
     }
 
     final body = node.body;
-    if (body is! BlockClassBody) return;
+    if (body is! BlockClassBody) {
+      return;
+    }
 
     final fieldNames = body.members
         .whereType<FieldDeclaration>()

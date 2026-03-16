@@ -15,7 +15,9 @@ class _Visitor extends RecursiveAstVisitor<List<_MemberInfo>> {
     _membersInfo.clear();
 
     final body = node.body;
-    if (body is! BlockClassBody) return _membersInfo;
+    if (body is! BlockClassBody) {
+      return _membersInfo;
+    }
 
     final type = node.extendsClause?.superclass.type;
     final isFlutterWidget =

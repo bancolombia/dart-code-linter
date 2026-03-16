@@ -15,7 +15,9 @@ class _Visitor extends SimpleAstVisitor<void> {
     }
 
     final body = node.body;
-    if (body is! BlockClassBody) return;
+    if (body is! BlockClassBody) {
+      return;
+    }
 
     final onLoadMethod = body.members.firstWhereOrNull((member) =>
         member is MethodDeclaration &&

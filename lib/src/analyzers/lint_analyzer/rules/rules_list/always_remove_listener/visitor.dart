@@ -189,7 +189,9 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   String? _targetName(Expression? target) {
-    if (target is Identifier) return target.name;
+    if (target is Identifier) {
+      return target.name;
+    }
     if (target is PropertyAccess) {
       return '${target.target?.toSource()}.${target.propertyName.name}';
     }
@@ -198,8 +200,12 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   Element? _targetElement(Expression? target) {
-    if (target is Identifier) return target.element;
-    if (target is PropertyAccess) return target.propertyName.element;
+    if (target is Identifier) {
+      return target.element;
+    }
+    if (target is PropertyAccess) {
+      return target.propertyName.element;
+    }
 
     return null;
   }
