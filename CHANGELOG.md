@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.0.0](https://github.com/bancolombia/dart-code-linter/compare/v3.2.1...v4.0.0) (2026-03-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* Minimum Dart SDK bumped to >=3.5.0.
+
+### Bug Fixes
+
+* address PR [#216](https://github.com/bancolombia/dart-code-linter/issues/216) review feedback and resolve merge conflicts ([#221](https://github.com/bancolombia/dart-code-linter/issues/221)) ([089aa87](https://github.com/bancolombia/dart-code-linter/commit/089aa87741ed8795558eb1eef9a0d4cde1502643))
+* Recover example.dart with its empty lines for test to catch these issues ([43b7abc](https://github.com/bancolombia/dart-code-linter/commit/43b7abca76f3a351991a2dff6df98fd681e7f52c))
+
 ## 4.0.0
 - **BREAKING**: Update minimum Dart SDK to >=3.5.0 (compatible with Flutter 3.24+).
 - Update `analyzer` to >=11.0.0 <12.0.0.
@@ -80,5 +92,3 @@
 
 ## 1.0.0
 - Fork: [Dart code metrics 5.7.3](https://github.com/dart-code-checker/dart-code-metrics)
-
-
