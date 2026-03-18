@@ -120,6 +120,152 @@ void main() {
         expect(report, isEmpty);
       });
 
+      test(
+        'should suppress cyclomatic-complexity metric when ignore_for_file comment is present',
+        () async {
+          final suppressionFolders = [
+            p.normalize(
+              File('test/resources/metric_suppression').absolute.path,
+            ),
+          ];
+
+          final config = _createConfig(
+            metrics: {'cyclomatic-complexity': 2},
+          );
+
+          final result = await analyzer.runCliAnalysis(
+            suppressionFolders,
+            rootDirectory,
+            config,
+          );
+
+          final report = reportForFile(result, 'high_cyclomatic_example.dart');
+          final functionMetric = report.functions.values.first;
+          final metricsMap = {
+            for (final m in functionMetric.metrics) m.metricsId: m.level,
+          };
+
+          expect(
+            metricsMap['cyclomatic-complexity'],
+            equals(MetricValueLevel.none),
+          );
+        },
+      );
+
+      test(
+        'should suppress multiple metrics when all are listed in ignore_for_file comment',
+        () async {
+          final suppressionFolders = [
+            p.normalize(
+              File('test/resources/metric_suppression').absolute.path,
+            ),
+          ];
+
+          final config = _createConfig(
+            metrics: {
+              'cyclomatic-complexity': 2,
+              'maximum-nesting-level': 1,
+            },
+          );
+
+          final result = await analyzer.runCliAnalysis(
+            suppressionFolders,
+            rootDirectory,
+            config,
+          );
+
+          final report =
+              reportForFile(result, 'multi_metric_suppression_example.dart');
+          final functionMetric = report.functions.values.first;
+          final metricsMap = {
+            for (final m in functionMetric.metrics) m.metricsId: m.level,
+          };
+
+          expect(
+            metricsMap['cyclomatic-complexity'],
+            equals(MetricValueLevel.none),
+          );
+          expect(
+            metricsMap['maximum-nesting-level'],
+            equals(MetricValueLevel.none),
+          );
+        },
+      );
+
+      test(
+        'should suppress only the named metric and still report violations for others',
+        () async {
+          final suppressionFolders = [
+            p.normalize(
+              File('test/resources/metric_suppression').absolute.path,
+            ),
+          ];
+
+          // nesting=3, threshold=2 → warning (3 > 2 but 3 ≤ 4)
+          final config = _createConfig(
+            metrics: {
+              'cyclomatic-complexity': 2,
+              'maximum-nesting-level': 2,
+            },
+          );
+
+          final result = await analyzer.runCliAnalysis(
+            suppressionFolders,
+            rootDirectory,
+            config,
+          );
+
+          final report =
+              reportForFile(result, 'selective_suppression_example.dart');
+          final functionMetric = report.functions.values.first;
+          final metricsMap = {
+            for (final m in functionMetric.metrics) m.metricsId: m.level,
+          };
+
+          expect(
+            metricsMap['cyclomatic-complexity'],
+            equals(MetricValueLevel.none),
+          );
+          expect(
+            metricsMap['maximum-nesting-level'],
+            equals(MetricValueLevel.warning),
+          );
+        },
+      );
+
+      test(
+        'should suppress class-level metric when ignore_for_file comment is present',
+        () async {
+          final suppressionFolders = [
+            p.normalize(
+              File('test/resources/metric_suppression').absolute.path,
+            ),
+          ];
+
+          final config = _createConfig(
+            metrics: {'number-of-methods': 2},
+          );
+
+          final result = await analyzer.runCliAnalysis(
+            suppressionFolders,
+            rootDirectory,
+            config,
+          );
+
+          final report =
+              reportForFile(result, 'class_metric_suppression_example.dart');
+          final classMetric = report.classes.values.first;
+          final metricsMap = {
+            for (final m in classMetric.metrics) m.metricsId: m.level,
+          };
+
+          expect(
+            metricsMap['number-of-methods'],
+            equals(MetricValueLevel.none),
+          );
+        },
+      );
+
       test('should report no-magic-number rule', () async {
         final config = _createConfig(rules: {'no-magic-number': {}});
 

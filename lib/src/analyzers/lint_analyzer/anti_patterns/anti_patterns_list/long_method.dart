@@ -8,6 +8,7 @@ import '../../../../utils/node_utils.dart';
 import '../../lint_utils.dart';
 import '../../metrics/metric_utils.dart';
 import '../../metrics/metrics_list/source_lines_of_code/source_lines_of_code_metric.dart';
+import '../../metrics/models/metric_value_level.dart';
 import '../../models/internal_resolved_unit_result.dart';
 import '../../models/issue.dart';
 import '../../models/report.dart';
@@ -53,7 +54,8 @@ class LongMethod extends Pattern {
                           metricValue.metricsId ==
                               SourceLinesOfCodeMetric.metricId &&
                           metricValue.value >
-                              _sourceLinesOfCodeMetricThreshold)
+                              _sourceLinesOfCodeMetricThreshold &&
+                          metricValue.level > MetricValueLevel.none)
                       .map(
                         (metricValue) => createIssue(
                           pattern: this,

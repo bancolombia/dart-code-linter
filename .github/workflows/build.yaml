@@ -4,8 +4,8 @@ on:
     branches:
       - trunk
     paths:
-      - 'lib/'
-      - 'tools/'
+      - 'lib/**'
+      - 'tools/**'
   
 jobs:
   build:

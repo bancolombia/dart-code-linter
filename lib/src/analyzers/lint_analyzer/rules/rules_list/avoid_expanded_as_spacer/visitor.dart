@@ -14,8 +14,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
     super.visitInstanceCreationExpression(expression);
 
     final arguments = expression.argumentList.arguments;
-    final isExpanded = expression.staticType?.getDisplayString() ==
-        _expandedClassName;
+    final isExpanded =
+        expression.staticType?.getDisplayString() == _expandedClassName;
 
     final hasOneArgument = arguments.length == 1;
 
