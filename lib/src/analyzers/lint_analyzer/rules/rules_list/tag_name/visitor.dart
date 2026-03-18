@@ -35,7 +35,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
     final fieldInitValue = fieldInitializer.stringValue;
 
     final classDeclaration = node.thisOrAncestorOfType<ClassDeclaration>();
-    final className = classDeclaration?.name.lexeme;
+    final className = classDeclaration?.namePart.typeName.lexeme;
     if (className == null) {
       return;
     }

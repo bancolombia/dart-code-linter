@@ -1,0 +1,30 @@
+resources:
+  - name: getting_started
+    title: "Getting Started with Dart Code Linter"
+    description: "Quick start guide for installing and configuring DCL"
+    path: extension/mcp/resources/getting_started.md
+  - name: rules_reference
+    title: "Lint Rules Reference"
+    description: "Complete reference of all lint rules with examples"
+    path: extension/mcp/resources/rules_reference.md
+  - name: metrics_reference
+    title: "Code Metrics Reference"
+    description: "Reference for all code metrics (cyclomatic complexity, etc.)"
+    path: extension/mcp/resources/metrics_reference.md
+  - name: cli_commands
+    title: "CLI Commands Reference"
+    description: "Usage guide for all CLI commands (analyze, check-unused-code, etc.)"
+    path: extension/mcp/resources/cli_commands.md
+  - name: configuration_guide
+    title: "Configuration Guide"
+    description: "How to configure rules, metrics, and thresholds in analysis_options.yaml"
+    path: extension/mcp/resources/configuration_guide.md
+prompts:
+  - name: analyze_code
+    title: "Analyze Code Quality"
+    description: "Run dart_code_linter analysis on the project and explain results"
+    path: extension/mcp/prompts/analyze_code.md
+  - name: fix_lints
+    title: "Fix Lint Violations"
+    description: "Identify and fix lint rule violations in the current project"
+    path: extension/mcp/prompts/fix_lints.md

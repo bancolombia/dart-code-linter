@@ -22,8 +22,15 @@ class ScopedFunctionDeclaration {
     if (node is FunctionDeclaration) {
       name = node.name.lexeme;
     } else if (node is ConstructorDeclaration) {
+      final parent = node.parent?.parent;
       name = node.name?.lexeme ??
-          (node.parent as NamedCompilationUnitMember).name.lexeme;
+          switch (parent) {
+            ClassDeclaration(:final namePart) ||
+            EnumDeclaration(:final namePart) =>
+              namePart.typeName.lexeme,
+            MixinDeclaration() => parent.name.lexeme,
+            _ => '',
+          };
     } else if (node is MethodDeclaration) {
       name = node.name.lexeme;
     }

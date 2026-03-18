@@ -36,8 +36,15 @@ abstract class IntlBaseVisitor extends GeneralizingAstVisitor<void> {
       return;
     }
 
-    final className =
-        node.parent?.as<NamedCompilationUnitMember>()?.name.lexeme;
+    final classNode = node.parent?.parent;
+    final className = switch (classNode) {
+      ClassDeclaration(:final namePart) ||
+      EnumDeclaration(:final namePart) =>
+        namePart.typeName.lexeme,
+      MixinDeclaration() => classNode.name.lexeme,
+      ExtensionDeclaration() => classNode.name?.lexeme,
+      _ => null,
+    };
 
     _checkVariables(className, node.fields);
 
@@ -117,9 +124,16 @@ abstract class IntlBaseVisitor extends GeneralizingAstVisitor<void> {
   }
 
   String? _getClassName(MethodDeclaration node) {
-    final name = node.parent?.as<NamedCompilationUnitMember>()?.name.lexeme;
+    final classNode = node.parent?.parent;
 
-    return name ?? node.parent?.as<ExtensionDeclaration>()?.name?.lexeme;
+    return switch (classNode) {
+      ClassDeclaration(:final namePart) ||
+      EnumDeclaration(:final namePart) =>
+        namePart.typeName.lexeme,
+      MixinDeclaration() => classNode.name.lexeme,
+      ExtensionDeclaration() => classNode.name?.lexeme,
+      _ => null,
+    };
   }
 
   MethodInvocation? _getMethodInvocation(FunctionBody body) {

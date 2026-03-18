@@ -14,7 +14,12 @@ class _Visitor extends SimpleAstVisitor<void> {
       return;
     }
 
-    final onLoadMethod = node.members.firstWhereOrNull((member) =>
+    final body = node.body;
+    if (body is! BlockClassBody) {
+      return;
+    }
+
+    final onLoadMethod = body.members.firstWhereOrNull((member) =>
         member is MethodDeclaration &&
         member.name.lexeme == 'onLoad' &&
         isOverride(member.metadata));
