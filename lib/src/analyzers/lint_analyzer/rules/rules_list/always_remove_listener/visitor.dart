@@ -9,12 +9,10 @@ class _Visitor extends RecursiveAstVisitor<void> {
   void visitMethodDeclaration(MethodDeclaration node) {
     super.visitMethodDeclaration(node);
 
-    final classBody = node.parent;
-    final parent =
-        classBody is ClassBody ? classBody.parent : classBody;
+    final parent = node.thisOrAncestorOfType<ClassDeclaration>();
     final body = node.body;
 
-    if (parent is! ClassDeclaration || body is! BlockFunctionBody) {
+    if (parent == null || body is! BlockFunctionBody) {
       return;
     }
 
