@@ -14,7 +14,7 @@ Or add it manually to your `pubspec.yaml`:
 
 ```yaml
 dev_dependencies:
-  dart_code_linter: ^3.2.1
+  dart_code_linter: ^4.0.0
 ```
 
 Then run `dart pub get`.
