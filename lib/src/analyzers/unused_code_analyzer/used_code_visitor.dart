@@ -35,7 +35,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
       if (currentSource != null && mainUriString != null) {
         try {
           mainImport = currentSource.uri.resolve(mainUriString).toFilePath();
-        } catch (_) {
+        } on Object catch (_) {
           final uri = node.libraryImport?.uri;
           if (uri is DirectiveUriWithLibrary) {
             mainImport = uri.library.firstFragment.source.fullName;

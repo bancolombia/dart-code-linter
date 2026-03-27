@@ -14,11 +14,16 @@ class _Visitor extends RecursiveAstVisitor<List<_MemberInfo>> {
 
     _membersInfo.clear();
 
+    final body = node.body;
+    if (body is! BlockClassBody) {
+      return _membersInfo;
+    }
+
     final type = node.extendsClause?.superclass.type;
     final isFlutterWidget =
         isWidgetOrSubclass(type) || isWidgetStateOrSubclass(type);
 
-    for (final member in node.members) {
+    for (final member in body.members) {
       if (member is FieldDeclaration) {
         _visitFieldDeclaration(member, isFlutterWidget);
       } else if (member is ConstructorDeclaration) {
@@ -64,7 +69,11 @@ class _Visitor extends RecursiveAstVisitor<List<_MemberInfo>> {
         memberOrder: _getOrder(
           closestGroup,
           declaration.name?.lexeme ?? '',
-          declaration.returnType.name,
+          (declaration.parent?.parent as ClassDeclaration?)
+                  ?.namePart
+                  .typeName
+                  .lexeme ??
+              '',
           isFlutterWidget,
         ),
       ));

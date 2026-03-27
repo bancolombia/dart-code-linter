@@ -9,10 +9,10 @@ class _Visitor extends RecursiveAstVisitor<void> {
   void visitMethodDeclaration(MethodDeclaration node) {
     super.visitMethodDeclaration(node);
 
-    final parent = node.parent;
+    final parent = node.thisOrAncestorOfType<ClassDeclaration>();
     final body = node.body;
 
-    if (parent is! ClassDeclaration || body is! BlockFunctionBody) {
+    if (parent == null || body is! BlockFunctionBody) {
       return;
     }
 
@@ -158,7 +158,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   MethodDeclaration? _getDisposeMethodDeclaration(ClassDeclaration parent) =>
-      parent.members.firstWhereOrNull((member) =>
+      (parent.body as BlockClassBody).members.firstWhereOrNull((member) =>
               member is MethodDeclaration && member.name.lexeme == 'dispose')
           as MethodDeclaration?;
 
@@ -189,7 +189,9 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   String? _targetName(Expression? target) {
-    if (target is Identifier) return target.name;
+    if (target is Identifier) {
+      return target.name;
+    }
     if (target is PropertyAccess) {
       return '${target.target?.toSource()}.${target.propertyName.name}';
     }
@@ -198,8 +200,12 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   Element? _targetElement(Expression? target) {
-    if (target is Identifier) return target.element;
-    if (target is PropertyAccess) return target.propertyName.element;
+    if (target is Identifier) {
+      return target.element;
+    }
+    if (target is PropertyAccess) {
+      return target.propertyName.element;
+    }
 
     return null;
   }

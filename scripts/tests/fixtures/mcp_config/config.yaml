@@ -1,0 +1,5 @@
+prompts:
+  - name: sample
+    title: "Sample Prompt"
+    description: "A sample skill for testing"
+    path: prompts/sample.md

@@ -10,7 +10,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   void visitClassDeclaration(ClassDeclaration node) {
     super.visitClassDeclaration(node);
 
-    _declarations.add(_TokeInfo(node.name, node));
+    _declarations.add(_TokeInfo(node.namePart.typeName, node));
   }
 
   @override
@@ -34,7 +34,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   void visitEnumDeclaration(EnumDeclaration node) {
     super.visitEnumDeclaration(node);
 
-    _declarations.add(_TokeInfo(node.name, node));
+    _declarations.add(_TokeInfo(node.namePart.typeName, node));
   }
 
   int _compareByPrivateType(_TokeInfo a, _TokeInfo b) {

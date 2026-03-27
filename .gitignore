@@ -34,3 +34,13 @@ test/fake_test.dart
 
 # FVM Version Cache
 .fvm/
+
+# Python (scripts generator and dev tools)
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.egg-info/
+*.egg
+.eggs/
