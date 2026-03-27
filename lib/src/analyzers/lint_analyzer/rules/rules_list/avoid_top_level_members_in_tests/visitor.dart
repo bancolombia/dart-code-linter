@@ -7,7 +7,7 @@ class _Visitor extends GeneralizingAstVisitor<void> {
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {
-    if (!Identifier.isPrivateName(node.name.lexeme)) {
+    if (!Identifier.isPrivateName(node.namePart.typeName.lexeme)) {
       _declarations.add(node);
     }
   }
@@ -29,7 +29,7 @@ class _Visitor extends GeneralizingAstVisitor<void> {
 
   @override
   void visitEnumDeclaration(EnumDeclaration node) {
-    if (!Identifier.isPrivateName(node.name.lexeme)) {
+    if (!Identifier.isPrivateName(node.namePart.typeName.lexeme)) {
       _declarations.add(node);
     }
   }

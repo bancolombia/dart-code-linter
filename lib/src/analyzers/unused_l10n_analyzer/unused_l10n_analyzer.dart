@@ -200,7 +200,7 @@ class UnusedL10nAnalyzer {
   ) {
     final unusedAccessors = classElement.fields
         .where((field) => !field.isPrivate && !usages.contains(field.name))
-        .map((field) => field.isSynthetic ? field.nonSynthetic : field);
+        .map((field) => !field.isOriginDeclaration ? field.nonSynthetic : field);
 
     return unusedAccessors
         .map((accessor) => _createL10nIssue(accessor as ElementImpl, unit))
@@ -214,7 +214,8 @@ class UnusedL10nAnalyzer {
   ) {
     final unusedMethods = classElement.methods
         .where((method) => !method.isPrivate && !usages.contains(method.name))
-        .map((method) => method.isSynthetic ? method.nonSynthetic : method);
+        .map((method) =>
+            !method.isOriginDeclaration ? method.nonSynthetic : method);
 
     return unusedMethods
         .map((method) => _createL10nIssue(method as ElementImpl, unit))

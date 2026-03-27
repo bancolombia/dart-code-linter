@@ -17,8 +17,14 @@ class ScopedClassDeclaration {
 
     if (node is ExtensionDeclaration) {
       name = node.name?.lexeme;
-    } else if (node is NamedCompilationUnitMember) {
+    } else if (node is ClassDeclaration) {
+      name = node.namePart.typeName.lexeme;
+    } else if (node is MixinDeclaration) {
       name = node.name.lexeme;
+    } else if (node is EnumDeclaration) {
+      name = node.namePart.typeName.lexeme;
+    } else if (node is ExtensionTypeDeclaration) {
+      name = node.primaryConstructor.typeName.lexeme;
     }
 
     return name ?? '';

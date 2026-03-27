@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.0.0
+- **BREAKING**: Update minimum Dart SDK to >=3.5.0 (compatible with Flutter 3.24+).
+- Update `analyzer` to >=11.0.0 <12.0.0.
+- Update `analyzer_plugin` to ^0.14.5.
+- Fix element comparison for substituted elements in `always-remove-listener` rule.
+- Add Packaged AI Assets for MCP integration (`extension/mcp/`).
+
 ## 3.2.1
 - Update homepage in `pubspec.yaml`.
 
