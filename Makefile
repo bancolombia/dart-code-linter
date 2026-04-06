@@ -1,10 +1,9 @@
-.PHONY: help install-dev generate-skills generate-skills-all test format lint
+.PHONY: help install-dev generate-skills generate-skills-all test format lint test-analyzer-compat test-analyzer-compat-full
 
 VENV_PYTHON := .venv/bin/python3
 VENV_PIP := .venv/bin/pip
 VENV_PYTEST := .venv/bin/pytest
-VENV_BLACK := .venv/bin/black
-VENV_FLAKE8 := .venv/bin/flake8
+VENV_RUFF := .venv/bin/ruff
 TARGETS ?=
 
 help:
@@ -13,8 +12,10 @@ help:
 	@echo "  generate-skills      Generate assets (default: cursor). Example: make generate-skills TARGETS=all"
 	@echo "  generate-skills-all  Generate Cursor + VSCode (same as --targets all)"
 	@echo "  test            Run pytest in scripts/tests/"
-	@echo "  format          Format scripts/ with black"
-	@echo "  lint            Lint scripts/ with flake8"
+	@echo "  test-analyzer-compat      Analyze lib/ with analyzer 10.x, 11.x, 12.x"
+	@echo "  test-analyzer-compat-full Run full dart test with analyzer 10.x, 11.x, 12.x"
+	@echo "  format          Format scripts/ with ruff"
+	@echo "  lint            Lint scripts/ with ruff"
 
 install-dev:
 	python3 -m venv .venv
@@ -30,7 +31,13 @@ test:
 	$(VENV_PYTEST) scripts/tests/ -v
 
 format:
-	$(VENV_BLACK) scripts/
+	$(VENV_RUFF) format scripts/
 
 lint:
-	$(VENV_FLAKE8) scripts/ --exclude=scripts/tests/fixtures
+	$(VENV_RUFF) check scripts/
+
+test-analyzer-compat:
+	$(VENV_PYTHON) scripts/test_analyzer_compat.py --analyze-only
+
+test-analyzer-compat-full:
+	$(VENV_PYTHON) scripts/test_analyzer_compat.py
