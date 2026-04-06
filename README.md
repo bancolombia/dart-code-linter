@@ -95,11 +95,13 @@ Rules that marked with 🛠 have auto-fixes available through the IDE context me
 
 As DCL depends on the Dart `analyzer` package. The following table shows the compatible versions:
 
-| DCL Version | Analyzer Version | Dart SDK |
-|-------------|------------------|----------|
-|>=3.2.0      | ^8.0.0           | >=3.4.0 <4.0.0|
-|>=3.0.0 <3.2.0| ^7.4.1          | >=3.4.0 <4.0.0|
-|>=2.0.0      | ^6.0.0          | >=3.0.0 <4.0.0|
+| DCL Version       | Analyzer Version   | Dart SDK          |
+|-------------------|--------------------|-------------------|
+| 4.0.1             | >=10.0.0 <13.0.0   | >=3.5.0 <4.0.0   |
+| 4.0.0             | >=11.0.0 <12.0.0   | >=3.5.0 <4.0.0   |
+| >=3.2.0 <4.0.0    | ^8.0.0             | >=3.4.0 <4.0.0   |
+| >=3.0.0 <3.2.0    | ^7.4.1             | >=3.4.0 <4.0.0   |
+| >=2.0.0 <3.0.0    | ^6.0.0             | >=3.0.0 <4.0.0   |
 
 
 

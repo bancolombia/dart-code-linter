@@ -23,10 +23,21 @@ class _Visitor extends GeneralizingAstVisitor<void> {
   }
 
   @override
-  void visitLibraryIdentifier(LibraryIdentifier node) {
-    for (final component in node.components) {
-      _visitIdent(node, component.name);
+  void visitLibraryDirective(LibraryDirective node) {
+    final name = node.name;
+    if (name != null) {
+      for (final entity in name.childEntities) {
+        if (entity is SimpleIdentifier) {
+          // analyzer 10-11: LibraryIdentifier with SimpleIdentifier components
+          _visitIdent(node, entity.name);
+        } else if (entity is Token && entity.type == TokenType.IDENTIFIER) {
+          // analyzer 12: DottedName with Token list
+          _visitIdent(node, entity.lexeme);
+        }
+      }
     }
+
+    super.visitLibraryDirective(node);
   }
 
   @override
