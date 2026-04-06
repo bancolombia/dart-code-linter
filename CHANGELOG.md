@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/bancolombia/dart-code-linter/compare/v4.0.0...v4.0.1) (2026-04-06)
+
+
+### Bug Fixes
+
+* relax analyzer constraints for Flutter stable compatibility ([#228](https://github.com/bancolombia/dart-code-linter/issues/228)) ([#229](https://github.com/bancolombia/dart-code-linter/issues/229)) ([9771482](https://github.com/bancolombia/dart-code-linter/commit/9771482d7e46a42f61ab6e32798d475b43096157))
+
 ## 4.0.1
 - Relax `analyzer` constraint to >=10.0.0 <13.0.0 to support Flutter stable with `meta` 1.17.0.
 - Relax `analyzer_plugin` constraint to >=0.14.0 <0.16.0.
@@ -86,5 +93,3 @@
 
 ## 1.0.0
 - Fork: [Dart code metrics 5.7.3](https://github.com/dart-code-checker/dart-code-metrics)
-
-
