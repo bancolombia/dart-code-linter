@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.0.2
+- Update `packageVersion` constant to match pubspec version (was hardcoded as `3.2.0`).
+
 ## 4.0.1
 - Relax `analyzer` constraint to >=10.0.0 <13.0.0 to support Flutter stable with `meta` 1.17.0.
 - Relax `analyzer_plugin` constraint to >=0.14.0 <0.16.0.
