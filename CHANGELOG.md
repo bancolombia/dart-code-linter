@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.1
+- Relax `analyzer` constraint to >=10.0.0 <13.0.0 to support Flutter stable with `meta` 1.17.0.
+- Relax `analyzer_plugin` constraint to >=0.14.0 <0.16.0.
+- Add support for `analyzer` 12.x (replace removed `LibraryIdentifier` with version-agnostic approach).
+- Remove `dependency_overrides` from main and example pubspecs.
+
 ## 4.0.0
 - **BREAKING**: Update minimum Dart SDK to >=3.5.0 (compatible with Flutter 3.24+).
 - Update `analyzer` to >=11.0.0 <12.0.0.
