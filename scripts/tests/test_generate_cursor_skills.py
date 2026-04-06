@@ -149,7 +149,7 @@ def _make_fixture_config_and_prompt(tmp_path, body_content=None):
 
 def test_generate_vscode_always_on_integration(tmp_path):
     """CLI vscode_always_on produces .github/copilot-instructions.md."""
-    body = "# Sample Prompt\n\n" "You are a sample assistant.\n"
+    body = "# Sample Prompt\n\nYou are a sample assistant.\n"
     config_file = _make_fixture_config_and_prompt(tmp_path, body)
     script_path = SCRIPTS_DIR / "generate_cursor_skills.py"
     result = subprocess.run(
@@ -177,7 +177,7 @@ def test_generate_vscode_always_on_integration(tmp_path):
 
 def test_generate_vscode_file_based_integration(tmp_path):
     """CLI vscode_file_based writes .github/instructions/*.instructions.md."""
-    body = "# Sample Prompt\n\n" "You are a sample assistant.\n"
+    body = "# Sample Prompt\n\nYou are a sample assistant.\n"
     config_file = _make_fixture_config_and_prompt(tmp_path, body)
     script_path = SCRIPTS_DIR / "generate_cursor_skills.py"
     result = subprocess.run(
