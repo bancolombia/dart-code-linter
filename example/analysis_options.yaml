@@ -9,6 +9,14 @@ analyzer:
     - dart_code_linter
 
 dart_code_linter:
+  # lib/main.dart is the Flutter entry point and intentionally violates some
+  # DCL rules to demonstrate them via code comments. Excluded here to prevent
+  # pana's `dart analyze --format machine` parser from crashing on DCL rule
+  # codes that contain hyphens (e.g. PREFER-MATCH-FILE-NAME), which pana's
+  # regex does not handle.
+  rules-exclude:
+    - lib/**
+
   # Dart Code Linter supports presets. The config from a preset will be merged
   # with the config listed in this file. The config listed here has a higher priority.
   # Any rule can be simply disabled by setting `- rule-name: false`.
