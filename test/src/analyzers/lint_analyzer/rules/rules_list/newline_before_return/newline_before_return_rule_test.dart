@@ -20,6 +20,10 @@ const _tabIndentationBeforePath =
     'newline_before_return/examples/tab_indentation.before.dart';
 const _tabIndentationAfterPath =
     'newline_before_return/examples/tab_indentation.after.dart';
+const _bareReturnBeforePath =
+    'newline_before_return/examples/bare_return.before.dart';
+const _bareReturnAfterPath =
+    'newline_before_return/examples/bare_return.after.dart';
 
 void main() {
   group('NewlineBeforeReturnRule', () {
@@ -107,6 +111,37 @@ void main() {
         beforePath: _tabIndentationBeforePath,
         afterPath: _tabIndentationAfterPath,
       );
+    });
+
+    test('applies fix for bare return with no value', () async {
+      await _verifyFixtureFix(
+        beforePath: _bareReturnBeforePath,
+        afterPath: _bareReturnAfterPath,
+      );
+    });
+
+    test('fix is idempotent across multiple issues', () async {
+      final unit = await RuleTestHelper.resolveFromFile(_examplePath);
+      final issues = NewlineBeforeReturnRule().check(unit).toList();
+      expect(issues, hasLength(3));
+
+      final fixed = _applyFirstSuggestions(unit.content, issues);
+      final fixedUnit = await RuleTestHelper.createAndResolveFromFile(
+        content: fixed,
+        filePath: 'newline_before_return/examples/_idempotency_temp.dart',
+      );
+      final issuesAfterFix =
+          NewlineBeforeReturnRule().check(fixedUnit).toList();
+      expect(issuesAfterFix, isEmpty);
+    });
+
+    test('does not report when return is first statement in block', () async {
+      final unit = await RuleTestHelper.createAndResolveFromFile(
+        content: 'int f(int a) {\n  return a + 1;\n}\n',
+        filePath: 'newline_before_return/examples/_first_statement_temp.dart',
+      );
+      final issues = NewlineBeforeReturnRule().check(unit).toList();
+      expect(issues, isEmpty);
     });
   });
 }
