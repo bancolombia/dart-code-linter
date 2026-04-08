@@ -18,4 +18,5 @@ class MyWidget {
 }
 
 // top-level expression-body function — two duplicates
-String join(SomeService s) => s.display.trim() + s.display.trim(); // LINT LINT
+String join(SomeService s) =>
+    s.display.trim() + s.display.trim(); // LINT LINT
