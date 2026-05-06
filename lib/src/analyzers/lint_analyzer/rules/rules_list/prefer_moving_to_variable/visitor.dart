@@ -16,6 +16,14 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
     _nodes.addAll(visitor.duplicates);
   }
+
+  @override
+  void visitExpressionFunctionBody(ExpressionFunctionBody node) {
+    final visitor = _BlockVisitor(_duplicatesThreshold);
+    node.visitChildren(visitor);
+
+    _nodes.addAll(visitor.duplicates);
+  }
 }
 
 class _BlockVisitor extends RecursiveAstVisitor<void> {

@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.0.3
+- Fix `prefer-moving-to-variable` rule not detecting duplicate invocations in expression function bodies (`=> expr`).
+
 ## 4.0.2
 - Update `packageVersion` constant to match pubspec version (was hardcoded as `3.2.0`).
 
