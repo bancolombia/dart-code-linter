@@ -259,6 +259,11 @@ class UnnecessaryNullableAnalyzer {
     );
   }
 
+  // Argument lists are typed `List<AstNode>` (not `List<Expression>`)
+  // because analyzer 13's `ArgumentList.arguments` yields `Argument` nodes
+  // for named arguments, which are not `Expression` subclasses. Callers
+  // unwrap via [asNamedArgument] / [unwrapArgumentExpression] when they
+  // need the inner expression.
   AstNode? _findRelatedArgument(
     FormalParameter parameter,
     List<AstNode> namedArguments,
