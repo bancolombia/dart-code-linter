@@ -16,6 +16,7 @@ import '../../config_builder/models/analysis_options.dart';
 import '../../logger/logger.dart';
 import '../../reporters/models/reporter.dart';
 import '../../utils/analyzer_utils.dart';
+import '../../utils/ast_compat.dart';
 import '../../utils/dart_types_utils.dart';
 import '../../utils/flutter_types_utils.dart';
 import '../../utils/suppression.dart';
@@ -222,9 +223,9 @@ class UnnecessaryNullableAnalyzer {
 
     for (final usage in usages) {
       final namedArguments =
-          usage.arguments.whereType<NamedExpression>().toList();
+          usage.arguments.where(isNamedArgument).toList();
       final notNamedArguments =
-          usage.arguments.whereNot((arg) => arg is NamedExpression).toList();
+          usage.arguments.whereNot(isNamedArgument).toList();
 
       for (final parameter in parameters) {
         final relatedArgument = _findRelatedArgument(
@@ -258,28 +259,33 @@ class UnnecessaryNullableAnalyzer {
     );
   }
 
-  Expression? _findRelatedArgument(
+  AstNode? _findRelatedArgument(
     FormalParameter parameter,
-    List<Expression> namedArguments,
-    List<Expression> notNamedArguments,
+    List<AstNode> namedArguments,
+    List<AstNode> notNamedArguments,
     List<FormalParameter> notNamedParameters,
   ) {
     if (parameter.isNamed) {
-      return namedArguments.firstWhereOrNull((arg) =>
-          arg is NamedExpression &&
-          arg.name.label.name == parameter.name?.lexeme);
+      return namedArguments.firstWhereOrNull((arg) {
+        final named = asNamedArgument(arg);
+        return named != null && named.name == parameter.name?.lexeme;
+      });
     }
 
     final parameterIndex = notNamedParameters.indexOf(parameter);
 
     return notNamedArguments
-        .whereNot((element) => element is NamedExpression)
+        .whereNot(isNamedArgument)
         .firstWhereIndexedOrNull((index, _) => index == parameterIndex);
   }
 
-  bool _shouldMarkParameterAsNullable(Expression argument) {
-    if (argument is NamedExpression) {
-      return _shouldMarkParameterAsNullable(argument.expression);
+  bool _shouldMarkParameterAsNullable(AstNode argument) {
+    final named = asNamedArgument(argument);
+    if (named != null) {
+      return _shouldMarkParameterAsNullable(named.expression);
+    }
+    if (argument is! Expression) {
+      return false;
     }
 
     final staticType = argument.staticType;

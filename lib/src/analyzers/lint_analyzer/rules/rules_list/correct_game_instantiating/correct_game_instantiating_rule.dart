@@ -4,6 +4,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:collection/collection.dart';
 
+import '../../../../../utils/ast_compat.dart';
 import '../../../../../utils/flutter_types_utils.dart';
 import '../../../../../utils/node_utils.dart';
 import '../../../lint_utils.dart';
@@ -50,8 +51,9 @@ class CorrectGameInstantiatingRule extends FlameRule {
   List<Replacement>? _createReplacement(_InstantiationInfo info) {
     if (info.isStateless) {
       final arguments = info.node.argumentList.arguments.map((arg) {
-        if (arg is NamedExpression && arg.name.label.name == 'game') {
-          final expression = arg.expression;
+        final named = asNamedArgument(arg);
+        if (named != null && named.name == 'game') {
+          final expression = named.expression;
           if (expression is InstanceCreationExpression) {
             final name = expression.staticType?.getDisplayString();
             if (name != null) {

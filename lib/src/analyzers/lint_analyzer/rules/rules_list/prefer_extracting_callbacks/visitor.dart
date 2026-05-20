@@ -1,13 +1,13 @@
 part of 'prefer_extracting_callbacks_rule.dart';
 
 class _Visitor extends SimpleAstVisitor<void> {
-  final _expressions = <Expression>[];
+  final _expressions = <AstNode>[];
 
   final LineInfo _lineInfo;
   final Iterable<String> _ignoredArguments;
   final int? _allowedLineCount;
 
-  Iterable<Expression> get expressions => _expressions;
+  Iterable<AstNode> get expressions => _expressions;
 
   _Visitor(this._lineInfo, this._ignoredArguments, this._allowedLineCount);
 
@@ -30,13 +30,13 @@ class _Visitor extends SimpleAstVisitor<void> {
 }
 
 class _InstanceCreationVisitor extends RecursiveAstVisitor<void> {
-  final _expressions = <Expression>[];
+  final _expressions = <AstNode>[];
 
   final LineInfo _lineInfo;
   final Iterable<String> _ignoredArguments;
   final int? _allowedLineCount;
 
-  Iterable<Expression> get expressions => _expressions;
+  Iterable<AstNode> get expressions => _expressions;
 
   _InstanceCreationVisitor(
     this._lineInfo,
@@ -49,8 +49,7 @@ class _InstanceCreationVisitor extends RecursiveAstVisitor<void> {
     super.visitInstanceCreationExpression(node);
 
     for (final argument in node.argumentList.arguments) {
-      final expression =
-          argument is NamedExpression ? argument.expression : argument;
+      final expression = unwrapArgumentExpression(argument);
 
       if (_isNotIgnored(argument) &&
           expression is FunctionExpression &&
@@ -87,9 +86,10 @@ class _InstanceCreationVisitor extends RecursiveAstVisitor<void> {
             );
   }
 
-  bool _isNotIgnored(Expression argument) =>
-      argument is! NamedExpression ||
-      !_ignoredArguments.contains(argument.name.label.name);
+  bool _isNotIgnored(AstNode argument) {
+    final named = asNamedArgument(argument);
+    return named == null || !_ignoredArguments.contains(named.name);
+  }
 
   bool _isLongEnough(Expression expression) {
     final allowedLineCount = _allowedLineCount;

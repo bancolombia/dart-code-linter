@@ -5,6 +5,7 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/type.dart';
 
+import '../../../../../utils/ast_compat.dart';
 import '../../../../../utils/dart_types_utils.dart';
 import '../../../../../utils/flutter_types_utils.dart';
 import '../../../../../utils/node_utils.dart';

@@ -18,7 +18,10 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   bool _hasShrinkWrap(InstanceCreationExpression node) =>
       node.argumentList.arguments.firstWhereOrNull(
-        (arg) => arg is NamedExpression && arg.name.label.name == 'shrinkWrap',
+        (arg) {
+          final named = asNamedArgument(arg);
+          return named != null && named.name == 'shrinkWrap';
+        },
       ) !=
       null;
 

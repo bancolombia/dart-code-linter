@@ -87,13 +87,13 @@ class _InvocationsVisitor extends RecursiveAstVisitor<void> {
   bool _isInsideBuilder(MethodInvocation node) {
     final grandParent = node.parent?.parent;
     if (grandParent is FunctionExpression &&
-        grandParent.parent is! NamedExpression) {
+        !isNamedArgument(grandParent.parent)) {
       return grandParent.declaredFragment?.enclosingFragment?.name == 'build';
     }
 
-    final expression = node.thisOrAncestorOfType<NamedExpression>();
-    if (expression is NamedExpression) {
-      final type = expression.staticType;
+    final ancestor = _namedArgumentAncestor(node);
+    if (ancestor != null) {
+      final type = ancestor.expression.staticType;
       if (type is FunctionType) {
         return type.returnType is InterfaceType &&
             _hasWidgetType(type.returnType, _allowNullable);
@@ -101,6 +101,18 @@ class _InvocationsVisitor extends RecursiveAstVisitor<void> {
     }
 
     return false;
+  }
+
+  NamedArgumentView? _namedArgumentAncestor(AstNode node) {
+    var current = node.parent;
+    while (current != null) {
+      final view = asNamedArgument(current);
+      if (view != null) {
+        return view;
+      }
+      current = current.parent;
+    }
+    return null;
   }
 }
 

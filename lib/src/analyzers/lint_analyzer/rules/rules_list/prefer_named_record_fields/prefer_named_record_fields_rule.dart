@@ -3,6 +3,7 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 
+import '../../../../../utils/ast_compat.dart';
 import '../../../../../utils/node_utils.dart';
 import '../../../lint_utils.dart';
 import '../../../models/internal_resolved_unit_result.dart';
@@ -90,7 +91,7 @@ class PreferNamedRecordFieldsRule extends DartRule {
     RecordLiteral recordLiteral,
   ) {
     final positionalFields = recordLiteral.fields
-        .where((field) => field is! NamedExpression)
+        .where((field) => !isNamedArgument(field))
         .toList();
 
     if (positionalFields.isEmpty) {
@@ -111,7 +112,7 @@ class PreferNamedRecordFieldsRule extends DartRule {
 
     final namedFieldsStr = namedFields.join(', ');
     final existingNamed = recordLiteral.fields
-        .whereType<NamedExpression>()
+        .where(isNamedArgument)
         .map((field) => field.toSource())
         .join(', ');
 

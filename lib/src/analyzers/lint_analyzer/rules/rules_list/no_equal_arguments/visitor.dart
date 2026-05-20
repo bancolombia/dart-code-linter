@@ -1,12 +1,12 @@
 part of 'no_equal_arguments_rule.dart';
 
 class _Visitor extends RecursiveAstVisitor<void> {
-  final _arguments = <Expression>[];
+  final _arguments = <AstNode>[];
 
   final Iterable<String> _ignoredParameters;
   final Iterable<String> _ignoredArguments;
 
-  Iterable<Expression> get arguments => _arguments;
+  Iterable<AstNode> get arguments => _arguments;
 
   _Visitor(this._ignoredParameters, this._ignoredArguments);
 
@@ -31,25 +31,36 @@ class _Visitor extends RecursiveAstVisitor<void> {
     _visitArguments(node.argumentList.arguments);
   }
 
-  void _visitArguments(Iterable<Expression> arguments) {
+  void _visitArguments(Iterable<AstNode> arguments) {
     final notIgnoredArguments = arguments.whereNot(_isIgnored).toList();
 
     for (final argument in notIgnoredArguments) {
       final lastAppearance = notIgnoredArguments.lastWhere((arg) {
-        if (argument is NamedExpression &&
-            arg is NamedExpression &&
-            argument.expression is! Literal &&
-            arg.expression is! Literal) {
-          return haveSameParameterType(argument.expression, arg.expression) &&
-              argument.expression.toString() == arg.expression.toString();
+        final argNamed = asNamedArgument(argument);
+        final otherNamed = asNamedArgument(arg);
+        if (argNamed != null &&
+            otherNamed != null &&
+            argNamed.expression is! Literal &&
+            otherNamed.expression is! Literal) {
+          return haveSameParameterType(
+                argNamed.expression,
+                otherNamed.expression,
+              ) &&
+              argNamed.expression.toString() == otherNamed.expression.toString();
         }
 
-        if (_bothLiterals(argument, arg)) {
-          return argument == arg;
+        final argExpr = unwrapArgumentExpression(argument);
+        final otherExpr = unwrapArgumentExpression(arg);
+        if (argExpr == null || otherExpr == null) {
+          return false;
         }
 
-        return haveSameParameterType(argument, arg) &&
-            argument.toString() == arg.toString();
+        if (_bothLiterals(argExpr, otherExpr)) {
+          return argExpr == otherExpr;
+        }
+
+        return haveSameParameterType(argExpr, otherExpr) &&
+            argExpr.toString() == otherExpr.toString();
       });
 
       if (argument != lastAppearance) {
@@ -65,11 +76,12 @@ class _Visitor extends RecursiveAstVisitor<void> {
           right is PrefixExpression &&
           right.operand is Literal);
 
-  bool _isIgnored(Expression arg) {
-    if (arg is NamedExpression) {
-      final expression = arg.expression;
+  bool _isIgnored(AstNode arg) {
+    final named = asNamedArgument(arg);
+    if (named != null) {
+      final expression = named.expression;
 
-      return _ignoredParameters.contains(arg.name.label.name) ||
+      return _ignoredParameters.contains(named.name) ||
           (expression is SimpleIdentifier &&
               _ignoredArguments.contains(expression.name));
     }

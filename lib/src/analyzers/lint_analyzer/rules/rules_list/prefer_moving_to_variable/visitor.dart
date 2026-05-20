@@ -174,8 +174,7 @@ class _BlockVisitor extends RecursiveAstVisitor<void> {
       visitedInvocation is MethodInvocation &&
       node is MethodInvocation &&
       visitedInvocation.argumentList.arguments.any((argument) {
-        final expression =
-            argument is NamedExpression ? argument.expression : argument;
+        final expression = unwrapArgumentExpression(argument);
 
         if (expression is SimpleIdentifier) {
           final element = expression.element;

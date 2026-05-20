@@ -22,11 +22,16 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   bool _withEmptyDescription(ArgumentList args) =>
-      args.arguments.any((argument) =>
-          argument is NamedExpression &&
-          argument.name.label.name == 'desc' &&
-          argument.expression is SimpleStringLiteral &&
-          (argument.expression as SimpleStringLiteral).value.isEmpty) ||
-      args.arguments.every((argument) =>
-          argument is! NamedExpression || argument.name.label.name != 'desc');
+      args.arguments.any((argument) {
+        final named = asNamedArgument(argument);
+        if (named == null || named.name != 'desc') {
+          return false;
+        }
+        final expr = named.expression;
+        return expr is SimpleStringLiteral && expr.value.isEmpty;
+      }) ||
+      args.arguments.every((argument) {
+        final named = asNamedArgument(argument);
+        return named == null || named.name != 'desc';
+      });
 }

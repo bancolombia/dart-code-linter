@@ -17,7 +17,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
       var isAllConst = true;
 
       for (final argument in expression.argumentList.arguments) {
-        final arg = (argument as NamedExpression).expression;
+        final arg = asNamedArgument(argument)?.expression ?? argument;
         if (arg is Literal) {
           continue;
         } else if (arg is MethodInvocation ||

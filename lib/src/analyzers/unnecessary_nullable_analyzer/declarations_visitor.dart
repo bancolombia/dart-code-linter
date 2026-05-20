@@ -4,6 +4,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 
+import '../../utils/ast_compat.dart';
 import '../../utils/dart_types_utils.dart';
 import '../../utils/node_utils.dart';
 import '../../utils/suppression.dart';
@@ -78,8 +79,7 @@ class DeclarationsVisitor extends RecursiveAstVisitor<void> {
                 (isNullableType(type) &&
                     (!parameter.isOptional ||
                         parameter.isOptional && parameter.isRequired)) ||
-            (parameter is DefaultFormalParameter &&
-                parameter.defaultValue == null);
+            (parameter.isOptional && defaultParameterValue(parameter) == null);
       });
 
   void _getDeclarationElement(
