@@ -266,6 +266,136 @@ void main() {
         },
       );
 
+      test(
+        'should suppress function metric for the targeted function only when '
+        'an inline `// ignore:` comment is present',
+        () async {
+          final suppressionFolders = [
+            p.normalize(
+              File('test/resources/metric_suppression').absolute.path,
+            ),
+          ];
+
+          final config = _createConfig(
+            metrics: {'cyclomatic-complexity': 2},
+          );
+
+          final result = await analyzer.runCliAnalysis(
+            suppressionFolders,
+            rootDirectory,
+            config,
+          );
+
+          final report =
+              reportForFile(result, 'inline_function_suppression_example.dart');
+          final levels = {
+            for (final entry in report.functions.entries)
+              entry.key: {
+                for (final m in entry.value.metrics) m.metricsId: m.level,
+              },
+          };
+
+          expect(
+            levels['suppressedAbove']?['cyclomatic-complexity'],
+            equals(MetricValueLevel.none),
+          );
+          expect(
+            levels['suppressedTrailing']?['cyclomatic-complexity'],
+            equals(MetricValueLevel.none),
+          );
+          expect(
+            levels['notSuppressed']?['cyclomatic-complexity'],
+            isNot(equals(MetricValueLevel.none)),
+          );
+        },
+      );
+
+      test(
+        'should suppress class metric for the targeted class only when '
+        'an inline `// ignore:` comment is present',
+        () async {
+          final suppressionFolders = [
+            p.normalize(
+              File('test/resources/metric_suppression').absolute.path,
+            ),
+          ];
+
+          final config = _createConfig(
+            metrics: {'number-of-methods': 2},
+          );
+
+          final result = await analyzer.runCliAnalysis(
+            suppressionFolders,
+            rootDirectory,
+            config,
+          );
+
+          final report =
+              reportForFile(result, 'inline_class_suppression_example.dart');
+          final levels = {
+            for (final entry in report.classes.entries)
+              entry.key: {
+                for (final m in entry.value.metrics) m.metricsId: m.level,
+              },
+          };
+
+          expect(
+            levels['SuppressedAbove']?['number-of-methods'],
+            equals(MetricValueLevel.none),
+          );
+          expect(
+            levels['SuppressedTrailing']?['number-of-methods'],
+            equals(MetricValueLevel.none),
+          );
+          expect(
+            levels['NotSuppressed']?['number-of-methods'],
+            isNot(equals(MetricValueLevel.none)),
+          );
+        },
+      );
+
+      test(
+        'inline `// ignore:` for one metric must not suppress sibling metrics',
+        () async {
+          final suppressionFolders = [
+            p.normalize(
+              File('test/resources/metric_suppression').absolute.path,
+            ),
+          ];
+
+          final config = _createConfig(
+            metrics: {
+              'cyclomatic-complexity': 2,
+              'maximum-nesting-level': 2,
+            },
+          );
+
+          final result = await analyzer.runCliAnalysis(
+            suppressionFolders,
+            rootDirectory,
+            config,
+          );
+
+          final report = reportForFile(
+            result,
+            'inline_selective_suppression_example.dart',
+          );
+          final functionMetric = report.functions.values.first;
+          final metricsMap = {
+            for (final m in functionMetric.metrics) m.metricsId: m.level,
+          };
+
+          expect(
+            metricsMap['cyclomatic-complexity'],
+            equals(MetricValueLevel.none),
+          );
+          expect(
+            metricsMap['maximum-nesting-level'],
+            isNot(equals(MetricValueLevel.none)),
+          );
+        },
+      );
+
       test('should report no-magic-number rule', () async {
         final config = _createConfig(rules: {'no-magic-number': {}});
 
