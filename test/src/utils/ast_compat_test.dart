@@ -1,7 +1,6 @@
 import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:dart_code_linter/src/utils/ast_compat.dart';
 import 'package:test/test.dart';
 
@@ -170,6 +169,45 @@ void main() {
       final param = _firstOfType<FormalParameter>(unit);
 
       expect(defaultParameterValue(param), isNull);
+    });
+  });
+
+  group('runtime-type allowlist invariant', () {
+    test('structural shape and runtime-type allowlist agree on all nodes', () {
+      final unit = _parse('''
+        void main() {
+          foo(1, named: 2, other: bar());
+          baz(answer: 42);
+          final r = (1, 2, answer: 42, name: 'x');
+          outer: for (;;) { break outer; }
+          inner: for (;;) { continue inner; }
+          final m = {'k': 'v', 'x': 1};
+          final c = true ? 1 : 2;
+        }
+
+        void f(int a, {int count = 7, String? value, List<int>? xs}) {}
+        void g([String? s = 'x', int n = 1]) {}
+      ''');
+
+      final mismatches = <String>[];
+      _walk(unit, (node) {
+        final structureMatches = debugMatchesNamedArgumentShape(node);
+        final inAllowlist =
+            debugNamedArgumentRuntimeTypes.contains(node.runtimeType.toString());
+        if (structureMatches != inAllowlist) {
+          mismatches.add(
+            '${node.runtimeType}: structure=$structureMatches '
+            'allowlist=$inAllowlist source="${node.toSource()}"',
+          );
+        }
+      });
+
+      expect(
+        mismatches,
+        isEmpty,
+        reason: 'Update _namedArgumentRuntimeTypes in ast_compat.dart. '
+            'Mismatches: $mismatches',
+      );
     });
   });
 
