@@ -24,10 +24,14 @@ class PreferMovingToVariableRule extends DartRule {
       'Prefer moving repeated invocations to variable and use it instead.';
 
   final int? _duplicatesThreshold;
+  final Iterable<String> _ignoredInvocations;
+  final Iterable<String> _ignoredTargets;
 
   PreferMovingToVariableRule([Map<String, Object> config = const {}])
       : _duplicatesThreshold =
             _ConfigParser.parseAllowedDuplicatedChains(config),
+        _ignoredInvocations = _ConfigParser.parseIgnoredInvocations(config),
+        _ignoredTargets = _ConfigParser.parseIgnoredTargets(config),
         super(
           id: ruleId,
           severity: readSeverity(config, Severity.warning),
@@ -39,13 +43,16 @@ class PreferMovingToVariableRule extends DartRule {
   Map<String, Object?> toJson() {
     final json = super.toJson();
     json[_ConfigParser._allowedDuplicatedChains] = _duplicatesThreshold;
+    json[_ConfigParser._ignoredInvocations] = _ignoredInvocations.toList();
+    json[_ConfigParser._ignoredTargets] = _ignoredTargets.toList();
 
     return json;
   }
 
   @override
   Iterable<Issue> check(InternalResolvedUnitResult source) {
-    final visitor = _Visitor(_duplicatesThreshold);
+    final visitor =
+        _Visitor(_duplicatesThreshold, _ignoredInvocations, _ignoredTargets);
 
     source.unit.visitChildren(visitor);
 
