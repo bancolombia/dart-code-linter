@@ -4,14 +4,18 @@ class _Visitor extends RecursiveAstVisitor<void> {
   final _nodes = <AstNode>[];
 
   final int? _duplicatesThreshold;
+  final Iterable<String> _ignoredInvocations;
+  final Iterable<String> _ignoredTargets;
 
   Iterable<AstNode> get nodes => _nodes;
 
-  _Visitor(this._duplicatesThreshold);
+  _Visitor(this._duplicatesThreshold, this._ignoredInvocations,
+      this._ignoredTargets);
 
   @override
   void visitBlockFunctionBody(BlockFunctionBody node) {
-    final visitor = _BlockVisitor(_duplicatesThreshold);
+    final visitor = _BlockVisitor(
+        _duplicatesThreshold, _ignoredInvocations, _ignoredTargets,);
     node.visitChildren(visitor);
 
     _nodes.addAll(visitor.duplicates);
@@ -19,7 +23,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitExpressionFunctionBody(ExpressionFunctionBody node) {
-    final visitor = _BlockVisitor(_duplicatesThreshold);
+    final visitor = _BlockVisitor(
+        _duplicatesThreshold, _ignoredInvocations, _ignoredTargets,);
     node.visitChildren(visitor);
 
     _nodes.addAll(visitor.duplicates);
@@ -32,6 +37,8 @@ class _BlockVisitor extends RecursiveAstVisitor<void> {
   final Map<String, Set<AstNode>> _duplicates = {};
 
   final int? _duplicatesThreshold;
+  final Iterable<String> _ignoredInvocations;
+  final Iterable<String> _ignoredTargets;
 
   Set<AstNode> get duplicates =>
       _duplicates.entries.fold(<AstNode>{}, (previousValue, element) {
@@ -44,10 +51,18 @@ class _BlockVisitor extends RecursiveAstVisitor<void> {
         return previousValue;
       });
 
-  _BlockVisitor(this._duplicatesThreshold);
+  _BlockVisitor(this._duplicatesThreshold, this._ignoredInvocations,
+      this._ignoredTargets);
 
   @override
   void visitPropertyAccess(PropertyAccess node) {
+    if (_ignoredInvocations.contains(node.propertyName.name)) {
+      return;
+    }
+    if (_isIgnoredTarget(node.realTarget)) {
+      return;
+    }
+
     final target = node.target;
     if (target == null) {
       return;
@@ -74,10 +89,30 @@ class _BlockVisitor extends RecursiveAstVisitor<void> {
       return;
     }
 
+    if (_ignoredInvocations.contains(node.methodName.name)) {
+      return;
+    }
+    if (_isIgnoredTarget(node.realTarget)) {
+      return;
+    }
+
     final hasDuplicates = _checkForDuplicates(node, node.target);
     if (!hasDuplicates) {
       super.visitMethodInvocation(node);
     }
+  }
+
+  bool _isIgnoredTarget(Expression? target) {
+    if (target == null || _ignoredTargets.isEmpty) {
+      return false;
+    }
+    final type = target.staticType;
+    if (type == null) {
+      return false;
+    }
+    final typeName = type.getDisplayString().replaceAll(RegExp('<.*>'), '');
+
+    return _ignoredTargets.contains(typeName);
   }
 
   bool _checkForDuplicates(AstNode node, Expression? target) {
