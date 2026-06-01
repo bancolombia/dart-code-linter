@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/syntactic_entity.dart';
 import 'package:path/path.dart';
 
 import '../../config_builder/config_builder.dart';
@@ -429,6 +431,8 @@ class LintAnalyzer {
 
     for (final classDeclaration in visitor.classes) {
       final metrics = <MetricValue>[];
+      final declarationLine =
+          _declarationLine(classDeclaration.declaration, ignores);
 
       for (final metric in config.classesMetrics) {
         if (metric.supports(
@@ -446,7 +450,9 @@ class LintAnalyzer {
             metrics,
           );
           metrics.add(
-            ignores.isSuppressed(metric.id) ? computed.suppressed() : computed,
+            ignores.isSuppressedAt(metric.id, declarationLine)
+                ? computed.suppressed()
+                : computed,
           );
         }
       }
@@ -512,6 +518,8 @@ class LintAnalyzer {
 
     for (final function in visitor.functions) {
       final metrics = <MetricValue>[];
+      final declarationLine =
+          _declarationLine(function.declaration, ignores);
 
       for (final metric in config.methodsMetrics) {
         if (metric.supports(
@@ -529,7 +537,9 @@ class LintAnalyzer {
             metrics,
           );
           metrics.add(
-            ignores.isSuppressed(metric.id) ? computed.suppressed() : computed,
+            ignores.isSuppressedAt(metric.id, declarationLine)
+                ? computed.suppressed()
+                : computed,
           );
         }
       }
@@ -542,6 +552,14 @@ class LintAnalyzer {
     }
 
     return functionRecords;
+  }
+
+  int _declarationLine(SyntacticEntity declaration, Suppression ignores) {
+    final offset = declaration is AnnotatedNode
+        ? declaration.firstTokenAfterCommentAndMetadata.offset
+        : declaration.offset;
+
+    return ignores.lineInfo.getLocation(offset).lineNumber;
   }
 
   bool _isSupported(FileResult result) =>
