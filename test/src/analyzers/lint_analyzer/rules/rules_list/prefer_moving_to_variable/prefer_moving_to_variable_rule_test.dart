@@ -23,6 +23,18 @@ const _providerExamplePath =
     'prefer_moving_to_variable/examples/provider_example.dart';
 const _whileExamplePath =
     'prefer_moving_to_variable/examples/while_example.dart';
+const _ignoredInvocationsExamplePath =
+    'prefer_moving_to_variable/examples/ignored_invocations_example.dart';
+const _ignoredTargetsExamplePath =
+    'prefer_moving_to_variable/examples/ignored_targets_example.dart';
+const _expressionBodyExamplePath =
+    'prefer_moving_to_variable/examples/expression_body_example.dart';
+const _expressionBodyCrossScopeExamplePath =
+    'prefer_moving_to_variable/examples/expression_body_cross_scope_example.dart';
+const _expressionBodyLambdaExamplePath =
+    'prefer_moving_to_variable/examples/expression_body_lambda_example.dart';
+const _expressionBodyNestedLambdaExamplePath =
+    'prefer_moving_to_variable/examples/expression_body_nested_lambda_example.dart';
 
 void main() {
   group('PreferMovingToVariableRule', () {
@@ -254,6 +266,184 @@ void main() {
     test('reports no issues for while', () async {
       final unit = await RuleTestHelper.resolveFromFile(_whileExamplePath);
       final issues = PreferMovingToVariableRule().check(unit);
+
+      RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    test('reports issues for ignored_invocations example without config',
+        () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_ignoredInvocationsExamplePath);
+      final issues = PreferMovingToVariableRule().check(unit);
+
+      RuleTestHelper.verifyIssues(
+        issues: issues,
+        locationTexts: ['16.h', '16.h', '8.r', '8.r'],
+        messages: List.filled(
+          4,
+          'Prefer moving repeated invocations to variable and use it instead.',
+        ),
+      );
+    });
+
+    test('reports no issues when invocations are ignored', () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_ignoredInvocationsExamplePath);
+      final issues = PreferMovingToVariableRule({
+        'ignored-invocations': ['h', 'r'],
+      }).check(unit);
+
+      RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    test('reports issues for ignored_targets example without config', () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_ignoredTargetsExamplePath);
+      final issues = PreferMovingToVariableRule().check(unit);
+
+      RuleTestHelper.verifyIssues(
+        issues: issues,
+        locationTexts: [
+          "AppTheme.of('compact')",
+          "AppTheme.of('compact')",
+          'ServiceLocator.instance.get<AuthService>()',
+          'ServiceLocator.instance.get<AuthService>()',
+        ],
+        messages: List.filled(
+          4,
+          'Prefer moving repeated invocations to variable and use it instead.',
+        ),
+      );
+    });
+
+    test(
+      'reports only service-locator issues when AppTheme target is ignored',
+      () async {
+        final unit =
+            await RuleTestHelper.resolveFromFile(_ignoredTargetsExamplePath);
+        final issues = PreferMovingToVariableRule({
+          'ignored-targets': ['AppTheme'],
+        }).check(unit);
+
+        RuleTestHelper.verifyIssues(
+          issues: issues,
+          locationTexts: [
+            'ServiceLocator.instance.get<AuthService>()',
+            'ServiceLocator.instance.get<AuthService>()',
+          ],
+          messages: List.filled(
+            2,
+            'Prefer moving repeated invocations to variable and use it instead.',
+          ),
+        );
+      },
+    );
+
+    test(
+      'reports only AppTheme issues when ServiceLocator target is ignored',
+      () async {
+        final unit =
+            await RuleTestHelper.resolveFromFile(_ignoredTargetsExamplePath);
+        final issues = PreferMovingToVariableRule({
+          'ignored-targets': ['ServiceLocator'],
+        }).check(unit);
+
+        RuleTestHelper.verifyIssues(
+          issues: issues,
+          locationTexts: [
+            "AppTheme.of('compact')",
+            "AppTheme.of('compact')",
+          ],
+          messages: List.filled(
+            2,
+            'Prefer moving repeated invocations to variable and use it instead.',
+          ),
+        );
+      },
+    );
+
+    test('reports no issues when all target classes are ignored', () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_ignoredTargetsExamplePath);
+      final issues = PreferMovingToVariableRule({
+        'ignored-targets': ['AppTheme', 'ServiceLocator'],
+      }).check(unit);
+
+      RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    test('reports issues in expression function bodies', () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_expressionBodyExamplePath);
+      final issues = PreferMovingToVariableRule().check(unit);
+
+      RuleTestHelper.verifyIssues(
+        issues: issues,
+        startLines: [12, 12, 21, 21],
+        startColumns: [7, 32, 31, 50],
+        locationTexts: [
+          'service.display.trim()',
+          'service.display.trim()',
+          's.display.trim()',
+          's.display.trim()',
+        ],
+        messages: [
+          'Prefer moving repeated invocations to variable and use it instead.',
+          'Prefer moving repeated invocations to variable and use it instead.',
+          'Prefer moving repeated invocations to variable and use it instead.',
+          'Prefer moving repeated invocations to variable and use it instead.',
+        ],
+      );
+    });
+
+    test('reports no issues across different expression function bodies',
+        () async {
+      final unit = await RuleTestHelper.resolveFromFile(
+        _expressionBodyCrossScopeExamplePath,
+      );
+      final issues = PreferMovingToVariableRule().check(unit);
+
+      RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    test('reports issues in lambda expression bodies', () async {
+      final unit = await RuleTestHelper.resolveFromFile(
+        _expressionBodyLambdaExamplePath,
+      );
+      final issues = PreferMovingToVariableRule().check(unit);
+
+      RuleTestHelper.verifyIssues(
+        issues: issues,
+        startLines: [7, 7],
+        startColumns: [24, 43],
+        locationTexts: [
+          's.display.trim()',
+          's.display.trim()',
+        ],
+        messages: [
+          'Prefer moving repeated invocations to variable and use it instead.',
+          'Prefer moving repeated invocations to variable and use it instead.',
+        ],
+      );
+    });
+
+    test(
+        'reports no issues for same expression in outer body and nested lambda',
+        () async {
+      final unit = await RuleTestHelper.resolveFromFile(
+        _expressionBodyNestedLambdaExamplePath,
+      );
+      final issues = PreferMovingToVariableRule().check(unit);
+
+      RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    test('respects custom config threshold for expression function bodies',
+        () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_expressionBodyExamplePath);
+      final config = {'allowed-duplicated-chains': 3};
+      final issues = PreferMovingToVariableRule(config).check(unit);
 
       RuleTestHelper.verifyNoIssues(issues);
     });

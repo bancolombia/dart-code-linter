@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.0.5
+- Add `ignored-invocations` and `ignored-targets` options to `prefer-moving-to-variable` rule to suppress reports for specific method/getter names or target receivers.
+
+## 4.0.4
+- Honor per-line `// ignore: <metric-id>` comments for function- and class-level metric violations (both leading and trailing forms). File-level metrics keep their `// ignore_for_file:` behavior.
+
+## 4.0.3
+- Fix `prefer-moving-to-variable` rule not detecting duplicate invocations in expression function bodies (`=> expr`).
+
 ## 4.0.2
 - Update `packageVersion` constant to match pubspec version (was hardcoded as `3.2.0`).
 
