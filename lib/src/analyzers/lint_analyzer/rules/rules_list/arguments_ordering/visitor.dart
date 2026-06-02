@@ -40,18 +40,18 @@ class _Visitor extends RecursiveAstVisitor<void> {
     List<FormalParameterElement> parameters,
   ) {
     final sortedArguments = argumentList.arguments.sorted((a, b) {
-      if (a is! NamedExpression && b is! NamedExpression) {
+      if (a is! NamedArgument && b is! NamedArgument) {
         return 0;
       }
-      if (a is NamedExpression && b is! NamedExpression) {
+      if (a is NamedArgument && b is! NamedArgument) {
         return 1;
       }
-      if (a is! NamedExpression && b is NamedExpression) {
+      if (a is! NamedArgument && b is NamedArgument) {
         return -1;
       }
-      if (a is NamedExpression && b is NamedExpression) {
-        final aName = a.name.label.name;
-        final bName = b.name.label.name;
+      if (a is NamedArgument && b is NamedArgument) {
+        final aName = a.name.lexeme;
+        final bName = b.name.lexeme;
 
         if (aName == bName) {
           return 0;
@@ -87,10 +87,10 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   static int _parameterIndex(
     List<FormalParameterElement> parameters,
-    NamedExpression argumentExpression,
+    NamedArgument argumentExpression,
   ) =>
       parameters.indexWhere(
-        (parameter) => parameter.name == argumentExpression.name.label.name,
+        (parameter) => parameter.name == argumentExpression.name.lexeme,
       );
 }
 

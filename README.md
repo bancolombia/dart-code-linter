@@ -18,10 +18,37 @@ dart pub add --dev dart_code_linter
 
 ## Basic configuration
 
-Add configuration to `analysis_options.yaml` and reload IDE to allow the analyzer to discover the plugin config.
+Add configuration to `analysis_options.yaml` and reload your IDE to allow the analyzer to discover the plugin.
 
+### Dart ≥ 3.9 (recommended)
 
-### Basic config example
+Use the new top-level `plugins:` key introduced in Dart 3.9 / `analysis_server_plugin`:
+
+```yaml title="analysis_options.yaml"
+plugins:
+  dart_code_linter:
+    diagnostics:
+      avoid-dynamic: true
+      avoid-passing-async-when-sync-expected: true
+      avoid-redundant-async: true
+      avoid-unnecessary-type-assertions: true
+      avoid-unnecessary-type-casts: true
+      avoid-unrelated-type-assertions: true
+      avoid-unused-parameters: true
+      avoid-nested-conditional-expressions: true
+      newline-before-return: true
+      no-boolean-literal-compare: true
+      no-empty-block: true
+      prefer-trailing-comma: true
+      prefer-conditional-expressions: true
+      no-equal-then-else: true
+      prefer-moving-to-variable: true
+      prefer-match-file-name: true
+```
+
+### Dart < 3.9 (legacy)
+
+For projects using an older Dart SDK, use the `analyzer.plugins` configuration:
 
 ```yaml title="analysis_options.yaml"
 analyzer:
@@ -50,11 +77,9 @@ dart_code_linter:
 
 ### Basic config with metrics
 
-```yaml title="analysis_options.yaml"
-analyzer:
-  plugins:
-    - dart_code_linter
+Metrics are available via the CLI and are configured using the legacy `dart_code_linter:` section regardless of which plugin integration you use:
 
+```yaml title="analysis_options.yaml"
 dart_code_linter:
   metrics:
     cyclomatic-complexity: 20
@@ -62,23 +87,6 @@ dart_code_linter:
     maximum-nesting-level: 5
   metrics-exclude:
     - test/**
-  rules:
-    - avoid-dynamic
-    - avoid-passing-async-when-sync-expected
-    - avoid-redundant-async
-    - avoid-unnecessary-type-assertions
-    - avoid-unnecessary-type-casts
-    - avoid-unrelated-type-assertions
-    - avoid-unused-parameters
-    - avoid-nested-conditional-expressions
-    - newline-before-return
-    - no-boolean-literal-compare
-    - no-empty-block
-    - prefer-trailing-comma
-    - prefer-conditional-expressions
-    - no-equal-then-else
-    - prefer-moving-to-variable
-    - prefer-match-file-name
 ```
 
 ## Usage

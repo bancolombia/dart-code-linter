@@ -53,11 +53,10 @@ class _Visitor extends GeneralizingAstVisitor<void> {
     }
   }
 
-  int _getCountableArgumentsLength(List<Expression> arguments) =>
+  int _getCountableArgumentsLength(List<Argument> arguments) =>
       arguments.where(
         (argument) {
-          final expression =
-              argument is NamedExpression ? argument.expression : argument;
+          final expression = argument.argumentExpression;
 
           return expression is! NullLiteral &&
               !isRenderObjectElementOrSubclass(expression.staticType);
@@ -82,7 +81,7 @@ class _MethodsVisitor extends GeneralizingAstVisitor<void> {
 }
 
 class _CreationVisitor extends RecursiveAstVisitor<void> {
-  final arguments = <Expression>[];
+  final arguments = <Argument>[];
 
   @override
   void visitReturnStatement(ReturnStatement node) {

@@ -25,10 +25,10 @@ class _Visitor extends IntlBaseVisitor {
   ) {
     final arguments = methodInvocation.argumentList.arguments;
     final argsArgument = arguments
-        .whereType<NamedExpression>()
-        .where((argument) => argument.name.label.name == 'args')
+        .whereType<NamedArgument>()
+        .where((argument) => argument.name.lexeme == 'args')
         .firstOrNull
-        ?.expression
+        ?.argumentExpression
         .as<ListLiteral>();
 
     final parameterSimpleIdentifiers =

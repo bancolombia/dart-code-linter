@@ -26,8 +26,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
                 methodName == _constructorLargeName ||
                 methodName == _constructorSmallName)) {
       if (!node.argumentList.arguments.any((arg) =>
-          arg is NamedExpression &&
-          arg.name.label.name == _heroTagPropertyName)) {
+          arg is NamedArgument && arg.name.lexeme == _heroTagPropertyName)) {
         _invocations.add(node);
       }
     }

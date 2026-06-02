@@ -55,11 +55,11 @@ class _GameWidgetInstantiatingVisitor extends RecursiveAstVisitor<void> {
         node.constructorName.name?.name != 'controlled') {
       final gameArgument = node.argumentList.arguments.firstWhereOrNull(
         (argument) =>
-            argument is NamedExpression && argument.name.label.name == 'game',
+            argument is NamedArgument && argument.name.lexeme == 'game',
       );
 
-      if (gameArgument is NamedExpression &&
-          gameArgument.expression is InstanceCreationExpression) {
+      if (gameArgument is NamedArgument &&
+          gameArgument.argumentExpression is InstanceCreationExpression) {
         wrongInstantiation = node;
       }
     }

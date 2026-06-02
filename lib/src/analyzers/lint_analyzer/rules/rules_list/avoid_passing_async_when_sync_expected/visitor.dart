@@ -1,9 +1,9 @@
 part of 'avoid_passing_async_when_sync_expected_rule.dart';
 
 class _Visitor extends RecursiveAstVisitor<void> {
-  final _invalidArguments = <Expression>[];
+  final _invalidArguments = <Argument>[];
 
-  Iterable<Expression> get invalidArguments => _invalidArguments;
+  Iterable<Argument> get invalidArguments => _invalidArguments;
 
   @override
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
@@ -25,7 +25,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   void _handleInvalidArguments(ArgumentList arguments) {
     for (final argument in arguments.arguments) {
-      final argumentType = argument.staticType;
+      final argumentExpression = argument.argumentExpression;
+      final argumentType = argumentExpression.staticType;
       final parameterType = argument.correspondingParameter?.type;
       if (argumentType is FunctionType && parameterType is FunctionType) {
         if (argumentType.returnType.isDartAsyncFuture &&

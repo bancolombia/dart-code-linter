@@ -9,10 +9,10 @@ class _Visitor extends IntlBaseVisitor {
     FormalParameterList? parameterList,
   }) {
     final nameExpression = methodInvocation.argumentList.arguments
-        .whereType<NamedExpression>()
-        .where((argument) => argument.name.label.name == 'name')
+        .whereType<NamedArgument>()
+        .where((argument) => argument.name.lexeme == 'name')
         .firstOrNull
-        ?.expression
+        ?.argumentExpression
         .as<SimpleStringLiteral>();
 
     if (nameExpression == null) {

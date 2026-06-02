@@ -78,8 +78,7 @@ class DeclarationsVisitor extends RecursiveAstVisitor<void> {
                 (isNullableType(type) &&
                     (!parameter.isOptional ||
                         parameter.isOptional && parameter.isRequired)) ||
-            (parameter is DefaultFormalParameter &&
-                parameter.defaultValue == null);
+            parameter.defaultClause == null;
       });
 
   void _getDeclarationElement(

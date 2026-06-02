@@ -50,8 +50,8 @@ class CorrectGameInstantiatingRule extends FlameRule {
   List<Replacement>? _createReplacement(_InstantiationInfo info) {
     if (info.isStateless) {
       final arguments = info.node.argumentList.arguments.map((arg) {
-        if (arg is NamedExpression && arg.name.label.name == 'game') {
-          final expression = arg.expression;
+        if (arg is NamedArgument && arg.name.lexeme == 'game') {
+          final expression = arg.argumentExpression;
           if (expression is InstanceCreationExpression) {
             final name = expression.staticType?.getDisplayString();
             if (name != null) {

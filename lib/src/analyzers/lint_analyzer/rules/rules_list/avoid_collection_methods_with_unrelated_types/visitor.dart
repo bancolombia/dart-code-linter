@@ -30,7 +30,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
     final listType = _getListTypeElement(staticType);
     final setType = _getSetTypeElement(staticType);
     final iterableType = _getIterableTypeElement(staticType);
-    final argType = node.argumentList.arguments.singleOrNull?.staticType;
+    final argType =
+        node.argumentList.arguments.singleOrNull?.argumentExpression.staticType;
 
     switch (node.methodName.name) {
       case 'containsKey':

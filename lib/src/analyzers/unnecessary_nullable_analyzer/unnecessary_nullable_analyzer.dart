@@ -221,10 +221,9 @@ class UnnecessaryNullableAnalyzer {
         parameters.where((parameter) => !parameter.isNamed).toList();
 
     for (final usage in usages) {
-      final namedArguments =
-          usage.arguments.whereType<NamedExpression>().toList();
+      final namedArguments = usage.arguments.whereType<NamedArgument>().toList();
       final notNamedArguments =
-          usage.arguments.whereNot((arg) => arg is NamedExpression).toList();
+          usage.arguments.whereNot((arg) => arg is NamedArgument).toList();
 
       for (final parameter in parameters) {
         final relatedArgument = _findRelatedArgument(
@@ -258,33 +257,30 @@ class UnnecessaryNullableAnalyzer {
     );
   }
 
-  Expression? _findRelatedArgument(
+  Argument? _findRelatedArgument(
     FormalParameter parameter,
-    List<Expression> namedArguments,
-    List<Expression> notNamedArguments,
+    List<NamedArgument> namedArguments,
+    List<Argument> notNamedArguments,
     List<FormalParameter> notNamedParameters,
   ) {
     if (parameter.isNamed) {
-      return namedArguments.firstWhereOrNull((arg) =>
-          arg is NamedExpression &&
-          arg.name.label.name == parameter.name?.lexeme);
+      return namedArguments.firstWhereOrNull(
+        (arg) => arg.name.lexeme == parameter.name?.lexeme,
+      );
     }
 
     final parameterIndex = notNamedParameters.indexOf(parameter);
 
-    return notNamedArguments
-        .whereNot((element) => element is NamedExpression)
-        .firstWhereIndexedOrNull((index, _) => index == parameterIndex);
+    return notNamedArguments.firstWhereIndexedOrNull(
+      (index, _) => index == parameterIndex,
+    );
   }
 
-  bool _shouldMarkParameterAsNullable(Expression argument) {
-    if (argument is NamedExpression) {
-      return _shouldMarkParameterAsNullable(argument.expression);
-    }
+  bool _shouldMarkParameterAsNullable(Argument argument) {
+    final expression = argument.argumentExpression;
+    final staticType = expression.staticType;
 
-    final staticType = argument.staticType;
-
-    final isNullable = argument is NullLiteral ||
+    final isNullable = expression is NullLiteral ||
         (staticType != null &&
             // ignore: deprecated_member_use
             (staticType is DynamicType || isNullableType(staticType)));

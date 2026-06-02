@@ -90,7 +90,7 @@ class PreferNamedRecordFieldsRule extends DartRule {
     RecordLiteral recordLiteral,
   ) {
     final positionalFields = recordLiteral.fields
-        .where((field) => field is! NamedExpression)
+        .where((field) => field is! NamedArgument)
         .toList();
 
     if (positionalFields.isEmpty) {
@@ -111,7 +111,7 @@ class PreferNamedRecordFieldsRule extends DartRule {
 
     final namedFieldsStr = namedFields.join(', ');
     final existingNamed = recordLiteral.fields
-        .whereType<NamedExpression>()
+        .whereType<NamedArgument>()
         .map((field) => field.toSource())
         .join(', ');
 

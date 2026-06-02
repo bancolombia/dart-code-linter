@@ -16,11 +16,11 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   bool _hasChildWithPadding(InstanceCreationExpression node) {
     final child = node.argumentList.arguments.firstWhereOrNull(
-      (arg) => arg is NamedExpression && arg.name.label.name == 'child',
+      (arg) => arg is NamedArgument && arg.name.lexeme == 'child',
     );
 
-    if (child != null && child is NamedExpression) {
-      final expression = child.expression;
+    if (child != null && child is NamedArgument) {
+      final expression = child.argumentExpression;
 
       return expression is InstanceCreationExpression &&
           expression.staticType?.getDisplayString() == 'Container';

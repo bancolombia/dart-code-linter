@@ -20,11 +20,9 @@ class _Visitor extends RecursiveAstVisitor<void> {
     final hasOneArgument = arguments.length == 1;
 
     if (isExpanded && hasOneArgument) {
-      final expandedChild = arguments.first as NamedExpression;
-
-      final childName = expandedChild.staticType?.getDisplayString();
-
-      final child = expandedChild.expression;
+      final expandedChild = arguments.first as NamedArgument;
+      final child = expandedChild.argumentExpression;
+      final childName = child.staticType?.getDisplayString();
       if (child is InstanceCreationExpression) {
         final hasNoArgument = child.argumentList.arguments.isEmpty;
 
