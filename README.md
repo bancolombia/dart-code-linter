@@ -85,9 +85,42 @@ dart_code_linter:
 
 ### Analyzer plugin
 
-DCL can be used as a plugin for the Dart `analyzer` [package](https://pub.dev/packages/analyzer) providing additional rules. All issues produced by rules or anti-patterns will be highlighted in IDE.
+DCL can be used as a plugin for the Dart `analyzer` [package](https://pub.dev/packages/analyzer) providing additional rules. All issues produced by rules or anti-patterns will be highlighted in the IDE.
 
-Rules that marked with 🛠 have auto-fixes available through the IDE context menu. VS Code example:
+Depending on your Dart SDK version, you can configure the plugin in two ways:
+
+#### 1. Analysis Server Plugin (Recommended for Dart >= 3.9)
+
+DCL supports the new Dart Analysis Server plugin protocol (`analysis_server_plugin`). To use it, add the plugin configuration under the top-level `plugins` key in your `analysis_options.yaml`:
+
+```yaml title="analysis_options.yaml"
+plugins:
+  dart_code_linter:
+    diagnostics:
+      avoid-dynamic: true
+      prefer-trailing-comma: true
+      # ... add other rule IDs to enable them
+```
+
+> [!NOTE]
+> Rules that require mandatory user-supplied configuration (such as `avoid-banned-imports` or `ban-name`) are not currently supported via the `analysis_server_plugin` protocol and should be configured using the legacy mechanism instead.
+
+#### 2. Legacy Analyzer Plugin (Dart < 3.9)
+
+Configure the plugin under `analyzer` in your `analysis_options.yaml`:
+
+```yaml title="analysis_options.yaml"
+analyzer:
+  plugins:
+    - dart_code_linter
+
+dart_code_linter:
+  rules:
+    - avoid-dynamic
+    - prefer-trailing-comma
+```
+
+Rules that are marked with 🛠 have auto-fixes available through the IDE context menu. VS Code example:
 
 ![VS Code example](https://github.com/bancolombia/dart-code-linter/blob/trunk/assets/quick-fixes.png)
 
@@ -97,7 +130,7 @@ As DCL depends on the Dart `analyzer` package. The following table shows the com
 
 | DCL Version       | Analyzer Version   | Dart SDK          |
 |-------------------|--------------------|-------------------|
-| 4.1.0             | >=10.0.0 <14.0.0   | >=3.9.0 <4.0.0   |
+| 4.1.0             | >=10.0.0 <14.0.0   | >=3.5.0 <4.0.0   |
 | 4.0.5             | >=10.0.0 <13.0.0   | >=3.5.0 <4.0.0   |
 | 4.0.4             | >=10.0.0 <13.0.0   | >=3.5.0 <4.0.0   |
 | 4.0.3             | >=10.0.0 <13.0.0   | >=3.5.0 <4.0.0   |
