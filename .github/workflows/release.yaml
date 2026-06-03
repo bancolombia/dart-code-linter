@@ -19,7 +19,7 @@ jobs:
         uses: bancolombia/flutter-setup-action@v1.1
         with:
           channel: 'stable'
-          flutter-version: '3.35.0'
+          flutter-version: '3.44.0'
       - name: Install dependencies
         run: dart pub get
       - name: Publish to pub.dev

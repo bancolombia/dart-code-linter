@@ -23,7 +23,7 @@ jobs:
         uses: bancolombia/flutter-setup-action@v1.1
         with:
           channel: 'stable'
-          flutter-version: '3.35.0'
+          flutter-version: '3.44.0'
       - name: Install dependencies
         run: dart pub get
       - name: Run tests
@@ -36,16 +36,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Use Pana-safe analysis options
-        run: cp .github/workflows/analysis_options.pana.yaml analysis_options.yaml
-
       - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
 
       - name: Setup Flutter
         uses: bancolombia/flutter-setup-action@v1.1
         with:
           channel: 'stable'
-          flutter-version: '3.35.0'
+          flutter-version: '3.44.0'
 
       - name: Install Dependencies
         run: |
