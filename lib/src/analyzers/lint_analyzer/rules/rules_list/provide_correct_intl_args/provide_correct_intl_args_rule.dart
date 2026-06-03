@@ -2,8 +2,8 @@
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
-import 'package:collection/collection.dart';
 
+import '../../../../../utils/ast_compat.dart';
 import '../../../../../utils/node_utils.dart';
 import '../../../../../utils/object_extensions.dart';
 import '../../../lint_utils.dart';

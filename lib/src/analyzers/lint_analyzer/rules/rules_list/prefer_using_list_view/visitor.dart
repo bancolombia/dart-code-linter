@@ -16,23 +16,31 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   bool _hasColumnChild(InstanceCreationExpression node) {
-    final child = node.argumentList.arguments.firstWhereOrNull(
-      (arg) => arg is NamedExpression && arg.name.label.name == 'child',
-    );
-
-    if (child != null && child is NamedExpression) {
-      final expression = child.expression;
-
-      if (expression is InstanceCreationExpression &&
-          isColumnWidget(expression.staticType)) {
-        final notChildren = expression.argumentList.arguments.firstWhereOrNull(
-          (arg) => arg is NamedExpression && arg.name.label.name != 'children',
-        );
-
-        return notChildren == null;
+    NamedArgumentView? child;
+    for (final arg in node.argumentList.arguments) {
+      final named = asNamedArgument(arg);
+      if (named != null && named.name == 'child') {
+        child = named;
+        break;
       }
     }
+    if (child == null) {
+      return false;
+    }
 
-    return false;
+    final expression = child.expression;
+    if (expression is! InstanceCreationExpression ||
+        !isColumnWidget(expression.staticType)) {
+      return false;
+    }
+
+    final notChildren = expression.argumentList.arguments.firstWhereOrNull(
+      (arg) {
+        final named = asNamedArgument(arg);
+        return named != null && named.name != 'children';
+      },
+    );
+
+    return notChildren == null;
   }
 }

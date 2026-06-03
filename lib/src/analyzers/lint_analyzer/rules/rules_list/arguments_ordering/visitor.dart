@@ -40,18 +40,20 @@ class _Visitor extends RecursiveAstVisitor<void> {
     List<FormalParameterElement> parameters,
   ) {
     final sortedArguments = argumentList.arguments.sorted((a, b) {
-      if (a is! NamedExpression && b is! NamedExpression) {
+      final aNamed = asNamedArgument(a);
+      final bNamed = asNamedArgument(b);
+      if (aNamed == null && bNamed == null) {
         return 0;
       }
-      if (a is NamedExpression && b is! NamedExpression) {
+      if (aNamed != null && bNamed == null) {
         return 1;
       }
-      if (a is! NamedExpression && b is NamedExpression) {
+      if (aNamed == null && bNamed != null) {
         return -1;
       }
-      if (a is NamedExpression && b is NamedExpression) {
-        final aName = a.name.label.name;
-        final bName = b.name.label.name;
+      if (aNamed != null && bNamed != null) {
+        final aName = aNamed.name;
+        final bName = bNamed.name;
 
         if (aName == bName) {
           return 0;
@@ -68,8 +70,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
               : -1;
         }
 
-        return _parameterIndex(parameters, a)
-            .compareTo(_parameterIndex(parameters, b));
+        return _parameterIndexByName(parameters, aName)
+            .compareTo(_parameterIndexByName(parameters, bName));
       }
 
       return 0;
@@ -85,13 +87,11 @@ class _Visitor extends RecursiveAstVisitor<void> {
     }
   }
 
-  static int _parameterIndex(
+  static int _parameterIndexByName(
     List<FormalParameterElement> parameters,
-    NamedExpression argumentExpression,
+    String name,
   ) =>
-      parameters.indexWhere(
-        (parameter) => parameter.name == argumentExpression.name.label.name,
-      );
+      parameters.indexWhere((parameter) => parameter.name == name);
 }
 
 class _IssueDetails {

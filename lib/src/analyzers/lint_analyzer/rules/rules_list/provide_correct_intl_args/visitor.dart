@@ -24,12 +24,18 @@ class _Visitor extends IntlBaseVisitor {
     FormalParameterList? parameterList,
   ) {
     final arguments = methodInvocation.argumentList.arguments;
-    final argsArgument = arguments
-        .whereType<NamedExpression>()
-        .where((argument) => argument.name.label.name == 'args')
-        .firstOrNull
-        ?.expression
-        .as<ListLiteral>();
+    ListLiteral? argsArgument;
+    for (final argument in arguments) {
+      final named = asNamedArgument(argument);
+      if (named == null || named.name != 'args') {
+        continue;
+      }
+      final expr = named.expression;
+      if (expr is ListLiteral) {
+        argsArgument = expr;
+      }
+      break;
+    }
 
     final parameterSimpleIdentifiers =
         parameterList?.parameters.map((parameter) => parameter.name).toList() ??

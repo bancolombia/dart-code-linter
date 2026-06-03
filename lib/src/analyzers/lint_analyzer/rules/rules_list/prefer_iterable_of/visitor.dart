@@ -12,9 +12,9 @@ class _Visitor extends RecursiveAstVisitor<void> {
     if (isIterableOrSubclass(node.staticType) &&
         node.constructorName.name?.name == 'from' &&
         _hasConstructorOf(node.staticType)) {
-      final arg = node.argumentList.arguments.first;
+      final arg = unwrapArgumentExpression(node.argumentList.arguments.first);
 
-      final argumentType = _getType(arg.staticType);
+      final argumentType = _getType(arg?.staticType);
       final castedType = _getType(node.staticType);
       if (argumentType != null &&
           !argumentType.isDartCoreObject &&

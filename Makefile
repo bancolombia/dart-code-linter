@@ -12,8 +12,8 @@ help:
 	@echo "  generate-skills      Generate assets (default: cursor). Example: make generate-skills TARGETS=all"
 	@echo "  generate-skills-all  Generate Cursor + VSCode (same as --targets all)"
 	@echo "  test            Run pytest in scripts/tests/"
-	@echo "  test-analyzer-compat      Analyze lib/ with analyzer 10.x, 11.x, 12.x"
-	@echo "  test-analyzer-compat-full Run full dart test with analyzer 10.x, 11.x, 12.x"
+	@echo "  test-analyzer-compat      Analyze lib/ with analyzer 10.x, 11.x, 12.x, 13.x"
+	@echo "  test-analyzer-compat-full Run full dart test with analyzer 10.x, 11.x, 12.x, 13.x"
 	@echo "  format          Format scripts/ with ruff"
 	@echo "  lint            Lint scripts/ with ruff"
 

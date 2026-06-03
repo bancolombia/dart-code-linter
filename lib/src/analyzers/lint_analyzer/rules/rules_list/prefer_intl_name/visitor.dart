@@ -8,12 +8,18 @@ class _Visitor extends IntlBaseVisitor {
     String? variableName,
     FormalParameterList? parameterList,
   }) {
-    final nameExpression = methodInvocation.argumentList.arguments
-        .whereType<NamedExpression>()
-        .where((argument) => argument.name.label.name == 'name')
-        .firstOrNull
-        ?.expression
-        .as<SimpleStringLiteral>();
+    SimpleStringLiteral? nameExpression;
+    for (final argument in methodInvocation.argumentList.arguments) {
+      final named = asNamedArgument(argument);
+      if (named == null || named.name != 'name') {
+        continue;
+      }
+      final expr = named.expression;
+      if (expr is SimpleStringLiteral) {
+        nameExpression = expr;
+      }
+      break;
+    }
 
     if (nameExpression == null) {
       addIssue(_NotExistNameIssue(methodInvocation.methodName));

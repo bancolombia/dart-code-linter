@@ -39,7 +39,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
     var namedCount = 0;
 
     for (final field in recordLiteral.fields) {
-      if (field is NamedExpression) {
+      if (isNamedArgument(field)) {
         namedCount++;
       } else {
         positionalCount++;
