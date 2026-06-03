@@ -21,13 +21,14 @@ from pathlib import Path
 # `extra_overrides` lets us pin test/test_core/test_api when a given analyzer
 # version requires a newer test stack than the lowest-allowed by pubspec.
 VERSION_PAIRS = [
-    ("10.0.1", "0.14.1", {}),  # Flutter stable (meta 1.17.0 compatible)
-    ("11.0.0", "0.14.5", {}),  # Previous default
-    ("12.1.0", "0.14.8", {}),  # Latest 12.x
+    ("10.0.1", "0.14.1", {"analysis_server_plugin": "0.3.7"}),  # Flutter stable (meta 1.17.0 compatible)
+    ("11.0.0", "0.14.5", {"analysis_server_plugin": "0.3.11"}),  # Previous default
+    ("12.1.0", "0.14.8", {"analysis_server_plugin": "0.3.14"}),  # Latest 12.x
     (
         "13.0.0",
         "0.14.9",
         {
+            "analysis_server_plugin": "0.3.15",
             # analyzer 13 needs the bumped test stack (NodeList<Argument>).
             "test": "1.31.1",
             "test_core": "0.6.18",
