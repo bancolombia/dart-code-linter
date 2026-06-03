@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
+      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
       - name: Setup Flutter
         uses: bancolombia/flutter-setup-action@v1.1
         with:
@@ -36,7 +36,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
+      - name: Use Pana-safe analysis options
+        run: cp .github/workflows/analysis_options.pana.yaml analysis_options.yaml
+
+      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
 
       - name: Setup Flutter
         uses: bancolombia/flutter-setup-action@v1.1
@@ -57,5 +60,5 @@ jobs:
           flutter --version
           PANA=$(pana . --no-warning); PANA_SCORE=$(echo $PANA | sed -n "s/.*Points: \([0-9]*\)\/\([0-9]*\)./\1\/\2/p")
           echo "score: $PANA_SCORE"
-          IFS='/'; read -a SCORE_ARR <<< "$PANA_SCORE"; SCORE=SCORE_ARR[0]; TOTAL=SCORE_ARR[1]
+          IFS='/'; read -a SCORE_ARR <<< "$PANA_SCORE"; SCORE=${SCORE_ARR[0]}; TOTAL=${SCORE_ARR[1]}
           if (( $SCORE < $TOTAL - 10 )); then echo $PANA; echo "minimum score not met!"; exit 1; fi
