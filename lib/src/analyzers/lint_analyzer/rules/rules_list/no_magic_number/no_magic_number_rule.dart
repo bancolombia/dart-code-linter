@@ -74,10 +74,10 @@ class NoMagicNumberRule extends DartRule {
       if (l is IntegerLiteral) {
         final value = l.value;
         if (value != null) {
-          literalsCount.update(value, (count) => ++count, ifAbsent: () => 1);
+          literalsCount.update(value, (count) => count + 1, ifAbsent: () => 1);
         }
       } else if (l is DoubleLiteral) {
-        literalsCount.update(l.value, (count) => ++count, ifAbsent: () => 1);
+        literalsCount.update(l.value, (count) => count + 1, ifAbsent: () => 1);
       }
     }
 
