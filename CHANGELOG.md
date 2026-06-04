@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.1.1
+- Add config option `prefer-match-file-name.ignore-enums` and `prefer-match-file-name.ignore-typedefs` to suppress reports for enum and typedef declarations whose name doesn't match the file name.
+
 ## 4.1.0
 - Add support for `analysis_server_plugin` (analyzer 13.x).
 - Add support for `analyzer` 13.x via a cross-version AST shim ([lib/src/utils/ast_compat.dart](lib/src/utils/ast_compat.dart)) that recognises the reshaped named-argument, record-field, default-parameter and label nodes structurally.

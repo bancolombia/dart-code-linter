@@ -15,6 +15,8 @@ const _multipleEnums = '$_examplePath/multiple_enums.dart';
 const _multipleExtensions = '$_examplePath/multiple_extensions.dart';
 const _multipleMixins = '$_examplePath/multiple_mixins.dart';
 const _codegenFile = '$_examplePath/some_widget.codegen.dart';
+const _exampleWithEnumBefore = '$_examplePath/example_with_enum_before.dart';
+const _exampleWithTypedefBefore = '$_examplePath/example_with_typedef_before.dart';
 
 void main() {
   group('PreferMatchFileNameRule', () {
@@ -130,6 +132,58 @@ void main() {
       final issues = PreferMatchFileNameRule().check(unit);
 
       RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    group('with ignore-enums config', () {
+      test('reports no issues when ignore-enums is true', () async {
+        final unit = await RuleTestHelper.resolveFromFile(_exampleWithEnumBefore);
+        final issues = PreferMatchFileNameRule({
+          'ignore-enums': true,
+        }).check(unit);
+
+        RuleTestHelper.verifyNoIssues(issues);
+      });
+
+      test('reports issue when ignore-enums is false', () async {
+        final unit = await RuleTestHelper.resolveFromFile(_exampleWithEnumBefore);
+        final issues = PreferMatchFileNameRule({
+          'ignore-enums': false,
+        }).check(unit);
+
+        RuleTestHelper.verifyIssues(
+          issues: issues,
+          startLines: [1],
+          startColumns: [6],
+          messages: ['File name does not match with first enum name.'],
+          locationTexts: ['ExampleWithEnumBeforeStates'],
+        );
+      });
+    });
+
+    group('with ignore-typedefs config', () {
+      test('reports no issues when ignore-typedefs is true', () async {
+        final unit = await RuleTestHelper.resolveFromFile(_exampleWithTypedefBefore);
+        final issues = PreferMatchFileNameRule({
+          'ignore-typedefs': true,
+        }).check(unit);
+
+        RuleTestHelper.verifyNoIssues(issues);
+      });
+
+      test('reports issue when ignore-typedefs is false', () async {
+        final unit = await RuleTestHelper.resolveFromFile(_exampleWithTypedefBefore);
+        final issues = PreferMatchFileNameRule({
+          'ignore-typedefs': false,
+        }).check(unit);
+
+        RuleTestHelper.verifyIssues(
+          issues: issues,
+          startLines: [1],
+          startColumns: [9],
+          messages: ['File name does not match with first type alias name.'],
+          locationTexts: ['ValueCallback'],
+        );
+      });
     });
   });
 }

@@ -15,13 +15,19 @@ import '../../node_utils.dart';
 import '../../rule_utils.dart';
 
 part 'visitor.dart';
+part 'config_parser.dart';
 
 class PreferMatchFileNameRule extends DartRule {
   static const String ruleId = 'prefer-match-file-name';
   static final _onlySymbolsRegex = RegExp('[^a-zA-Z0-9]');
 
+  final bool _ignoreEnums;
+  final bool _ignoreTypedefs;
+
   PreferMatchFileNameRule([Map<String, Object> config = const {}])
-      : super(
+      : _ignoreEnums = _ConfigParser.parseIgnoreEnums(config),
+        _ignoreTypedefs = _ConfigParser.parseIgnoreTypedefs(config),
+        super(
           id: ruleId,
           severity: readSeverity(config, Severity.warning),
           excludes: readExcludes(config),
@@ -29,8 +35,20 @@ class PreferMatchFileNameRule extends DartRule {
         );
 
   @override
+  Map<String, Object?> toJson() {
+    final json = super.toJson();
+    json[_ConfigParser._ignoreEnumsName] = _ignoreEnums;
+    json[_ConfigParser._ignoreTypedefsName] = _ignoreTypedefs;
+
+    return json;
+  }
+
+  @override
   Iterable<Issue> check(InternalResolvedUnitResult source) {
-    final visitor = _Visitor();
+    final visitor = _Visitor(
+      ignoreEnums: _ignoreEnums,
+      ignoreTypedefs: _ignoreTypedefs,
+    );
 
     source.unit.visitChildren(visitor);
 
