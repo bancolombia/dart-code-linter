@@ -9,6 +9,8 @@ String humanReadableNodeType(AstNode? node) {
     return 'Extension';
   } else if (node is MixinDeclaration) {
     return 'Mixin';
+  } else if (node is TypeAlias) {
+    return 'Type alias';
   }
 
   return 'Node';

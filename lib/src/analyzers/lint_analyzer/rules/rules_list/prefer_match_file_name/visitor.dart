@@ -1,6 +1,14 @@
 part of 'prefer_match_file_name_rule.dart';
 
 class _Visitor extends RecursiveAstVisitor<void> {
+  final bool ignoreEnums;
+  final bool ignoreTypedefs;
+
+  _Visitor({
+    required this.ignoreEnums,
+    required this.ignoreTypedefs,
+  });
+
   final _declarations = <_TokeInfo>[];
 
   Iterable<_TokeInfo> get declaration =>
@@ -34,7 +42,27 @@ class _Visitor extends RecursiveAstVisitor<void> {
   void visitEnumDeclaration(EnumDeclaration node) {
     super.visitEnumDeclaration(node);
 
-    _declarations.add(_TokeInfo(node.namePart.typeName, node));
+    if (!ignoreEnums) {
+      _declarations.add(_TokeInfo(node.namePart.typeName, node));
+    }
+  }
+
+  @override
+  void visitGenericTypeAlias(GenericTypeAlias node) {
+    super.visitGenericTypeAlias(node);
+
+    if (!ignoreTypedefs) {
+      _declarations.add(_TokeInfo(node.name, node));
+    }
+  }
+
+  @override
+  void visitFunctionTypeAlias(FunctionTypeAlias node) {
+    super.visitFunctionTypeAlias(node);
+
+    if (!ignoreTypedefs) {
+      _declarations.add(_TokeInfo(node.name, node));
+    }
   }
 
   int _compareByPrivateType(_TokeInfo a, _TokeInfo b) {
