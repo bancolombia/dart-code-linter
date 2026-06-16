@@ -224,20 +224,27 @@ class LintAnalyzer {
     var fixedContent = originalContent.toString();
     final fixedIssues = <Issue>[];
 
-    for (final issue in result.issues) {
-      final fix = issue.suggestions;
+    // Issue locations are computed against the original content, so applying
+    // fixes from the start would shift every subsequent offset and either
+    // corrupt the output or throw a RangeError (issue #188). Apply them from
+    // the end of the file towards the start so earlier offsets stay valid.
+    final issuesToFix = result.issues
+        .where((issue) => issue.suggestions != null)
+        .toList()
+      ..sort(
+        (a, b) => b.location.start.offset.compareTo(a.location.start.offset),
+      );
 
-      if (fix != null) {
-        for (final suggestion in fix) {
-          fixedContent = fixedContent.replaceRange(
-            issue.location.start.offset,
-            issue.location.end.offset,
-            suggestion.replacement,
-          );
-        }
-
-        fixedIssues.add(issue);
+    for (final issue in issuesToFix) {
+      for (final suggestion in issue.suggestions!) {
+        fixedContent = fixedContent.replaceRange(
+          issue.location.start.offset,
+          issue.location.end.offset,
+          suggestion.replacement,
+        );
       }
+
+      fixedIssues.add(issue);
     }
 
     _applyFixesToFile(fixedContent, filePath);
