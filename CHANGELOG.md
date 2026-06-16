@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.1.4
+- Add an auto-fix to the `no-blank-line-before-single-return` rule that removes the blank line(s) before a single `return` statement in a block, preserving any comments.
+
 ## 4.1.3
 - Add an auto-fix to the `avoid-unnecessary-type-casts` rule that removes the redundant `as` cast (e.g. `value as String` becomes `value`).
 
