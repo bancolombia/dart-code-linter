@@ -8,6 +8,7 @@ import '../../../../../utils/node_utils.dart';
 import '../../../lint_utils.dart';
 import '../../../models/internal_resolved_unit_result.dart';
 import '../../../models/issue.dart';
+import '../../../models/replacement.dart';
 import '../../../models/severity.dart';
 import '../../models/dart_rule.dart';
 import '../../rule_utils.dart';
@@ -31,14 +32,22 @@ class AvoidUnnecessaryTypeCastsRule extends DartRule {
 
     source.unit.visitChildren(visitor);
 
-    return visitor.expressions.entries
-        .map(
-          (node) => createIssue(
-            rule: this,
-            location: nodeLocation(node: node.key, source: source),
-            message: 'Avoid unnecessary "${node.value}" type cast.',
-          ),
-        )
-        .toList(growable: false);
+    return visitor.expressions.entries.map((entry) {
+      final node = entry.key;
+
+      return createIssue(
+        rule: this,
+        location: nodeLocation(node: node, source: source),
+        message: 'Avoid unnecessary "${entry.value}" type cast.',
+        replacements: node is AsExpression
+            ? [
+                Replacement(
+                  comment: 'Remove unnecessary cast.',
+                  replacement: node.expression.toString(),
+                ),
+              ]
+            : null,
+      );
+    }).toList(growable: false);
   }
 }

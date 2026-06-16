@@ -75,5 +75,37 @@ void main() {
         ],
       );
     });
+
+    test('provides replacement suggestions that drop the cast', () async {
+      final unit = await RuleTestHelper.resolveFromFile(_path);
+      final issues = AvoidUnnecessaryTypeCastsRule().check(unit);
+
+      expect(issues, isNotEmpty);
+
+      const expectedReplacements = [
+        'regularString',
+        'nullableString',
+        'regularString',
+        'animal',
+        'cat',
+        'cat',
+        'dog',
+        'dog',
+        'regular',
+        'myList',
+      ];
+
+      expect(
+        issues.map((issue) => issue.suggestions?.single.replacement),
+        equals(expectedReplacements),
+      );
+
+      for (final issue in issues) {
+        expect(
+          issue.suggestions?.single.comment,
+          equals('Remove unnecessary cast.'),
+        );
+      }
+    });
   });
 }
