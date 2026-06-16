@@ -54,5 +54,10 @@ int f(int a) {
     return a + 8;
   }
 
+  if (a > 9) { // trailing brace comment
+
+    return a + 9;
+  }
+
   return a;
 }

@@ -151,6 +151,12 @@ Token _optimalToken(Token token, LineInfo lineInfo) {
   var optimalToken = token;
   var commentToken = _latestCommentToken(token);
 
+  // Line of the previous non-comment token (e.g. the block's opening brace).
+  final previousToken = token.previous;
+  final previousLine = previousToken != null
+      ? lineInfo.getLocation(previousToken.end).lineNumber
+      : -1;
+
   while (commentToken != null) {
     final commentTokenLineNumber =
         lineInfo.getLocation(commentToken.end).lineNumber;
@@ -160,7 +166,12 @@ Token _optimalToken(Token token, LineInfo lineInfo) {
     final isDirectlyPrecedingComment =
         commentTokenLineNumber + 1 >= optimalTokenLineNumber;
 
-    if (!isDirectlyPrecedingComment) {
+    // A comment sharing the previous token's line is a trailing comment (e.g.
+    // on the opening brace), not an own-line comment, so it must not pull the
+    // optimal token up to that line and hide the real return position.
+    final isTrailingComment = commentTokenLineNumber <= previousLine;
+
+    if (!isDirectlyPrecedingComment || isTrailingComment) {
       break;
     }
 

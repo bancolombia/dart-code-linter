@@ -42,6 +42,25 @@ void main() {
       );
     });
 
+    test('does not report a trailing brace comment without a blank line',
+        () async {
+      // Regression: a comment on the opening-brace line is a trailing comment,
+      // not a blank line before the return, so the rule must stay silent.
+      final unit = await RuleTestHelper.createAndResolveFromFile(
+        content: 'int f(int a) {\n'
+            '  if (a > 0) { // trailing comment\n'
+            '    return a + 1;\n'
+            '  }\n'
+            '  return a;\n'
+            '}\n',
+        filePath:
+            'no_blank_line_before_single_return/examples/_trailing_brace_temp.dart',
+      );
+      final issues = NoBlankLineBeforeSingleReturnRule().check(unit).toList();
+
+      expect(issues, isEmpty);
+    });
+
     test('provides replacement suggestions', () async {
       final unit = await RuleTestHelper.resolveFromFile(_beforeFixPath);
       final issues = NoBlankLineBeforeSingleReturnRule().check(unit);
