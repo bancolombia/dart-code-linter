@@ -3,6 +3,16 @@
 Rules are one of the core building blocks of DCL. A rule validates if your code meets a certain expectation, and what to do if it does not meet that expectation.
 
 All rules can be configured with severity, exclude and include options, but some rules also have additional configuration options specific to that rule and are marked with ⚙️.
+
+:::info
+You can enable the linter as an Analysis Server Plugin by adding `dart_code_linter` under the `plugins` section of your `analysis_options.yaml` file:
+
+```yaml
+plugins:
+  dart_code_linter: 4.1.3
+```
+:::
+
 ## Enabling a Rule
 
 To enable a rule add its id to the rules entry:
