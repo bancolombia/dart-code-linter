@@ -145,7 +145,7 @@ class LintAnalyzer {
 
         final unit = await context.currentSession.getResolvedUnit(filePath);
         if (unit is ResolvedUnitResult) {
-          final (issuesNo, fixesNo) = _analyzeAndFixFile(
+          final (issuesNo, fixesNo) = await _analyzeAndFixFile(
             unit,
             lintAnalysisConfig,
             rootFolder,
@@ -208,12 +208,12 @@ class LintAnalyzer {
     return (lintAnalysisConfig, analyzedFiles, report);
   }
 
-  (int issuesNo, int fixesNo) _analyzeAndFixFile(
+  Future<(int issuesNo, int fixesNo)> _analyzeAndFixFile(
     ResolvedUnitResult unit,
     LintAnalysisConfig config,
     String rootFolder, {
     required String filePath,
-  }) {
+  }) async {
     final result = _analyzeFile(unit, config, rootFolder, filePath: filePath);
 
     if (result == null || result.issues.isEmpty) {
@@ -247,7 +247,7 @@ class LintAnalyzer {
       fixedIssues.add(issue);
     }
 
-    _applyFixesToFile(fixedContent, filePath);
+    await _applyFixesToFile(fixedContent, filePath);
 
     return (result.issues.length, fixedIssues.length);
   }

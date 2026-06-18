@@ -601,6 +601,50 @@ void main() {
           await File(originalExamplePath).writeAsString(originalExampleContent);
         }
       });
+
+      test('runCliFix flushes file writes before returning (issue #188)',
+          () async {
+        // Regression guard: the fix must be written to disk before runCliFix
+        // returns. We read back synchronously (no event-loop yield) so that a
+        // fire-and-forget, unawaited write would deterministically be observed
+        // as stale content here.
+        final basePath =
+            '${Directory.current.path}/test/resources/lint_analyzer_fix_multiple';
+        final originalExamplePath =
+            '$basePath/multiple_fixes_original_example.dart';
+        final fixedExamplePath = '$basePath/multiple_fixes_fixed_example.dart';
+
+        final originalExampleContent =
+            await File(originalExamplePath).readAsString();
+
+        final config = _createConfig(
+          rules: {
+            NoBooleanLiteralCompareRule.ruleId: {},
+          },
+        );
+
+        final multipleFolders = [
+          p.normalize(
+            File('test/resources/lint_analyzer_fix_multiple').absolute.path,
+          ),
+        ];
+
+        try {
+          await analyzer.runCliFix(
+            multipleFolders,
+            rootDirectory,
+            config,
+          );
+
+          final onDisk = File(originalExamplePath).readAsStringSync();
+          final fixedExampleContent =
+              await File(fixedExamplePath).readAsString();
+
+          expect(onDisk, equals(fixedExampleContent));
+        } finally {
+          await File(originalExamplePath).writeAsString(originalExampleContent);
+        }
+      });
     },
     testOn: 'posix',
   );
