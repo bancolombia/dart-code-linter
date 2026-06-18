@@ -27,9 +27,8 @@ void main() {
 
       final issues = AvoidDuplicateExportsRule().check(unit);
 
-      // The reported location spans the whole physical line of the duplicate
-      // directive (including its trailing line break) so the fix can delete it
-      // cleanly, hence it starts at column 1.
+      // The location spans the whole line so the fix can delete it cleanly,
+      // hence column 1 and a location text that includes the trailing comment.
       RuleTestHelper.verifyIssues(
         issues: issues,
         startLines: [6],
@@ -125,9 +124,8 @@ void main() {
     test(
         'only removes the directive when the line tail holds a block comment '
         '(keeps the output valid)', () async {
-      // A block comment opened on the duplicate's line that runs onto the next
-      // line, followed by another directive: deleting the whole line would
-      // corrupt the comment, so only the directive itself is removed.
+      // Deleting the whole line here would split the block comment, so only
+      // the directive is removed.
       final unit = await RuleTestHelper.createAndResolveFromFile(
         content: "export 'package:a/a.dart';\n"
             "export 'package:a/a.dart'; /* multi\n"

@@ -60,14 +60,6 @@ class AvoidDuplicateExportsRule extends DartRule {
 int _lineStartOffset(int offset, String content) =>
     content.lastIndexOf('\n', offset - 1) + 1;
 
-// Where to stop deleting, starting from the end of the directive ([offset]).
-//
-// When the rest of the physical line holds nothing but whitespace and/or a
-// `//` comment, the whole line (including its trailing line break) is removed
-// so no dangling blank line is left. Otherwise — e.g. a block comment that
-// runs onto the next line, or another directive sharing the line — only the
-// directive itself is removed, since swallowing the line would corrupt that
-// trailing content.
 int _deletionEndOffset(int offset, String content) {
   final newlineIndex = content.indexOf('\n', offset);
   final lineEnd = newlineIndex == -1 ? content.length : newlineIndex;
@@ -75,6 +67,9 @@ int _deletionEndOffset(int offset, String content) {
 
   final isCleanLine = lineTail.isEmpty || lineTail.startsWith('//');
 
+  // Drop only the directive when the rest of the line isn't ours to remove
+  // (a block comment running onto the next line, or another directive),
+  // otherwise swallowing the line break would corrupt that trailing content.
   if (!isCleanLine) {
     return offset;
   }
