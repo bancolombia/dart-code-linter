@@ -5,6 +5,7 @@ import 'package:dart_code_linter/src/analyzers/lint_analyzer/lint_config.dart';
 import 'package:dart_code_linter/src/analyzers/lint_analyzer/metrics/models/metric_value_level.dart';
 import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/lint_file_report.dart';
 import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/report.dart';
+import 'package:dart_code_linter/src/analyzers/lint_analyzer/rules/rules_list/no_boolean_literal_compare/no_boolean_literal_compare_rule.dart';
 import 'package:dart_code_linter/src/analyzers/lint_analyzer/rules/rules_list/prefer_first_or_null/prefer_first_or_null_rule.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -556,6 +557,49 @@ void main() {
         );
 
         await File(originalExamplePath).writeAsString(originalExampleContent);
+      });
+
+      test('should fix files with multiple issues (issue #188)', () async {
+        final basePath =
+            '${Directory.current.path}/test/resources/lint_analyzer_fix_multiple';
+        final originalExamplePath =
+            '$basePath/multiple_fixes_original_example.dart';
+        final fixedExamplePath = '$basePath/multiple_fixes_fixed_example.dart';
+
+        final originalExampleContent =
+            await File(originalExamplePath).readAsString();
+
+        final config = _createConfig(
+          rules: {
+            NoBooleanLiteralCompareRule.ruleId: {},
+          },
+        );
+
+        final multipleFolders = [
+          p.normalize(
+            File('test/resources/lint_analyzer_fix_multiple').absolute.path,
+          ),
+        ];
+
+        try {
+          await analyzer.runCliFix(
+            multipleFolders,
+            rootDirectory,
+            config,
+          );
+
+          final modifiedExampleContent =
+              await File(originalExamplePath).readAsString();
+          final fixedExampleContent =
+              await File(fixedExamplePath).readAsString();
+
+          expect(
+            modifiedExampleContent,
+            equals(fixedExampleContent),
+          );
+        } finally {
+          await File(originalExamplePath).writeAsString(originalExampleContent);
+        }
       });
     },
     testOn: 'posix',
