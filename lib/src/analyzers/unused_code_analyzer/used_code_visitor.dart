@@ -12,7 +12,10 @@ import 'models/file_elements_usage.dart';
 class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   final fileElementsUsage = FileElementsUsage();
 
-  UsedCodeVisitor();
+  final bool _recordClassMembers;
+
+  UsedCodeVisitor({bool recordClassMembers = false})
+      : _recordClassMembers = recordClassMembers;
 
   @override
   void visitImportDirective(ImportDirective node) {
@@ -239,6 +242,9 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
     if (enclosingElement is LibraryElement ||
         enclosingElement is LibraryFragment) {
+      _recordUsedElement(element);
+    } else if (_recordClassMembers &&
+        enclosingElement is InterfaceElement) {
       _recordUsedElement(element);
     } else if (enclosingElement is ExtensionElement) {
       _recordUsedExtension(enclosingElement);

@@ -15,6 +15,7 @@ const _defaults = UnusedCodeConfig(
   analyzerExcludePatterns: ['test/**'],
   isMonorepo: false,
   shouldPrintConfig: false,
+  analyzePrivateMembers: false,
 );
 
 const _empty = UnusedCodeConfig(
@@ -22,6 +23,7 @@ const _empty = UnusedCodeConfig(
   analyzerExcludePatterns: [],
   isMonorepo: false,
   shouldPrintConfig: false,
+  analyzePrivateMembers: false,
 );
 
 const _merged = UnusedCodeConfig(
@@ -29,6 +31,7 @@ const _merged = UnusedCodeConfig(
   analyzerExcludePatterns: ['test/**', 'examples/**'],
   isMonorepo: true,
   shouldPrintConfig: true,
+  analyzePrivateMembers: true,
 );
 
 const _overrides = UnusedCodeConfig(
@@ -36,6 +39,7 @@ const _overrides = UnusedCodeConfig(
   analyzerExcludePatterns: ['examples/**'],
   isMonorepo: true,
   shouldPrintConfig: true,
+  analyzePrivateMembers: true,
 );
 
 void main() {
@@ -50,12 +54,25 @@ void main() {
         expect(config.analyzerExcludePatterns, isEmpty);
         expect(config.isMonorepo, false);
         expect(config.shouldPrintConfig, false);
+        expect(config.analyzePrivateMembers, false);
       });
 
       test('data', () {
         final config = UnusedCodeConfig.fromAnalysisOptions(_options);
 
         expect(config.analyzerExcludePatterns, equals(['test/resources/**']));
+      });
+
+      test('analyze-private-members option', () {
+        final config = UnusedCodeConfig.fromAnalysisOptions(
+          const AnalysisOptions('path', {
+            'dart_code_linter': {
+              'unused-code': {'analyze-private-members': true},
+            },
+          }),
+        );
+
+        expect(config.analyzePrivateMembers, true);
       });
     });
 
@@ -65,12 +82,14 @@ void main() {
           ['hello'],
           isMonorepo: true,
           shouldPrintConfig: true,
+          analyzePrivateMembers: true,
         );
 
         expect(config.excludePatterns, equals(['hello']));
         expect(config.analyzerExcludePatterns, isEmpty);
         expect(config.isMonorepo, true);
         expect(config.shouldPrintConfig, true);
+        expect(config.analyzePrivateMembers, true);
       });
     });
 
@@ -109,6 +128,10 @@ void main() {
         );
         expect(result.isMonorepo, equals(_merged.isMonorepo));
         expect(result.shouldPrintConfig, equals(_merged.shouldPrintConfig));
+        expect(
+          result.analyzePrivateMembers,
+          equals(_merged.analyzePrivateMembers),
+        );
       });
     });
   });

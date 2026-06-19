@@ -41,4 +41,6 @@ class FlagNames {
   static const fatalOnUnused = 'fatal-unused';
   static const fatalOnFound = 'fatal-found';
   static const deleteFiles = 'delete-files';
+
+  static const analyzePrivateMembers = 'analyze-private-members';
 }

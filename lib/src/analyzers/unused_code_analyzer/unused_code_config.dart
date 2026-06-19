@@ -7,11 +7,16 @@ class UnusedCodeConfig {
   final bool isMonorepo;
   final bool shouldPrintConfig;
 
+  /// Whether unused private class members (methods, fields, getters and
+  /// setters) should be reported in addition to top-level declarations.
+  final bool analyzePrivateMembers;
+
   const UnusedCodeConfig({
     required this.excludePatterns,
     required this.analyzerExcludePatterns,
     required this.isMonorepo,
     required this.shouldPrintConfig,
+    required this.analyzePrivateMembers,
   });
 
   /// Creates the config from analysis [options].
@@ -22,6 +27,10 @@ class UnusedCodeConfig {
             options.readIterableOfString(['analyzer', 'exclude']),
         isMonorepo: false,
         shouldPrintConfig: false,
+        analyzePrivateMembers: options.readBool(
+          ['unused-code', 'analyze-private-members'],
+          packageRelated: true,
+        ),
       );
 
   /// Creates the config from cli args.
@@ -29,12 +38,14 @@ class UnusedCodeConfig {
     Iterable<String> excludePatterns, {
     required bool isMonorepo,
     required bool shouldPrintConfig,
+    required bool analyzePrivateMembers,
   }) =>
       UnusedCodeConfig(
         shouldPrintConfig: shouldPrintConfig,
         excludePatterns: excludePatterns,
         analyzerExcludePatterns: const [],
         isMonorepo: isMonorepo,
+        analyzePrivateMembers: analyzePrivateMembers,
       );
 
   /// Merges two configs into a single one.
@@ -49,5 +60,7 @@ class UnusedCodeConfig {
         },
         isMonorepo: isMonorepo || overrides.isMonorepo,
         shouldPrintConfig: shouldPrintConfig || overrides.shouldPrintConfig,
+        analyzePrivateMembers:
+            analyzePrivateMembers || overrides.analyzePrivateMembers,
       );
 }

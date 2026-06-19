@@ -181,6 +181,47 @@ void main() {
 
         expect(reporter, isA<UnusedCodeConsoleReporter>());
       });
+
+      group('analyze-private-members', () {
+        final privateMembersFolders = [
+          normalize(File('test/resources/unused_code_private_members_analyzer')
+              .absolute
+              .path),
+        ];
+
+        test('is disabled by default', () async {
+          final result = await analyzer.runCliAnalysis(
+            privateMembersFolders,
+            rootDirectory,
+            _createConfig(),
+          );
+
+          expect(result, isEmpty);
+        });
+
+        test('reports only unused private members when enabled', () async {
+          final result = await analyzer.runCliAnalysis(
+            privateMembersFolders,
+            rootDirectory,
+            _createConfig(analyzePrivateMembers: true),
+          );
+
+          final report = result.firstWhere(
+            (report) => report.path.endsWith('private_members.dart'),
+          );
+
+          final names = report.issues.map((issue) => issue.declarationName);
+
+          expect(
+            names,
+            unorderedEquals(['_unusedField', '_unusedMethod', '_unusedGetter']),
+          );
+          expect(names, isNot(contains('publicUnusedMethod')));
+          expect(names, isNot(contains('_usedField')));
+          expect(names, isNot(contains('_usedMethod')));
+          expect(names, isNot(contains('_usedGetter')));
+        });
+      });
     },
     testOn: 'posix',
   );
@@ -188,10 +229,12 @@ void main() {
 
 UnusedCodeConfig _createConfig({
   Iterable<String> analyzerExcludePatterns = const [],
+  bool analyzePrivateMembers = false,
 }) =>
     UnusedCodeConfig(
       excludePatterns: const [],
       analyzerExcludePatterns: analyzerExcludePatterns,
       isMonorepo: false,
       shouldPrintConfig: false,
+      analyzePrivateMembers: analyzePrivateMembers,
     );

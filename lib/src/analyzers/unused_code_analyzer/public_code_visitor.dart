@@ -12,8 +12,13 @@ class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
 
   final Suppression _suppression;
   final String _pattern;
+  final bool _analyzePrivateMembers;
 
-  PublicCodeVisitor(this._suppression, this._pattern);
+  PublicCodeVisitor(
+    this._suppression,
+    this._pattern, {
+    bool analyzePrivateMembers = false,
+  }) : _analyzePrivateMembers = analyzePrivateMembers;
 
   @override
   void visitCompilationUnitMember(CompilationUnitMember node) {
@@ -29,6 +34,17 @@ class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
     }
 
     _getTopLevelElement(node);
+
+    if (_analyzePrivateMembers && _isTypeDeclaration(node)) {
+      // Descend into the type body with a recursive visitor. The shape of the
+      // members container (`ClassDeclaration.members` vs `body.members`) changed
+      // across supported analyzer versions, so we rely on the visitor dispatch
+      // for `MethodDeclaration`/`FieldDeclaration`, which is stable, instead of
+      // typed member accessors.
+      node.accept(
+        _PrivateMemberVisitor(topLevelElements, _suppression, _pattern),
+      );
+    }
   }
 
   @override
@@ -50,6 +66,60 @@ class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
 
     if (element != null) {
       topLevelElements.add(element);
+    }
+  }
+
+  bool _isTypeDeclaration(CompilationUnitMember node) =>
+      node is ClassDeclaration ||
+      node is MixinDeclaration ||
+      node is EnumDeclaration ||
+      node is ExtensionDeclaration ||
+      node is ExtensionTypeDeclaration;
+}
+
+/// Collects private members (methods, fields, getters and setters) of a single
+/// type declaration as unused-code candidates.
+///
+/// Only private members are considered: they cannot be referenced from outside
+/// the declaring library, so whole-program usage analysis can detect them
+/// reliably, without the false positives that public members (reachable via
+/// overrides, interfaces or reflection) would produce.
+class _PrivateMemberVisitor extends RecursiveAstVisitor<void> {
+  final Set<Element> _elements;
+  final Suppression _suppression;
+  final String _pattern;
+
+  _PrivateMemberVisitor(this._elements, this._suppression, this._pattern);
+
+  @override
+  void visitMethodDeclaration(MethodDeclaration node) {
+    if (_isSuppressed(node)) {
+      return;
+    }
+
+    _addIfPrivate(node.declaredFragment?.element);
+  }
+
+  @override
+  void visitFieldDeclaration(FieldDeclaration node) {
+    if (_isSuppressed(node)) {
+      return;
+    }
+
+    for (final variable in node.fields.variables) {
+      _addIfPrivate(variable.declaredFragment?.element);
+    }
+  }
+
+  bool _isSuppressed(AstNode node) {
+    final lineIndex = _suppression.lineInfo.getLocation(node.offset).lineNumber;
+
+    return _suppression.isSuppressedAt(_pattern, lineIndex);
+  }
+
+  void _addIfPrivate(Element? element) {
+    if (element != null && element.isPrivate) {
+      _elements.add(element);
     }
   }
 }

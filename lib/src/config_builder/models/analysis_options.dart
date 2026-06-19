@@ -48,6 +48,27 @@ class AnalysisOptions {
     return isIterableOfStrings(data) ? (data as Iterable).cast<String>() : [];
   }
 
+  bool readBool(
+    Iterable<String> pathSegments, {
+    bool packageRelated = false,
+    bool defaultValue = false,
+  }) {
+    final usedSegments =
+        packageRelated ? [_rootKey, ...pathSegments] : pathSegments;
+
+    Object? data = options;
+
+    for (final key in usedSegments) {
+      if (data is Map<String, Object> && data.containsKey(key)) {
+        data = data[key];
+      } else {
+        return defaultValue;
+      }
+    }
+
+    return data is bool ? data : defaultValue;
+  }
+
   Map<String, Object> readMap(
     Iterable<String> pathSegments, {
     bool packageRelated = false,

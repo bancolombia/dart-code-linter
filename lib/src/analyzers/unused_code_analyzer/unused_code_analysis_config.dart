@@ -5,11 +5,13 @@ class UnusedCodeAnalysisConfig {
   final Iterable<Glob> globalExcludes;
   final Iterable<Glob> analyzerExcludedPatterns;
   final bool isMonorepo;
+  final bool analyzePrivateMembers;
 
   const UnusedCodeAnalysisConfig(
     this.globalExcludes,
     this.analyzerExcludedPatterns, {
     required this.isMonorepo,
+    required this.analyzePrivateMembers,
   });
 
   Map<String, Object?> toJson() => {
@@ -17,5 +19,6 @@ class UnusedCodeAnalysisConfig {
         'analyzer-excluded-patterns':
             analyzerExcludedPatterns.map((glob) => glob.pattern).toList(),
         'is-monorepo': isMonorepo,
+        'analyze-private-members': analyzePrivateMembers,
       };
 }

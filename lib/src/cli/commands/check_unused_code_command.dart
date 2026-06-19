@@ -42,11 +42,14 @@ class CheckUnusedCodeCommand extends BaseCommand {
     final reporterName = argResults[FlagNames.reporter] as String;
     final isMonorepo = argResults[FlagNames.isMonorepo] as bool;
     final shouldPrintConfig = argResults[FlagNames.printConfig] as bool;
+    final analyzePrivateMembers =
+        argResults[FlagNames.analyzePrivateMembers] as bool;
 
     final config = ConfigBuilder.getUnusedCodeConfigFromArgs(
       [excludePath],
       isMonorepo: isMonorepo,
       shouldPrintConfig: shouldPrintConfig,
+      analyzePrivateMembers: analyzePrivateMembers,
     );
 
     final unusedCodeResult = await _analyzer.runCliAnalysis(
@@ -79,6 +82,7 @@ class CheckUnusedCodeCommand extends BaseCommand {
     _usesReporterOption();
     addCommonFlags();
     _usesIsMonorepoOption();
+    _usesAnalyzePrivateMembersOption();
     _usesExitOption();
   }
 
@@ -104,6 +108,16 @@ class CheckUnusedCodeCommand extends BaseCommand {
       ..addFlag(
         FlagNames.isMonorepo,
         help: 'Treat all exported code as unused by default.',
+      );
+  }
+
+  void _usesAnalyzePrivateMembersOption() {
+    argParser
+      ..addSeparator('')
+      ..addFlag(
+        FlagNames.analyzePrivateMembers,
+        help: 'Also report unused private class members '
+            '(methods, fields, getters and setters).',
       );
   }
 
