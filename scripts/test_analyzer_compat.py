@@ -35,6 +35,19 @@ VERSION_PAIRS = [
             "test_api": "0.7.12",
         },
     ),
+    (
+        # 13.1+ deprecated ExtensionTypeDeclaration.primaryConstructor in favour
+        # of namePart; 13.0.0 (above) predates that. This row covers the post-
+        # reshape side so ast_compat.extensionTypeName stays valid on both.
+        "13.3.0",
+        "0.14.12",
+        {
+            "analysis_server_plugin": "0.3.18",
+            "test": "1.31.1",
+            "test_core": "0.6.18",
+            "test_api": "0.7.12",
+        },
+    ),
 ]
 
 PUBSPEC_PATH = Path("pubspec.yaml")
