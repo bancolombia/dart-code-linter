@@ -16,14 +16,17 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Analyzer + analyzer_plugin version pairs to test.
+# Analyzer + analyzer_plugin version pairs to test. One representative per
+# analyzer major spanned by the pubspec range (>=10.0.0 <14.0.0), plus a second
+# 13.x row to straddle the namePart reshape (see the 13.3.0 entry).
 # Each entry: (analyzer_version, analyzer_plugin_version, extra_overrides).
 # `extra_overrides` lets us pin test/test_core/test_api when a given analyzer
 # version requires a newer test stack than the lowest-allowed by pubspec.
 VERSION_PAIRS = [
-    ("10.0.1", "0.14.1", {"analysis_server_plugin": "0.3.7"}),  # Flutter stable (meta 1.17.0 compatible)
-    ("11.0.0", "0.14.5", {"analysis_server_plugin": "0.3.11"}),  # Previous default
-    ("12.1.0", "0.14.8", {"analysis_server_plugin": "0.3.14"}),  # Latest 12.x
+    # 10.x: the pubspec floor. .0.1 patch is the lowest that resolves with meta 1.17.0.
+    ("10.0.1", "0.14.1", {"analysis_server_plugin": "0.3.7"}),
+    ("11.0.0", "0.14.5", {"analysis_server_plugin": "0.3.11"}),  # 11.x
+    ("12.1.0", "0.14.8", {"analysis_server_plugin": "0.3.14"}),  # 12.x
     (
         "13.0.0",
         "0.14.9",
