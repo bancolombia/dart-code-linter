@@ -1,6 +1,9 @@
 // Cross-version helpers for analyzer 10.x–13.x. Analyzer 13 reshaped
 // named-argument, record-field, default-parameter and label nodes; these
 // helpers recognise the affected shapes structurally via `childEntities`.
+// Later 13.x patches also deprecated some getters (e.g. `isAbstract`) whose
+// replacements don't exist on earlier rows; those are reimplemented here from
+// stable APIs so a single call site works across the whole supported range.
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/syntactic_entity.dart';
@@ -149,4 +152,21 @@ Expression? _expressionAfterEqualsToken(Iterable<SyntacticEntity> entities) {
     }
   }
   return null;
+}
+
+/// Returns whether [node] declares an abstract method across analyzer versions.
+///
+/// `MethodDeclaration.isAbstract` is non-deprecated on analyzer 10.0–13.1, but
+/// 13.2+ deprecates it in favour of `isComplete` — which is its inverse (not a
+/// rename) and does not exist before 13.2. So neither getter is callable and
+/// non-deprecated on every supported row. This mirrors the analyzer's own
+/// `isAbstract` definition using stable APIs: a method is abstract iff it is
+/// not external and its body is an empty (`;`) body with a real, non-synthetic
+/// semicolon (the synthetic case is error recovery, not a real declaration).
+bool isAbstractMethod(MethodDeclaration node) {
+  final body = node.body;
+
+  return node.externalKeyword == null &&
+      body is EmptyFunctionBody &&
+      !body.semicolon.isSynthetic;
 }
