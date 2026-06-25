@@ -51,8 +51,9 @@ class AnalyzerPlugin extends ServerPlugin {
 
     // resourceProvider.getFile (not location.getFile, which only exists in
     // analyzer >=13.3.0) keeps this compatible across the supported range.
+    final pathContext = resourceProvider.pathContext;
     final file = resourceProvider.getFile(
-      resourceProvider.pathContext.join(location.path, 'uuid'),
+      pathContext.normalize(pathContext.join(location.path, 'uuid')),
     );
     if (!file.exists) {
       uuid = const Uuid().v4();
