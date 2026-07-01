@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/ast/ast.dart';
 
+import '../../../utils/ast_compat.dart';
 import 'class_type.dart';
 
 /// Represents a declaration of a class / mixin / extension.
@@ -24,7 +25,7 @@ class ScopedClassDeclaration {
     } else if (node is EnumDeclaration) {
       name = node.namePart.typeName.lexeme;
     } else if (node is ExtensionTypeDeclaration) {
-      name = node.primaryConstructor.typeName.lexeme;
+      name = extensionTypeName(node);
     }
 
     return name ?? '';
