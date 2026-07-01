@@ -2,6 +2,7 @@
 
 ## 4.1.6
 - Add an auto-fix to the `prefer-enums-by-name` rule that converts `Enum.values.firstWhere((e) => e.name == x)` to `Enum.values.byName(x)`. The fix is offered only when the call is safely convertible: a single-parameter `== name` arrow closure, no `orElse`, and a lookup that does not reference the closure parameter.
+- Fix a deprecation warning for `ExtensionTypeDeclaration.primaryConstructor` (deprecated on analyzer 13.1+ in favor of `namePart`, which doesn't exist before 13.1) by reading the extension type's name structurally through a new `ast_compat` helper instead of the version-specific getter.
 - Replace the deprecated `Folder.getChildAssumingFile` with `ResourceProvider.getFile` in the analyzer plugin's UUID bootstrap, resolving the pana static-analysis deprecation warning on analyzer 13.x. The call stays compatible across the full `>=10.0.0 <14.0.0` range (`Folder.getFile` only exists in analyzer 13.3.0+).
 
 ## 4.1.5
