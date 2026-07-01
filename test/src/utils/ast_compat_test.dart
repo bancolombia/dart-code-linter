@@ -268,4 +268,79 @@ void main() {
       }
     });
   });
+
+  group('extensionTypeName', () {
+    ExtensionTypeDeclaration parseExtensionType(String source) =>
+        _firstOfType<ExtensionTypeDeclaration>(_parse(source));
+
+    test('returns the name of a simple extension type', () {
+      final node = parseExtensionType('extension type Meters(int value) {}');
+
+      expect(extensionTypeName(node), equals('Meters'));
+    });
+
+    test('returns the name of a const extension type', () {
+      final node =
+          parseExtensionType('extension type const Id(String value) {}');
+
+      expect(extensionTypeName(node), equals('Id'));
+    });
+
+    test('returns the name when a named primary constructor is present', () {
+      final node = parseExtensionType(
+        'extension type Wrapper.of(int value) {}',
+      );
+
+      expect(extensionTypeName(node), equals('Wrapper'));
+    });
+
+    test('returns the name of a generic extension type', () {
+      final node = parseExtensionType('extension type Box<T>(T value) {}');
+
+      expect(extensionTypeName(node), equals('Box'));
+    });
+
+    test('returns the name when an implements clause is present', () {
+      final node = parseExtensionType(
+        'extension type Celsius(double value) implements num {}',
+      );
+
+      expect(extensionTypeName(node), equals('Celsius'));
+    });
+
+    test(
+      'structural anchor holds: the name part is the first child node and its '
+      'first identifier token is the type name (validated per analyzer row)',
+      () {
+        const cases = {
+          'extension type Meters(int value) {}': 'Meters',
+          'extension type const Id(String value) {}': 'Id',
+          'extension type Wrapper.of(int value) {}': 'Wrapper',
+          'extension type Box<T>(T value) {}': 'Box',
+          'extension type Celsius(double value) implements num {}': 'Celsius',
+        };
+
+        for (final entry in cases.entries) {
+          final node = parseExtensionType(entry.key);
+          final namePart = debugExtensionTypeNamePart(node);
+
+          expect(
+            namePart,
+            isNotNull,
+            reason: 'No name-part node resolved for "${entry.key}". '
+                'ExtensionTypeDeclaration child shape changed in this '
+                'analyzer version.',
+          );
+          // The name part must precede the implements clause and body.
+          expect(
+            namePart,
+            isNot(isA<ImplementsClause>()),
+            reason: 'Resolved the implements clause instead of the name part '
+                'for "${entry.key}".',
+          );
+          expect(extensionTypeName(node), equals(entry.value));
+        }
+      },
+    );
+  });
 }

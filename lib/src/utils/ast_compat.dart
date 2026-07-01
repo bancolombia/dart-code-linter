@@ -170,3 +170,47 @@ bool isAbstractMethod(MethodDeclaration node) {
       body is EmptyFunctionBody &&
       !body.semicolon.isSynthetic;
 }
+
+/// Returns the declared type name of an [ExtensionTypeDeclaration] across
+/// analyzer versions, or `null` if it can't be located.
+///
+/// `primaryConstructor.typeName` works on analyzer 10.0–13.0 but is deprecated
+/// on 13.1+ (use `namePart.typeName`), which in turn is absent on 10.0–13.0 —
+/// so neither getter is callable and non-deprecated on every supported row.
+/// Instead the name is read structurally: on all rows the name part is the
+/// first child node (preceded only by keyword tokens; `type` is a contextual
+/// identifier and is not anchored on), and its first identifier token is the
+/// type name (any leading `const` is a keyword token, so it is skipped).
+String? extensionTypeName(ExtensionTypeDeclaration node) {
+  final namePart = _firstChildNode(node);
+  if (namePart == null) {
+    return null;
+  }
+
+  return _firstIdentifierLexeme(namePart);
+}
+
+/// Exposes the structurally-resolved name-part node of an
+/// [ExtensionTypeDeclaration] so cross-version tests can validate the anchor's
+/// shape against every analyzer row in the compatibility matrix.
+@visibleForTesting
+AstNode? debugExtensionTypeNamePart(ExtensionTypeDeclaration node) =>
+    _firstChildNode(node);
+
+AstNode? _firstChildNode(AstNode node) {
+  for (final entity in node.childEntities) {
+    if (entity is AstNode) {
+      return entity;
+    }
+  }
+  return null;
+}
+
+String? _firstIdentifierLexeme(AstNode node) {
+  for (final entity in node.childEntities) {
+    if (entity is Token && entity.type == TokenType.IDENTIFIER) {
+      return entity.lexeme;
+    }
+  }
+  return null;
+}
