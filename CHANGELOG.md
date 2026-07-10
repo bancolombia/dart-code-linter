@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.1.7
+- Raise the `analyzer` ceiling to `<15.0.0`, enabling analyzer 14.x support now that `dart_style` 3.1.11 added compatibility with it. Add a 14.0.0 row to the `scripts/test_analyzer_compat.py` matrix (`analyzer_plugin` 0.14.13, `analysis_server_plugin` 0.3.19).
+
 ## 4.1.6
 - Add an auto-fix to the `prefer-enums-by-name` rule that converts `Enum.values.firstWhere((e) => e.name == x)` to `Enum.values.byName(x)`. The fix is offered only when the call is safely convertible: a single-parameter `== name` arrow closure, no `orElse`, and a lookup that does not reference the closure parameter.
 - Fix a deprecation warning for `ExtensionTypeDeclaration.primaryConstructor` (deprecated on analyzer 13.1+ in favor of `namePart`, which doesn't exist before 13.1) by reading the extension type's name structurally through a new `ast_compat` helper instead of the version-specific getter.
