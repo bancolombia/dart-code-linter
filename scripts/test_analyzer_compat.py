@@ -59,6 +59,13 @@ VERSION_PAIRS = [
         "0.14.13",
         {"analysis_server_plugin": "0.3.19"},
     ),
+    (
+        # Upper boundary of the current <15.0.0 ceiling: latest 14.x patch,
+        # which is what `dart pub upgrade` actually resolves to today.
+        "14.1.0",
+        "0.14.14",
+        {"analysis_server_plugin": "0.3.20"},
+    ),
 ]
 
 PUBSPEC_PATH = Path("pubspec.yaml")
