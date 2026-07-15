@@ -40,8 +40,10 @@ VERSION_PAIRS = [
     ),
     (
         # 13.1+ deprecated ExtensionTypeDeclaration.primaryConstructor in favour
-        # of namePart; 13.0.0 (above) predates that. This row covers the post-
-        # reshape side so ast_compat.extensionTypeName stays valid on both.
+        # of namePart, and 13.2+ deprecated MethodDeclaration.isAbstract in
+        # favour of isComplete; 13.0.0 (above) predates both. This row covers
+        # the post-deprecation side so ast_compat.extensionTypeName and
+        # ast_compat.isAbstractMethod stay valid on both.
         "13.3.0",
         "0.14.12",
         {
