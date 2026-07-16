@@ -49,7 +49,12 @@ class AnalyzerPlugin extends ServerPlugin {
 
     var uuid = '';
 
-    final file = location.getChildAssumingFile('uuid');
+    // resourceProvider.getFile (not location.getFile, which only exists in
+    // analyzer >=13.3.0) keeps this compatible across the supported range.
+    final pathContext = resourceProvider.pathContext;
+    final file = resourceProvider.getFile(
+      pathContext.normalize(pathContext.join(location.path, 'uuid')),
+    );
     if (!file.exists) {
       uuid = const Uuid().v4();
       file.writeAsStringSync(uuid);

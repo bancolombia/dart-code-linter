@@ -221,6 +221,54 @@ void main() {
     });
   });
 
+  group('isAbstractMethod', () {
+    MethodDeclaration parseMethod(String source) =>
+        _firstOfType<MethodDeclaration>(_parse(source));
+
+    test('is true for an abstract method (no body, not external)', () {
+      final node = parseMethod('abstract class A { void foo(); }');
+
+      expect(isAbstractMethod(node), isTrue);
+    });
+
+    test('is false for a method with a body', () {
+      final node = parseMethod('class A { void foo() {} }');
+
+      expect(isAbstractMethod(node), isFalse);
+    });
+
+    test('is false for an arrow-bodied method', () {
+      final node = parseMethod('class A { int foo() => 1; }');
+
+      expect(isAbstractMethod(node), isFalse);
+    });
+
+    test('is false for an external method (complete, not abstract)', () {
+      final node = parseMethod('class A { external void foo(); }');
+
+      expect(isAbstractMethod(node), isFalse);
+    });
+
+    test('matches MethodDeclaration.isAbstract on the current analyzer', () {
+      const sources = [
+        'abstract class A { void foo(); }',
+        'class A { void foo() {} }',
+        'class A { int foo() => 1; }',
+        'class A { external void foo(); }',
+      ];
+
+      for (final source in sources) {
+        final node = parseMethod(source);
+        // ignore: deprecated_member_use
+        expect(
+          isAbstractMethod(node),
+          equals(node.isAbstract),
+          reason: 'Diverged from analyzer isAbstract for: $source',
+        );
+      }
+    });
+  });
+
   group('extensionTypeName', () {
     ExtensionTypeDeclaration parseExtensionType(String source) =>
         _firstOfType<ExtensionTypeDeclaration>(_parse(source));
