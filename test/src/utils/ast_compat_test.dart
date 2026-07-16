@@ -220,4 +220,127 @@ void main() {
       expect(view.name, equals('answer'));
     });
   });
+
+  group('isAbstractMethod', () {
+    MethodDeclaration parseMethod(String source) =>
+        _firstOfType<MethodDeclaration>(_parse(source));
+
+    test('is true for an abstract method (no body, not external)', () {
+      final node = parseMethod('abstract class A { void foo(); }');
+
+      expect(isAbstractMethod(node), isTrue);
+    });
+
+    test('is false for a method with a body', () {
+      final node = parseMethod('class A { void foo() {} }');
+
+      expect(isAbstractMethod(node), isFalse);
+    });
+
+    test('is false for an arrow-bodied method', () {
+      final node = parseMethod('class A { int foo() => 1; }');
+
+      expect(isAbstractMethod(node), isFalse);
+    });
+
+    test('is false for an external method (complete, not abstract)', () {
+      final node = parseMethod('class A { external void foo(); }');
+
+      expect(isAbstractMethod(node), isFalse);
+    });
+
+    test('matches MethodDeclaration.isAbstract on the current analyzer', () {
+      const sources = [
+        'abstract class A { void foo(); }',
+        'class A { void foo() {} }',
+        'class A { int foo() => 1; }',
+        'class A { external void foo(); }',
+      ];
+
+      for (final source in sources) {
+        final node = parseMethod(source);
+        // ignore: deprecated_member_use
+        expect(
+          isAbstractMethod(node),
+          equals(node.isAbstract),
+          reason: 'Diverged from analyzer isAbstract for: $source',
+        );
+      }
+    });
+  });
+
+  group('extensionTypeName', () {
+    ExtensionTypeDeclaration parseExtensionType(String source) =>
+        _firstOfType<ExtensionTypeDeclaration>(_parse(source));
+
+    test('returns the name of a simple extension type', () {
+      final node = parseExtensionType('extension type Meters(int value) {}');
+
+      expect(extensionTypeName(node), equals('Meters'));
+    });
+
+    test('returns the name of a const extension type', () {
+      final node =
+          parseExtensionType('extension type const Id(String value) {}');
+
+      expect(extensionTypeName(node), equals('Id'));
+    });
+
+    test('returns the name when a named primary constructor is present', () {
+      final node = parseExtensionType(
+        'extension type Wrapper.of(int value) {}',
+      );
+
+      expect(extensionTypeName(node), equals('Wrapper'));
+    });
+
+    test('returns the name of a generic extension type', () {
+      final node = parseExtensionType('extension type Box<T>(T value) {}');
+
+      expect(extensionTypeName(node), equals('Box'));
+    });
+
+    test('returns the name when an implements clause is present', () {
+      final node = parseExtensionType(
+        'extension type Celsius(double value) implements num {}',
+      );
+
+      expect(extensionTypeName(node), equals('Celsius'));
+    });
+
+    test(
+      'structural anchor holds: the name part is the first child node and its '
+      'first identifier token is the type name (validated per analyzer row)',
+      () {
+        const cases = {
+          'extension type Meters(int value) {}': 'Meters',
+          'extension type const Id(String value) {}': 'Id',
+          'extension type Wrapper.of(int value) {}': 'Wrapper',
+          'extension type Box<T>(T value) {}': 'Box',
+          'extension type Celsius(double value) implements num {}': 'Celsius',
+        };
+
+        for (final entry in cases.entries) {
+          final node = parseExtensionType(entry.key);
+          final namePart = debugExtensionTypeNamePart(node);
+
+          expect(
+            namePart,
+            isNotNull,
+            reason: 'No name-part node resolved for "${entry.key}". '
+                'ExtensionTypeDeclaration child shape changed in this '
+                'analyzer version.',
+          );
+          // The name part must precede the implements clause and body.
+          expect(
+            namePart,
+            isNot(isA<ImplementsClause>()),
+            reason: 'Resolved the implements clause instead of the name part '
+                'for "${entry.key}".',
+          );
+          expect(extensionTypeName(node), equals(entry.value));
+        }
+      },
+    );
+  });
 }
