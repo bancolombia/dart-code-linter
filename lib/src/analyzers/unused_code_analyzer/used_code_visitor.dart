@@ -103,6 +103,23 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   }
 
   @override
+  void visitPatternField(PatternField node) {
+    // The member name in an object pattern is a plain token, not a
+    // SimpleIdentifier, so visitSimpleIdentifier never sees it.
+    final element = node.element;
+    _recordIfExtensionMember(element);
+    if (_recordClassMembers && element != null) {
+      final enclosingElement = element.enclosingElement;
+      if (enclosingElement is InterfaceElement ||
+          enclosingElement is ExtensionElement) {
+        _recordUsedElement(element);
+      }
+    }
+
+    super.visitPatternField(node);
+  }
+
+  @override
   void visitPostfixExpression(PostfixExpression node) {
     _recordAssignmentTarget(node, node.operand);
 

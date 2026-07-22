@@ -3,6 +3,9 @@
 class SomeClass {
   final int _usedField = 1;
 
+  // Used only via an object pattern in `main`: must NOT be reported.
+  final int _patternUsedField = 6;
+
   final int _unusedField = 2;
 
   int _usedMethod() => _usedField;
@@ -34,4 +37,8 @@ void main() {
   instance.publicUsedMethod();
 
   1._usedExtensionMethod();
+
+  if (instance case SomeClass(_patternUsedField: > 0)) {
+    instance.publicUsedMethod();
+  }
 }
