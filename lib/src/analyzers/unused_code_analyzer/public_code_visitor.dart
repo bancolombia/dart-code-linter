@@ -80,10 +80,15 @@ class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
 /// Collects private members (methods, fields, getters and setters) of a single
 /// type declaration as unused-code candidates.
 ///
-/// Only private members are considered: they cannot be referenced from outside
-/// the declaring library, so whole-program usage analysis can detect them
-/// reliably, without the false positives that public members (reachable via
-/// overrides, interfaces or reflection) would produce.
+/// Only private members are considered: they cannot be referenced from
+/// outside the declaring library, which rules out the reflection and
+/// cross-library false positives that make public members unreliable to
+/// analyze. Note that privacy is library-scoped, not class-scoped, so a
+/// private member can still be overridden or implemented by another type in
+/// the same library; usage tracking does not currently guard against that
+/// (tracked as a known limitation, not yet a reported false positive because
+/// of how usage matching happens to fall back to same-name-in-library
+/// matching).
 class _PrivateMemberVisitor extends RecursiveAstVisitor<void> {
   final Set<Element> _elements;
   final Suppression _suppression;

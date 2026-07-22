@@ -229,6 +229,31 @@ void main() {
           expect(names, isNot(contains('_usedExtensionGetter')));
           expect(names, isNot(contains('_usedExtensionMethod')));
         });
+
+        test(
+          'known limitation: a dead private override sharing a name with a '
+          'live ancestor member is not reported (see private_override.dart)',
+          () async {
+            final result = await analyzer.runCliAnalysis(
+              privateMembersFolders,
+              rootDirectory,
+              _createConfig(analyzePrivateMembers: true),
+            );
+
+            final report = result.firstWhereOrNull(
+              (report) => report.path.endsWith('private_override.dart'),
+            );
+
+            // Derived2 is instantiated (so the class itself isn't flagged),
+            // but Derived2._template2 is never called on it and is
+            // genuinely dead. It is NOT flagged: the name+library fallback
+            // in _isEqualElements treats it as used because Base2._template2
+            // (same name, same library) is used elsewhere. Tracked as a
+            // known limitation, not a regression to fix here. A file with no
+            // issues at all is omitted from the result set entirely.
+            expect(report, null);
+          },
+        );
       });
     },
     testOn: 'posix',
