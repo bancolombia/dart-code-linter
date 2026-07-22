@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.1.9
+- Add opt-in detection of unused private class members (methods, fields, getters and setters) to `check-unused-code`. Private members are library-scoped and cannot be reached via overrides, interfaces or reflection, so they can be analyzed reliably without the false positives public members would produce. Enabled via the `--analyze-private-members` CLI flag or the `unused-code: analyze-private-members: true` analysis-options key; disabled by default.
+
 ## 4.1.8
 - Raise the `analyzer` ceiling to `<15.0.0`, enabling analyzer 14.x support now that `dart_style` 3.1.11 added compatibility with it. Add 14.0.0 and 14.1.0 rows to the `scripts/test_analyzer_compat.py` matrix (`analyzer_plugin` 0.14.13/0.14.14, `analysis_server_plugin` 0.3.19/0.3.20).
 
