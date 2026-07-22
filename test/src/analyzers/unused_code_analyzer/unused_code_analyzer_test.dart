@@ -214,12 +214,20 @@ void main() {
 
           expect(
             names,
-            unorderedEquals(['_unusedField', '_unusedMethod', '_unusedGetter']),
+            unorderedEquals([
+              '_unusedField',
+              '_unusedMethod',
+              '_unusedGetter',
+              '_unusedExtensionGetter',
+              '_unusedExtensionMethod',
+            ]),
           );
           expect(names, isNot(contains('publicUnusedMethod')));
           expect(names, isNot(contains('_usedField')));
           expect(names, isNot(contains('_usedMethod')));
           expect(names, isNot(contains('_usedGetter')));
+          expect(names, isNot(contains('_usedExtensionGetter')));
+          expect(names, isNot(contains('_usedExtensionMethod')));
         });
       });
     },

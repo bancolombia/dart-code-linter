@@ -249,6 +249,10 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     } else if (enclosingElement is ExtensionElement) {
       _recordUsedExtension(enclosingElement);
 
+      if (_recordClassMembers) {
+        _recordUsedElement(element);
+      }
+
       return;
     } else if (element is MultiplyDefinedElement) {
       // If the element is multiply defined then call this method recursively

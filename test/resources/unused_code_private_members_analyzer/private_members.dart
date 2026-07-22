@@ -19,7 +19,19 @@ class SomeClass {
   int publicUnusedMethod() => 5;
 }
 
+extension IntPrivateMembersExtension on int {
+  int get _usedExtensionGetter => this;
+
+  int get _unusedExtensionGetter => this;
+
+  int _usedExtensionMethod() => _usedExtensionGetter;
+
+  int _unusedExtensionMethod() => 3;
+}
+
 void main() {
   final instance = SomeClass();
   instance.publicUsedMethod();
+
+  1._usedExtensionMethod();
 }
