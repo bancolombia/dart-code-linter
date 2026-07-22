@@ -1,5 +1,5 @@
 """Tests dart_code_linter against multiple analyzer versions to verify
-cross-version compatibility (analyzer 10.x, 11.x, 12.x, 13.x).
+cross-version compatibility (analyzer 10.x, 11.x, 12.x, 13.x, 14.x).
 
 Usage:
     python scripts/test_analyzer_compat.py [--analyze-only]
@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 # Analyzer + analyzer_plugin version pairs to test. One representative per
-# analyzer major spanned by the pubspec range (>=10.0.0 <14.0.0), plus a second
+# analyzer major spanned by the pubspec range (>=10.0.0 <15.0.0), plus a second
 # 13.x row to straddle the namePart reshape (see the 13.3.0 entry).
 # Each entry: (analyzer_version, analyzer_plugin_version, extra_overrides).
 # `extra_overrides` lets us pin test/test_core/test_api when a given analyzer
@@ -52,6 +52,21 @@ VERSION_PAIRS = [
             "test_core": "0.6.18",
             "test_api": "0.7.12",
         },
+    ),
+    (
+        # 14.x requires dart_style 3.1.11+ (transitive via analyzer_plugin),
+        # which only just added analyzer-14 support. dart_style itself isn't
+        # pinned here; pub resolves it automatically off analyzer_plugin.
+        "14.0.0",
+        "0.14.13",
+        {"analysis_server_plugin": "0.3.19"},
+    ),
+    (
+        # Upper boundary of the current <15.0.0 ceiling: latest 14.x patch,
+        # which is what `dart pub upgrade` actually resolves to today.
+        "14.1.0",
+        "0.14.14",
+        {"analysis_server_plugin": "0.3.20"},
     ),
 ]
 

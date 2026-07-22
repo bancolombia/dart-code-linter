@@ -1,7 +1,11 @@
 # Changelog
 
+## 4.1.8
+- Raise the `analyzer` ceiling to `<15.0.0`, enabling analyzer 14.x support now that `dart_style` 3.1.11 added compatibility with it. Add 14.0.0 and 14.1.0 rows to the `scripts/test_analyzer_compat.py` matrix (`analyzer_plugin` 0.14.13/0.14.14, `analysis_server_plugin` 0.3.19/0.3.20).
+
 ## 4.1.7
 - Replace the deprecated `Folder.getChildAssumingFile` with `ResourceProvider.getFile` in the analyzer plugin's UUID bootstrap, resolving the pana static-analysis deprecation warning on analyzer 13.x. The call stays compatible across the full `>=10.0.0 <14.0.0` range (`Folder.getFile` only exists in analyzer 13.3.0+).
+- Replace the deprecated `MethodDeclaration.isAbstract` with a structural `ast_compat.isAbstractMethod()` helper in `avoid-unused-parameters`, keeping the call non-deprecated across the full `>=10.0.0 <14.0.0` range (`isComplete` only exists in analyzer 13.2+).
 
 ## 4.1.6
 - Add an auto-fix to the `prefer-enums-by-name` rule that converts `Enum.values.firstWhere((e) => e.name == x)` to `Enum.values.byName(x)`. The fix is offered only when the call is safely convertible: a single-parameter `== name` arrow closure, no `orElse`, and a lookup that does not reference the closure parameter.
