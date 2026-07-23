@@ -218,6 +218,7 @@ void main() {
               '_unusedField',
               '_unusedMethod',
               '_unusedGetter',
+              '_unusedSetter',
               '_unusedExtensionGetter',
               '_unusedExtensionMethod',
             ]),
@@ -226,6 +227,8 @@ void main() {
           expect(names, isNot(contains('_usedField')));
           expect(names, isNot(contains('_usedMethod')));
           expect(names, isNot(contains('_usedGetter')));
+          expect(names, isNot(contains('_usedSetter')));
+          expect(names, isNot(contains('_setterBackingField')));
           expect(names, isNot(contains('_usedExtensionGetter')));
           expect(names, isNot(contains('_usedExtensionMethod')));
         });

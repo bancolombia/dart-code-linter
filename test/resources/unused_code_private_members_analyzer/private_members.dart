@@ -16,6 +16,12 @@ class SomeClass {
 
   int get _unusedGetter => 4;
 
+  int _setterBackingField = 0;
+
+  set _usedSetter(int value) => _setterBackingField = value;
+
+  set _unusedSetter(int value) => _setterBackingField = value;
+
   int publicUsedMethod() => _usedMethod() + _usedGetter;
 
   // Public and unused: must NOT be reported by the private-members analysis.
@@ -35,6 +41,7 @@ extension IntPrivateMembersExtension on int {
 void main() {
   final instance = SomeClass();
   instance.publicUsedMethod();
+  instance._usedSetter = 10;
 
   1._usedExtensionMethod();
 
