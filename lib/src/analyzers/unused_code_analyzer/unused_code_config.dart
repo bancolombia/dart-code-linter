@@ -10,8 +10,9 @@ class UnusedCodeConfig {
   final bool? isMonorepo;
   final bool? shouldPrintConfig;
 
-  /// Whether unused private class members (methods, fields, getters and
-  /// setters) should be reported in addition to top-level declarations.
+  /// Whether unused private members in type declarations (methods, fields,
+  /// getters and setters) should be reported in addition to top-level
+  /// declarations.
   final bool? analyzePrivateMembers;
 
   const UnusedCodeConfig({

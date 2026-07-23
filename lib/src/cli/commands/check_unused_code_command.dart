@@ -120,7 +120,7 @@ class CheckUnusedCodeCommand extends BaseCommand {
       ..addSeparator('')
       ..addFlag(
         FlagNames.analyzePrivateMembers,
-        help: 'Also report unused private class members '
+        help: 'Also report unused private members in type declarations '
             '(methods, fields, getters and setters).',
       );
   }
