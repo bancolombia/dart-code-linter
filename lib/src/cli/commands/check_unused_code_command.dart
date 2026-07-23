@@ -40,10 +40,10 @@ class CheckUnusedCodeCommand extends BaseCommand {
     final folders = argResults.rest;
     final excludePath = argResults[FlagNames.exclude] as String;
     final reporterName = argResults[FlagNames.reporter] as String;
-    final isMonorepo = argResults[FlagNames.isMonorepo] as bool;
-    final shouldPrintConfig = argResults[FlagNames.printConfig] as bool;
+    final isMonorepo = _boolFlagOrNull(FlagNames.isMonorepo);
+    final shouldPrintConfig = _boolFlagOrNull(FlagNames.printConfig);
     final analyzePrivateMembers =
-        argResults[FlagNames.analyzePrivateMembers] as bool;
+        _boolFlagOrNull(FlagNames.analyzePrivateMembers);
 
     final config = ConfigBuilder.getUnusedCodeConfigFromArgs(
       [excludePath],
@@ -77,6 +77,10 @@ class CheckUnusedCodeCommand extends BaseCommand {
       exit(1);
     }
   }
+
+  /// `null` means not passed, distinct from an explicit `--no-...`.
+  bool? _boolFlagOrNull(String name) =>
+      argResults.wasParsed(name) ? argResults[name] as bool : null;
 
   void _addFlags() {
     _usesReporterOption();

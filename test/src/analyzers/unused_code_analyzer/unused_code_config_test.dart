@@ -52,9 +52,9 @@ void main() {
 
         expect(config.excludePatterns, isEmpty);
         expect(config.analyzerExcludePatterns, isEmpty);
-        expect(config.isMonorepo, false);
-        expect(config.shouldPrintConfig, false);
-        expect(config.analyzePrivateMembers, false);
+        expect(config.isMonorepo, null);
+        expect(config.shouldPrintConfig, null);
+        expect(config.analyzePrivateMembers, null);
       });
 
       test('data', () {
@@ -132,6 +132,49 @@ void main() {
           result.analyzePrivateMembers,
           equals(_merged.analyzePrivateMembers),
         );
+      });
+
+      // Tri-state (bool?) precedence for isMonorepo, shouldPrintConfig and
+      // analyzePrivateMembers: an explicit override must be able to disable
+      // what the base config enabled, and an unset override must not.
+      const enabledBase = UnusedCodeConfig(
+        excludePatterns: [],
+        analyzerExcludePatterns: [],
+        isMonorepo: true,
+        shouldPrintConfig: true,
+        analyzePrivateMembers: true,
+      );
+
+      test('explicit false override wins over an enabled base', () {
+        const overrides = UnusedCodeConfig(
+          excludePatterns: [],
+          analyzerExcludePatterns: [],
+          isMonorepo: false,
+          shouldPrintConfig: false,
+          analyzePrivateMembers: false,
+        );
+
+        final result = enabledBase.merge(overrides);
+
+        expect(result.isMonorepo, false);
+        expect(result.shouldPrintConfig, false);
+        expect(result.analyzePrivateMembers, false);
+      });
+
+      test('unset (null) override falls back to the base config', () {
+        const overrides = UnusedCodeConfig(
+          excludePatterns: [],
+          analyzerExcludePatterns: [],
+          isMonorepo: null,
+          shouldPrintConfig: null,
+          analyzePrivateMembers: null,
+        );
+
+        final result = enabledBase.merge(overrides);
+
+        expect(result.isMonorepo, true);
+        expect(result.shouldPrintConfig, true);
+        expect(result.analyzePrivateMembers, true);
       });
     });
   });

@@ -62,7 +62,7 @@ class UnusedCodeAnalyzer {
       final unusedCodeAnalysisConfig =
           _getAnalysisConfig(context, rootFolder, config);
 
-      if (config.shouldPrintConfig) {
+      if (config.shouldPrintConfig ?? false) {
         _logger?.printConfig(unusedCodeAnalysisConfig.toJson());
       }
 
@@ -106,7 +106,7 @@ class UnusedCodeAnalyzer {
       }
     }
 
-    if (!config.isMonorepo) {
+    if (!(config.isMonorepo ?? false)) {
       _logger?.infoVerbose(
         'Removing globally exported files with code usages from the analysis: ${codeUsages.exports.length}',
       );

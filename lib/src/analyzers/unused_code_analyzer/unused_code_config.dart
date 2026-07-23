@@ -1,15 +1,18 @@
 import '../../config_builder/models/analysis_options.dart';
 
 /// Represents raw unused code config which can be merged with other raw configs.
+///
+/// Bool flags are `bool?` so an override can explicitly disable what the
+/// base config enabled.
 class UnusedCodeConfig {
   final Iterable<String> excludePatterns;
   final Iterable<String> analyzerExcludePatterns;
-  final bool isMonorepo;
-  final bool shouldPrintConfig;
+  final bool? isMonorepo;
+  final bool? shouldPrintConfig;
 
   /// Whether unused private class members (methods, fields, getters and
   /// setters) should be reported in addition to top-level declarations.
-  final bool analyzePrivateMembers;
+  final bool? analyzePrivateMembers;
 
   const UnusedCodeConfig({
     required this.excludePatterns,
@@ -25,20 +28,20 @@ class UnusedCodeConfig {
         excludePatterns: const [],
         analyzerExcludePatterns:
             options.readIterableOfString(['analyzer', 'exclude']),
-        isMonorepo: false,
-        shouldPrintConfig: false,
-        analyzePrivateMembers: options.readBool(
+        isMonorepo: null,
+        shouldPrintConfig: null,
+        analyzePrivateMembers: options.readBoolOrNull(
           ['unused-code', 'analyze-private-members'],
           packageRelated: true,
         ),
       );
 
-  /// Creates the config from cli args.
+  /// Creates the config from cli args. Pass `null` for an unparsed flag.
   factory UnusedCodeConfig.fromArgs(
     Iterable<String> excludePatterns, {
-    required bool isMonorepo,
-    required bool shouldPrintConfig,
-    required bool analyzePrivateMembers,
+    required bool? isMonorepo,
+    required bool? shouldPrintConfig,
+    required bool? analyzePrivateMembers,
   }) =>
       UnusedCodeConfig(
         shouldPrintConfig: shouldPrintConfig,
@@ -58,9 +61,9 @@ class UnusedCodeConfig {
           ...analyzerExcludePatterns,
           ...overrides.analyzerExcludePatterns,
         },
-        isMonorepo: isMonorepo || overrides.isMonorepo,
-        shouldPrintConfig: shouldPrintConfig || overrides.shouldPrintConfig,
+        isMonorepo: overrides.isMonorepo ?? isMonorepo,
+        shouldPrintConfig: overrides.shouldPrintConfig ?? shouldPrintConfig,
         analyzePrivateMembers:
-            analyzePrivateMembers || overrides.analyzePrivateMembers,
+            overrides.analyzePrivateMembers ?? analyzePrivateMembers,
       );
 }

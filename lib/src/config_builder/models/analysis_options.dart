@@ -52,6 +52,15 @@ class AnalysisOptions {
     Iterable<String> pathSegments, {
     bool packageRelated = false,
     bool defaultValue = false,
+  }) =>
+      readBoolOrNull(pathSegments, packageRelated: packageRelated) ??
+      defaultValue;
+
+  /// Like [readBool], but returns `null` when the key is absent instead of a
+  /// default value.
+  bool? readBoolOrNull(
+    Iterable<String> pathSegments, {
+    bool packageRelated = false,
   }) {
     final usedSegments =
         packageRelated ? [_rootKey, ...pathSegments] : pathSegments;
@@ -62,11 +71,11 @@ class AnalysisOptions {
       if (data is Map<String, Object> && data.containsKey(key)) {
         data = data[key];
       } else {
-        return defaultValue;
+        return null;
       }
     }
 
-    return data is bool ? data : defaultValue;
+    return data is bool ? data : null;
   }
 
   Map<String, Object> readMap(
