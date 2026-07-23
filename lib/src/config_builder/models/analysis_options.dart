@@ -48,16 +48,7 @@ class AnalysisOptions {
     return isIterableOfStrings(data) ? (data as Iterable).cast<String>() : [];
   }
 
-  bool readBool(
-    Iterable<String> pathSegments, {
-    bool packageRelated = false,
-    bool defaultValue = false,
-  }) =>
-      readBoolOrNull(pathSegments, packageRelated: packageRelated) ??
-      defaultValue;
-
-  /// Like [readBool], but returns `null` when the key is absent instead of a
-  /// default value.
+  /// Returns `null` when the key is absent.
   bool? readBoolOrNull(
     Iterable<String> pathSegments, {
     bool packageRelated = false,
