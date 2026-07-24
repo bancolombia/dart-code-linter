@@ -1,0 +1,126 @@
+// Flagged: NavigationDelegate configured on a widget-supplied controller,
+// but none of its named callbacks reference any field of `widget` — the
+// behavior is fully hardcoded, with no way for callers of this widget to
+// customize it.
+class BcWebviewTemplate extends StatefulWidget {
+  const BcWebviewTemplate({required this.webviewController});
+
+  final WebViewController webviewController;
+
+  @override
+  State<BcWebviewTemplate> createState() => _BcWebviewTemplateState();
+}
+
+class _BcWebviewTemplateState extends State<BcWebviewTemplate> {
+  @override
+  void initState() {
+    super.initState();
+
+    widget.webviewController.setNavigationDelegate(
+      NavigationDelegate(
+        onWebResourceError: (error) {},
+        onNavigationRequest: (request) => NavigationDecision.navigate,
+      ),
+    );
+  }
+}
+
+// Not flagged: at least one callback references a widget field, so callers
+// have some way to customize the behavior.
+class PartiallyConfigurableWebview extends StatefulWidget {
+  const PartiallyConfigurableWebview({
+    required this.webviewController,
+    this.onError,
+  });
+
+  final WebViewController webviewController;
+  final Function? onError;
+
+  @override
+  State<PartiallyConfigurableWebview> createState() =>
+      _PartiallyConfigurableWebviewState();
+}
+
+class _PartiallyConfigurableWebviewState
+    extends State<PartiallyConfigurableWebview> {
+  @override
+  void initState() {
+    super.initState();
+
+    widget.webviewController.setNavigationDelegate(
+      NavigationDelegate(
+        onWebResourceError: (error) => widget.onError?.call(),
+        onNavigationRequest: (request) => NavigationDecision.navigate,
+      ),
+    );
+  }
+}
+
+// Not flagged: the configured object isn't a field of `widget`.
+class LocalControllerWebview extends StatefulWidget {
+  @override
+  State<LocalControllerWebview> createState() =>
+      _LocalControllerWebviewState();
+}
+
+class _LocalControllerWebviewState extends State<LocalControllerWebview> {
+  final controller = WebViewController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller.setNavigationDelegate(
+      NavigationDelegate(
+        onWebResourceError: (error) {},
+        onNavigationRequest: (request) => NavigationDecision.navigate,
+      ),
+    );
+  }
+}
+
+// Not flagged: the hardcoded configuration happens outside initState.
+class BuildTimeConfigurationWebview extends StatefulWidget {
+  const BuildTimeConfigurationWebview({required this.webviewController});
+
+  final WebViewController webviewController;
+
+  @override
+  State<BuildTimeConfigurationWebview> createState() =>
+      _BuildTimeConfigurationWebviewState();
+}
+
+class _BuildTimeConfigurationWebviewState
+    extends State<BuildTimeConfigurationWebview> {
+  void configure() {
+    widget.webviewController.setNavigationDelegate(
+      NavigationDelegate(
+        onWebResourceError: (error) {},
+        onNavigationRequest: (request) => NavigationDecision.navigate,
+      ),
+    );
+  }
+
+  @override
+  Widget build() => Widget();
+}
+
+class State<T> {}
+
+class Widget {}
+
+class WebViewController {
+  void setNavigationDelegate(NavigationDelegate delegate) {}
+}
+
+class NavigationDelegate {
+  const NavigationDelegate({this.onWebResourceError, this.onNavigationRequest});
+
+  final Function? onWebResourceError;
+  final Function? onNavigationRequest;
+}
+
+class NavigationDecision {
+  static const navigate = NavigationDecision();
+  const NavigationDecision();
+}

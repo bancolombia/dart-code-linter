@@ -17,6 +17,8 @@ import 'rules_list/avoid_late_keyword/avoid_late_keyword_rule.dart';
 import 'rules_list/avoid_missing_enum_constant_in_map/avoid_missing_enum_constant_in_map_rule.dart';
 import 'rules_list/avoid_nested_conditional_expressions/avoid_nested_conditional_expressions_rule.dart';
 import 'rules_list/avoid_non_ascii_symbols/avoid_non_ascii_symbols_rule.dart';
+import 'rules_list/avoid_non_configurable_callbacks_in_init_state/avoid_non_configurable_callbacks_in_init_state_rule.dart';
+import 'rules_list/avoid_non_exhaustive_switch_on_sealed_classes/avoid_non_exhaustive_switch_on_sealed_classes_rule.dart';
 import 'rules_list/avoid_non_null_assertion/avoid_non_null_assertion_rule.dart';
 import 'rules_list/avoid_passing_async_when_sync_expected/avoid_passing_async_when_sync_expected_rule.dart';
 import 'rules_list/avoid_redundant_async/avoid_redundant_async_rule.dart';
@@ -61,6 +63,7 @@ import 'rules_list/prefer_correct_identifier_length/prefer_correct_identifier_le
 import 'rules_list/prefer_correct_test_file_name/prefer_correct_test_file_name_rule.dart';
 import 'rules_list/prefer_correct_type_name/prefer_correct_type_name_rule.dart';
 import 'rules_list/prefer_define_hero_tag/prefer_define_hero_tag_rule.dart';
+import 'rules_list/prefer_dot_shorthands/prefer_dot_shorthands_rule.dart';
 import 'rules_list/prefer_enums_by_name/prefer_enums_by_name_rule.dart';
 import 'rules_list/prefer_extracting_callbacks/prefer_extracting_callbacks_rule.dart';
 import 'rules_list/prefer_first/prefer_first_rule.dart';
@@ -105,6 +108,10 @@ final _implementedRules = <String, Rule Function(Map<String, Object>)>{
   AvoidNestedConditionalExpressionsRule.ruleId:
       AvoidNestedConditionalExpressionsRule.new,
   AvoidNonAsciiSymbolsRule.ruleId: AvoidNonAsciiSymbolsRule.new,
+  AvoidNonConfigurableCallbacksInInitStateRule.ruleId:
+      AvoidNonConfigurableCallbacksInInitStateRule.new,
+  AvoidNonExhaustiveSwitchOnSealedClassesRule.ruleId:
+      AvoidNonExhaustiveSwitchOnSealedClassesRule.new,
   AvoidNonNullAssertionRule.ruleId: AvoidNonNullAssertionRule.new,
   AvoidPassingAsyncWhenSyncExpectedRule.ruleId:
       AvoidPassingAsyncWhenSyncExpectedRule.new,
@@ -159,6 +166,7 @@ final _implementedRules = <String, Rule Function(Map<String, Object>)>{
   PreferCorrectTestFileNameRule.ruleId: PreferCorrectTestFileNameRule.new,
   PreferCorrectTypeNameRule.ruleId: PreferCorrectTypeNameRule.new,
   PreferDefineHeroTagRule.ruleId: PreferDefineHeroTagRule.new,
+  PreferDotShorthandsRule.ruleId: PreferDotShorthandsRule.new,
   PreferEnumsByNameRule.ruleId: PreferEnumsByNameRule.new,
   PreferExtractingCallbacksRule.ruleId: PreferExtractingCallbacksRule.new,
   PreferFirstRule.ruleId: PreferFirstRule.new,
