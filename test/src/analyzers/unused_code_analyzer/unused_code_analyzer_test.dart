@@ -233,6 +233,56 @@ void main() {
           expect(names, isNot(contains('_usedExtensionMethod')));
         });
 
+        test('reports only unused private named constructors', () async {
+          final result = await analyzer.runCliAnalysis(
+            privateMembersFolders,
+            rootDirectory,
+            _createConfig(analyzePrivateMembers: true),
+          );
+
+          final report = result.firstWhere(
+            (report) => report.path.endsWith('private_constructors.dart'),
+          );
+
+          final names = report.issues.map((issue) => issue.declarationName);
+
+          expect(
+            names,
+            unorderedEquals([
+              'InstanceCreation._unusedNamed',
+              'FactoryRedirect._unusedInFactoryClass',
+              'GenerativeRedirect._unusedInRedirectClass',
+              'SuperBase._unusedInBase',
+              'TearOff._unusedInTearOffClass',
+              'SelectorEnum._unusedEnumCtor',
+              'Meters._unusedSecondary',
+            ]),
+          );
+
+          // Used via instance creation, factory redirect, `this.` redirect,
+          // `super.` invocation, tear-off and enum constant selector.
+          expect(names, isNot(contains('InstanceCreation._used')));
+          expect(names, isNot(contains('FactoryRedirect._impl')));
+          expect(names, isNot(contains('GenerativeRedirect._delegate')));
+          expect(names, isNot(contains('SuperBase._base')));
+          expect(names, isNot(contains('TearOff._tearOff')));
+          expect(names, isNot(contains('SelectorEnum._select')));
+          // Sole private constructor (prevent-instantiation pattern).
+          expect(names, isNot(contains('StaticOnly._')));
+          // Public constructors are out of scope.
+          expect(names, isNot(contains('PublicCtors.publicUnused')));
+          // Suppressed with an ignore comment.
+          expect(names, isNot(contains('SuppressedCtor._suppressed')));
+
+          expect(
+            report.issues
+                .map((issue) => issue.declarationType)
+                .toSet()
+                .single,
+            'constructor',
+          );
+        });
+
         test(
           'known limitation: a dead private override sharing a name with a '
           'live ancestor member is not reported (see private_override.dart)',

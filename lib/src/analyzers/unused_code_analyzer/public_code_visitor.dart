@@ -77,8 +77,8 @@ class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
       node is ExtensionTypeDeclaration;
 }
 
-/// Collects private members (methods, fields, getters and setters) of a single
-/// type declaration as unused-code candidates.
+/// Collects private members (methods, fields, getters, setters and named
+/// constructors) of a single type declaration as unused-code candidates.
 ///
 /// Only private members are considered: they cannot be referenced from
 /// outside the declaring library, which rules out the reflection and
@@ -114,6 +114,33 @@ class _PrivateMemberVisitor extends RecursiveAstVisitor<void> {
     for (final variable in node.fields.variables) {
       _addIfPrivate(variable.declaredFragment?.element);
     }
+  }
+
+  @override
+  void visitConstructorDeclaration(ConstructorDeclaration node) {
+    if (_isSuppressed(node)) {
+      return;
+    }
+
+    // Only named constructors can be candidates: privacy is determined by the
+    // identifier, and an unnamed constructor has none (its element is named
+    // `new`, so `isPrivate` is naturally false). Primary constructors of
+    // extension types are part of the type declaration itself, not
+    // `ConstructorDeclaration` nodes, so they never reach this visitor.
+    final element = node.declaredFragment?.element;
+    if (element == null || !element.isPrivate) {
+      return;
+    }
+
+    // Mirror the SDK's unused_element carve-out: a sole private constructor
+    // exists to prevent instantiation or extension, which counts as usage.
+    // This hides no dead code: an entirely unused class is still reported by
+    // the top-level check in [PublicCodeVisitor], independent of this visitor.
+    if (element.enclosingElement.constructors.length <= 1) {
+      return;
+    }
+
+    _elements.add(element);
   }
 
   bool _isSuppressed(AstNode node) {

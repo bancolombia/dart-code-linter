@@ -103,6 +103,21 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   }
 
   @override
+  void visitEnumConstantDeclaration(EnumConstantDeclaration node) {
+    // The constructor selector of an enum constant is not resolved like an
+    // ordinary identifier, so visitSimpleIdentifier never records it.
+    // `baseElement` unwraps the member produced by generic enums.
+    if (_recordClassMembers) {
+      final constructor = node.constructorElement?.baseElement;
+      if (constructor != null) {
+        _recordUsedElement(constructor);
+      }
+    }
+
+    super.visitEnumConstantDeclaration(node);
+  }
+
+  @override
   void visitPatternField(PatternField node) {
     // The member name in an object pattern is a plain token, not a
     // SimpleIdentifier, so visitSimpleIdentifier never sees it.
