@@ -121,7 +121,7 @@ class CheckUnusedCodeCommand extends BaseCommand {
       ..addFlag(
         FlagNames.analyzePrivateMembers,
         help: 'Also report unused private members in type declarations '
-            '(methods, fields, getters and setters).',
+            '(methods, fields, getters, setters and named constructors).',
       );
   }
 

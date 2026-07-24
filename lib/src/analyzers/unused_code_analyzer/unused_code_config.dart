@@ -11,8 +11,8 @@ class UnusedCodeConfig {
   final bool? shouldPrintConfig;
 
   /// Whether unused private members in type declarations (methods, fields,
-  /// getters and setters) should be reported in addition to top-level
-  /// declarations.
+  /// getters, setters and named constructors) should be reported in addition
+  /// to top-level declarations.
   final bool? analyzePrivateMembers;
 
   const UnusedCodeConfig({
