@@ -78,9 +78,16 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   InterfaceElement? _contextTypeElement(Expression node) {
-    final parameterType = correspondingParameterOf(node)?.type;
-    if (parameterType != null) {
-      return _classElement(parameterType);
+    final parameter = correspondingParameterOf(node);
+    if (parameter != null) {
+      // A parameter declared with a type parameter (e.g. `T value`) may get
+      // its type substituted from this very argument; a shorthand would
+      // remove the inference source and no longer compile.
+      if (parameter.baseElement.type is TypeParameterType) {
+        return null;
+      }
+
+      return _classElement(parameter.type);
     }
 
     final parent = node.parent;

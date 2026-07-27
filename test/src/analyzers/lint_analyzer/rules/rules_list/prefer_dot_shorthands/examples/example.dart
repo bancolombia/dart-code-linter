@@ -57,3 +57,16 @@ void mismatchedArgument() {
 void unnamedConstructorCall() {
   acceptPoint(Point(1, 2));
 }
+
+class ValueNotifier<T> {
+  ValueNotifier(T value);
+}
+
+T identity<T>(T value) => value;
+
+// Not flagged: the parameter is declared as a type parameter, so its type is
+// inferred from this very argument; a shorthand would have no context type.
+void inferredGenericArguments() {
+  print(ValueNotifier(LogLevel.info));
+  print(identity(LogLevel.error));
+}
