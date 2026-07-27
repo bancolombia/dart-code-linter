@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
+import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
@@ -33,6 +34,12 @@ class PreferDotShorthandsRule extends DartRule {
 
   @override
   Iterable<Issue> check(InternalResolvedUnitResult source) {
+    // Dot shorthands are Dart 3.10+ syntax; on earlier language versions the
+    // suggestion (and its auto-fix) would not compile.
+    if (!source.unit.featureSet.isEnabled(Feature.dot_shorthands)) {
+      return const [];
+    }
+
     final visitor = _Visitor();
     source.unit.visitChildren(visitor);
 

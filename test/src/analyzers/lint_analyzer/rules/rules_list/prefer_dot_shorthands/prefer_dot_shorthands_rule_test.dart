@@ -8,6 +8,8 @@ import 'package:test/test.dart';
 import '../../../../../helpers/rule_test_helper.dart';
 
 const _examplePath = 'prefer_dot_shorthands/examples/example.dart';
+const _preDotShorthandsExamplePath =
+    'prefer_dot_shorthands/examples/example_pre_dot_shorthands.dart';
 const _fixedExamplePath =
     'test/src/analyzers/lint_analyzer/rules/rules_list/prefer_dot_shorthands/examples/example_fixed.dart';
 
@@ -28,7 +30,7 @@ void main() {
 
       RuleTestHelper.verifyIssues(
         issues: issues,
-        startLines: [19, 24, 29, 35, 40],
+        startLines: [21, 26, 31, 37, 42],
         replacements: [
           '.error',
           '.warning',
@@ -37,6 +39,16 @@ void main() {
           '.zero()',
         ],
       );
+    });
+
+    test(
+        'is silent on a file whose language version predates dot shorthands',
+        () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_preDotShorthandsExamplePath);
+      final issues = PreferDotShorthandsRule().check(unit);
+
+      RuleTestHelper.verifyNoIssues(issues);
     });
 
     test(
@@ -58,10 +70,11 @@ void main() {
         );
       }
 
-      // Dot shorthands need language version 3.10+, while this package's own
-      // language version is lower; the rewritten file opts in explicitly.
+      // The fixture opts in to Dart 3.10 via its own `// @dart` marker
+      // (this package's language version is lower), so the rewritten
+      // content stays valid as-is.
       final fixedFile = File(_fixedExamplePath)
-        ..writeAsStringSync('// @dart=3.10\n$fixedContent');
+        ..writeAsStringSync(fixedContent);
       addTearDown(() {
         if (fixedFile.existsSync()) {
           fixedFile.deleteSync();

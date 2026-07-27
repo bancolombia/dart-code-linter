@@ -124,3 +124,38 @@ class NavigationDecision {
   static const navigate = NavigationDecision();
   const NavigationDecision();
 }
+
+// Flagged twice: two widget-supplied controllers are each configured with a
+// fully hardcoded callback object in the same initState.
+class DoubleConfigurationWebview extends StatefulWidget {
+  const DoubleConfigurationWebview({
+    required this.firstController,
+    required this.secondController,
+  });
+
+  final WebViewController firstController;
+  final WebViewController secondController;
+
+  @override
+  State<DoubleConfigurationWebview> createState() =>
+      _DoubleConfigurationWebviewState();
+}
+
+class _DoubleConfigurationWebviewState
+    extends State<DoubleConfigurationWebview> {
+  @override
+  void initState() {
+    super.initState();
+
+    widget.firstController.setNavigationDelegate(
+      NavigationDelegate(
+        onWebResourceError: (error) {},
+      ),
+    );
+    widget.secondController.setNavigationDelegate(
+      NavigationDelegate(
+        onNavigationRequest: (request) => NavigationDecision.navigate,
+      ),
+    );
+  }
+}

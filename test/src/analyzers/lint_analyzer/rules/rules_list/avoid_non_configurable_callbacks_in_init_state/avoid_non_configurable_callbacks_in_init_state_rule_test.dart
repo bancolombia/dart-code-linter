@@ -17,14 +17,17 @@ void main() {
     });
 
     test(
-        'reports only the fully hardcoded configuration built in initState, '
-        'and not the partially-configurable one, the one built off a local '
-        'variable, or the one built outside initState', () async {
+        'reports the fully hardcoded configurations built in initState '
+        '(including two in one initState), and not the '
+        'partially-configurable one, the one built off a local variable, or '
+        'the one built outside initState', () async {
       final unit = await RuleTestHelper.resolveFromFile(_examplePath);
       final issues = AvoidNonConfigurableCallbacksInInitStateRule().check(unit);
 
-      expect(issues, hasLength(1));
-      expect(issues.first.location.start.line, 20);
+      RuleTestHelper.verifyIssues(
+        issues: issues,
+        startLines: [20, 151, 156],
+      );
     });
   });
 }
