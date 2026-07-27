@@ -37,14 +37,17 @@ class _Visitor extends RecursiveAstVisitor<void> {
       for (final argument in invocation.argumentList.arguments) {
         final expression = unwrapArgumentExpression(argument);
         if (expression is InstanceCreationExpression &&
-            _isNonConfigurableCallbackObject(expression)) {
+            _isNonConfigurableCallbackObject(expression, body)) {
           _hardcodedConfigurations.add(expression);
         }
       }
     }
   }
 
-  bool _isNonConfigurableCallbackObject(InstanceCreationExpression node) {
+  bool _isNonConfigurableCallbackObject(
+    InstanceCreationExpression node,
+    BlockClassBody classBody,
+  ) {
     final hasNamedCallback =
         node.argumentList.arguments.any(_isNamedFunctionArgument);
 
@@ -52,15 +55,9 @@ class _Visitor extends RecursiveAstVisitor<void> {
       return false;
     }
 
-    final widgetReferenceVisitor = _WidgetReferenceVisitor();
-    node.accept(widgetReferenceVisitor);
-
-    return !widgetReferenceVisitor.referencesWidget;
+    return !_mayReferenceWidget(node, classBody);
   }
 
-  // Known limitation: a tear-off callback (e.g. `onError: _handleError`) that
-  // reads widget fields inside its body is still reported, since only this
-  // creation expression is inspected for `widget` references.
   bool _isNamedFunctionArgument(Object? argument) {
     if (!isNamedArgument(argument)) {
       return false;
@@ -69,6 +66,66 @@ class _Visitor extends RecursiveAstVisitor<void> {
     final expression = unwrapArgumentExpression(argument);
 
     return expression?.staticType is FunctionType;
+  }
+
+  /// Whether the configuration [node] can reach a `widget` reference: directly
+  /// in its own expression tree, or through methods of the same State class
+  /// (tear-off callbacks and calls inside callback literals, followed
+  /// transitively). A function-typed argument that is neither a literal nor a
+  /// method of this class cannot be inspected here and is conservatively
+  /// treated as referencing the widget.
+  bool _mayReferenceWidget(
+    InstanceCreationExpression node,
+    BlockClassBody classBody,
+  ) {
+    if (_referencesWidget(node)) {
+      return true;
+    }
+
+    final methods = <String, MethodDeclaration>{
+      for (final member in classBody.members)
+        if (member is MethodDeclaration) member.name.lexeme: member,
+    };
+
+    for (final expression in argumentExpressions(node.argumentList)) {
+      final isOpaqueCallback = expression is! FunctionExpression &&
+          expression.staticType is FunctionType &&
+          !(expression is SimpleIdentifier &&
+              methods.containsKey(expression.name));
+      if (isOpaqueCallback) {
+        return true;
+      }
+    }
+
+    final collector = _MethodReferenceCollector(methods.keys.toSet());
+    node.accept(collector);
+
+    final pending = collector.referencedNames.toList();
+    final visited = <String>{};
+    while (pending.isNotEmpty) {
+      final name = pending.removeLast();
+      if (!visited.add(name)) {
+        continue;
+      }
+
+      final methodBody = methods[name]!.body;
+      if (_referencesWidget(methodBody)) {
+        return true;
+      }
+
+      final bodyCollector = _MethodReferenceCollector(methods.keys.toSet());
+      methodBody.accept(bodyCollector);
+      pending.addAll(bodyCollector.referencedNames);
+    }
+
+    return false;
+  }
+
+  bool _referencesWidget(AstNode node) {
+    final visitor = _WidgetReferenceVisitor();
+    node.accept(visitor);
+
+    return visitor.referencesWidget;
   }
 }
 
@@ -101,6 +158,24 @@ class _WidgetReferenceVisitor extends RecursiveAstVisitor<void> {
 
     if (node.name == 'widget') {
       _referencesWidget = true;
+    }
+  }
+}
+
+/// Collects identifiers that match a method name of the enclosing State
+/// class, i.e. tear-offs of and calls to same-class methods.
+class _MethodReferenceCollector extends RecursiveAstVisitor<void> {
+  _MethodReferenceCollector(this._knownMethodNames);
+
+  final Set<String> _knownMethodNames;
+  final referencedNames = <String>{};
+
+  @override
+  void visitSimpleIdentifier(SimpleIdentifier node) {
+    super.visitSimpleIdentifier(node);
+
+    if (_knownMethodNames.contains(node.name)) {
+      referencedNames.add(node.name);
     }
   }
 }

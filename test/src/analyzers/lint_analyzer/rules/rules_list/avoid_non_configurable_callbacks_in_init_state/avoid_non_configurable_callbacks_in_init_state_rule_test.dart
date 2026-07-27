@@ -18,15 +18,17 @@ void main() {
 
     test(
         'reports the fully hardcoded configurations built in initState '
-        '(including two in one initState), and not the '
-        'partially-configurable one, the one built off a local variable, or '
-        'the one built outside initState', () async {
+        '(including two in one initState and a hardcoded tear-off), and not '
+        'the partially-configurable ones (literal, tear-off, or transitive '
+        'tear-off referencing widget fields), the one built off a local '
+        'variable, the one built outside initState, the non-callback config, '
+        'or the tear-off resolving outside the State class', () async {
       final unit = await RuleTestHelper.resolveFromFile(_examplePath);
       final issues = AvoidNonConfigurableCallbacksInInitStateRule().check(unit);
 
       RuleTestHelper.verifyIssues(
         issues: issues,
-        startLines: [20, 151, 156],
+        startLines: [20, 151, 156, 240],
       );
     });
   });
