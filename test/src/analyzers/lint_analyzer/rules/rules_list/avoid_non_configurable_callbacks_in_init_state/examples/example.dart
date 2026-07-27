@@ -159,3 +159,35 @@ class _DoubleConfigurationWebviewState
     );
   }
 }
+
+// Not flagged: the named arguments are plain values, not callbacks, so this
+// is not a hardcoded callback configuration.
+class ValueConfigurationWebview extends StatefulWidget {
+  const ValueConfigurationWebview({required this.controller});
+
+  final ConfigurableController controller;
+
+  @override
+  State<ValueConfigurationWebview> createState() =>
+      _ValueConfigurationWebviewState();
+}
+
+class _ValueConfigurationWebviewState
+    extends State<ValueConfigurationWebview> {
+  @override
+  void initState() {
+    super.initState();
+
+    widget.controller.configure(Options(timeout: 5));
+  }
+}
+
+class ConfigurableController {
+  void configure(Options options) {}
+}
+
+class Options {
+  const Options({this.timeout});
+
+  final int? timeout;
+}

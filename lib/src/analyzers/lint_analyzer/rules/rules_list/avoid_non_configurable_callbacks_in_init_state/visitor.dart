@@ -46,7 +46,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   bool _isNonConfigurableCallbackObject(InstanceCreationExpression node) {
     final hasNamedCallback =
-        node.argumentList.arguments.any(isNamedArgument);
+        node.argumentList.arguments.any(_isNamedFunctionArgument);
 
     if (!hasNamedCallback) {
       return false;
@@ -56,6 +56,19 @@ class _Visitor extends RecursiveAstVisitor<void> {
     node.accept(widgetReferenceVisitor);
 
     return !widgetReferenceVisitor.referencesWidget;
+  }
+
+  // Known limitation: a tear-off callback (e.g. `onError: _handleError`) that
+  // reads widget fields inside its body is still reported, since only this
+  // creation expression is inspected for `widget` references.
+  bool _isNamedFunctionArgument(Object? argument) {
+    if (!isNamedArgument(argument)) {
+      return false;
+    }
+
+    final expression = unwrapArgumentExpression(argument);
+
+    return expression?.staticType is FunctionType;
   }
 }
 
