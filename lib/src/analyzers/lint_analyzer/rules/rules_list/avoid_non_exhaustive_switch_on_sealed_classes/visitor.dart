@@ -17,7 +17,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
       if (member is SwitchDefault) {
         _fallbackNodes.add(member);
       } else if (member is SwitchPatternCase &&
-          member.guardedPattern.pattern is WildcardPattern) {
+          _isUnguardedWildcard(member.guardedPattern)) {
         _fallbackNodes.add(member);
       }
     }
@@ -32,11 +32,18 @@ class _Visitor extends RecursiveAstVisitor<void> {
     }
 
     for (final switchCase in node.cases) {
-      if (switchCase.guardedPattern.pattern is WildcardPattern) {
+      if (_isUnguardedWildcard(switchCase.guardedPattern)) {
         _fallbackNodes.add(switchCase);
       }
     }
   }
+
+  // A guarded wildcard (`_ when ...`) doesn't satisfy exhaustiveness, so the
+  // compiler still enforces the remaining subtypes and there is no fallback
+  // to report.
+  bool _isUnguardedWildcard(GuardedPattern guardedPattern) =>
+      guardedPattern.pattern is WildcardPattern &&
+      guardedPattern.whenClause == null;
 
   bool _isSealedType(DartType? type) {
     final element = type is InterfaceType ? type.element : null;
