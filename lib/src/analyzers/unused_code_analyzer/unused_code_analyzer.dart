@@ -62,7 +62,7 @@ class UnusedCodeAnalyzer {
       final unusedCodeAnalysisConfig =
           _getAnalysisConfig(context, rootFolder, config);
 
-      if (config.shouldPrintConfig) {
+      if (config.shouldPrintConfig ?? false) {
         _logger?.printConfig(unusedCodeAnalysisConfig.toJson());
       }
 
@@ -88,19 +88,25 @@ class UnusedCodeAnalyzer {
 
         final unit = await context.currentSession.getResolvedUnit(filePath);
 
-        final codeUsage = _analyzeFileCodeUsages(unit);
+        final codeUsage = _analyzeFileCodeUsages(
+          unit,
+          unusedCodeAnalysisConfig.analyzePrivateMembers,
+        );
         if (codeUsage != null) {
           codeUsages.merge(codeUsage);
         }
 
         if (!unusedCodeAnalysisConfig.analyzerExcludedPatterns
             .any((pattern) => pattern.matches(filePath))) {
-          publicCode[filePath] = _analyzeFilePublicCode(unit);
+          publicCode[filePath] = _analyzeFilePublicCode(
+            unit,
+            unusedCodeAnalysisConfig.analyzePrivateMembers,
+          );
         }
       }
     }
 
-    if (!config.isMonorepo) {
+    if (!(config.isMonorepo ?? false)) {
       _logger?.infoVerbose(
         'Removing globally exported files with code usages from the analysis: ${codeUsages.exports.length}',
       );
@@ -125,9 +131,13 @@ class UnusedCodeAnalyzer {
     return ConfigBuilder.getUnusedCodeConfig(contextConfig, rootFolder);
   }
 
-  FileElementsUsage? _analyzeFileCodeUsages(SomeResolvedUnitResult unit) {
+  FileElementsUsage? _analyzeFileCodeUsages(
+    SomeResolvedUnitResult unit,
+    bool analyzePrivateMembers,
+  ) {
     if (unit is ResolvedUnitResult) {
-      final visitor = UsedCodeVisitor();
+      final visitor =
+          UsedCodeVisitor(recordClassMembers: analyzePrivateMembers);
       unit.unit.visitChildren(visitor);
 
       return visitor.fileElementsUsage;
@@ -136,7 +146,10 @@ class UnusedCodeAnalyzer {
     return null;
   }
 
-  Set<Element> _analyzeFilePublicCode(SomeResolvedUnitResult unit) {
+  Set<Element> _analyzeFilePublicCode(
+    SomeResolvedUnitResult unit,
+    bool analyzePrivateMembers,
+  ) {
     if (unit is ResolvedUnitResult) {
       final suppression = Suppression(unit.content, unit.lineInfo);
       final isSuppressed = suppression.isSuppressed(_ignoreName);
@@ -144,7 +157,11 @@ class UnusedCodeAnalyzer {
         return {};
       }
 
-      final visitor = PublicCodeVisitor(suppression, _ignoreName);
+      final visitor = PublicCodeVisitor(
+        suppression,
+        _ignoreName,
+        analyzePrivateMembers: analyzePrivateMembers,
+      );
       unit.unit.visitChildren(visitor);
 
       return visitor.topLevelElements;

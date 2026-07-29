@@ -48,6 +48,27 @@ class AnalysisOptions {
     return isIterableOfStrings(data) ? (data as Iterable).cast<String>() : [];
   }
 
+  /// Returns `null` when the key is absent.
+  bool? readBoolOrNull(
+    Iterable<String> pathSegments, {
+    bool packageRelated = false,
+  }) {
+    final usedSegments =
+        packageRelated ? [_rootKey, ...pathSegments] : pathSegments;
+
+    Object? data = options;
+
+    for (final key in usedSegments) {
+      if (data is Map<String, Object> && data.containsKey(key)) {
+        data = data[key];
+      } else {
+        return null;
+      }
+    }
+
+    return data is bool ? data : null;
+  }
+
   Map<String, Object> readMap(
     Iterable<String> pathSegments, {
     bool packageRelated = false,
