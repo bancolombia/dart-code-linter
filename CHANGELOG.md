@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.2.1
+- Fix a false negative in `check-unused-code` with `analyze-private-members` enabled: a used class member no longer marks a dead top-level declaration of the same name as used (a class calling its own `dispose` used to hide an unused top-level `dispose` function). The name based fallback that works around [dart-lang/sdk#49182](https://github.com/dart-lang/sdk/issues/49182) now requires both sides to agree on whether they are members, which cannot introduce false positives because member dispatch never resolves to a library level declaration.
+- Document the `--analyze-private-members` flag and the `unused-code.analyze-private-members` analysis-options key in the README, including their precedence and known limitations.
+- Extend the private members test coverage to mixin, enum and extension type members, static members, and member level `// ignore: unused-code` suppressions.
+
 ## 4.1.9
 - Add opt-in detection of unused private members in type declarations (methods, fields, getters, setters and named constructors) to `check-unused-code`. Private members cannot be referenced from outside the declaring library, which rules out the reflection and cross-library false positives that make public members unreliable to analyze. Mirroring the SDK's `unused_element` semantics, a sole private constructor is never reported: it is the intentional prevent-instantiation/extension pattern (an entirely unused class is still reported by the class-level check). Enabled via the `--analyze-private-members` CLI flag or the `unused-code.analyze-private-members` analysis-options key; disabled by default.
 

@@ -283,6 +283,46 @@ void main() {
           );
         });
 
+        test('reports unused private members of every type kind', () async {
+          final result = await analyzer.runCliAnalysis(
+            privateMembersFolders,
+            rootDirectory,
+            _createConfig(analyzePrivateMembers: true),
+          );
+
+          final report = result.firstWhere(
+            (report) => report.path.endsWith('private_type_kinds.dart'),
+          );
+
+          final names = report.issues.map((issue) => issue.declarationName);
+
+          expect(
+            names,
+            unorderedEquals([
+              '_unusedInMixin',
+              '_unusedStaticInEnum',
+              '_unusedEnumGetter',
+              '_unusedEnumMethod',
+              '_unusedInExtensionType',
+              '_unusedStaticConst',
+              '_unusedStaticMethod',
+              '_unusedStaticGetter',
+              '_reportedUnusedMethod',
+            ]),
+          );
+
+          // Used from the mixing in class, from another member of the same
+          // enum, extension type or class, and suppressed with a member level
+          // ignore comment.
+          expect(names, isNot(contains('_usedInMixin')));
+          expect(names, isNot(contains('_usedStaticInEnum')));
+          expect(names, isNot(contains('_usedEnumGetter')));
+          expect(names, isNot(contains('_usedInExtensionType')));
+          expect(names, isNot(contains('_usedStaticConst')));
+          expect(names, isNot(contains('_usedStaticMethod')));
+          expect(names, isNot(contains('_suppressedUnusedMethod')));
+        });
+
         test(
           'known limitation: a dead private override sharing a name with a '
           'live ancestor member is not reported (see private_override.dart)',
@@ -307,6 +347,37 @@ void main() {
             expect(report, null);
           },
         );
+      });
+
+      group('member usages do not mask top level declarations', () {
+        final maskedFolders = [
+          normalize(File('test/resources/unused_code_masked_top_level_analyzer')
+              .absolute
+              .path),
+        ];
+
+        for (final analyzePrivateMembers in [false, true]) {
+          test(
+            'reports dead top level declarations sharing a name with a used '
+            'member (analyze-private-members: $analyzePrivateMembers)',
+            () async {
+              final result = await analyzer.runCliAnalysis(
+                maskedFolders,
+                rootDirectory,
+                _createConfig(analyzePrivateMembers: analyzePrivateMembers),
+              );
+
+              final report = result.firstWhere(
+                (report) => report.path.endsWith('masked_top_level.dart'),
+              );
+
+              expect(
+                report.issues.map((issue) => issue.declarationName),
+                unorderedEquals(['reset', 'counter']),
+              );
+            },
+          );
+        }
       });
     },
     testOn: 'posix',

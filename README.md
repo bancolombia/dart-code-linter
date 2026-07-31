@@ -130,6 +130,7 @@ As DCL depends on the Dart `analyzer` package. The following table shows the com
 
 | DCL Version       | Analyzer Version   | Dart SDK          |
 |-------------------|--------------------|-------------------|
+| 4.2.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.1.9             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.1.8             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.1.7             | >=10.0.0 <14.0.0   | >=3.5.0 <4.0.0   |
@@ -260,6 +261,36 @@ It will produce a result in one of the format:
 
 - Console
 - JSON
+
+By default only top level declarations (classes, functions, variables, and so
+on) are checked. Unused private members of type declarations (methods, fields,
+getters, setters and named constructors) are reported too when the check is
+opted in:
+
+```sh
+$ dart run dart_code_linter:metrics check-unused-code lib --analyze-private-members
+```
+
+The same can be enabled through `analysis_options.yaml`, so it applies to every
+run:
+
+```yaml
+dart_code_linter:
+  unused-code:
+    analyze-private-members: true
+```
+
+The CLI flag wins over the `analysis_options.yaml` value when both are set.
+Only private members are analyzed: they cannot be referenced from outside the
+declaring library, which rules out the reflection and cross library false
+positives that make public members unreliable to report. Two limitations are
+worth knowing about:
+
+- A private field that is only ever assigned, never read, is reported as unused,
+  the same way an unused top level variable is.
+- Usages that live only in files excluded from analysis (generated `part` files,
+  for example) are invisible, so members used exclusively from there are
+  reported.
 
 
 

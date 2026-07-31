@@ -221,10 +221,29 @@ class UnusedCodeAnalyzer {
     // see: https://github.com/dart-lang/sdk/issues/49182
     return usedLibrary != null &&
         declaredSource != null &&
+        _isMember(left) == _isMember(right) &&
         left.name == right?.name &&
         usedLibrary.fragments
             .map((fragment) => fragment.source.fullName)
             .contains(declaredSource.fullName);
+  }
+
+  /// Whether [element] is declared inside a type or an extension rather than
+  /// at the library level.
+  ///
+  /// The name based fallback in [_isEqualElements] is deliberately loose, and
+  /// with member analysis enabled a used member would otherwise mark a dead
+  /// library level declaration of the same name as used (a class calling its
+  /// own `dispose` hiding an unused top level `dispose` function). Requiring
+  /// both sides to agree on member-ness cannot introduce false positives:
+  /// member dispatch never resolves to a library level declaration, so the
+  /// fallback was never needed across that boundary. Member to member matching
+  /// stays loose, since that is what keeps overrides from being reported.
+  bool _isMember(Element? element) {
+    final enclosingElement = element?.enclosingElement;
+
+    return enclosingElement is InterfaceElement ||
+        enclosingElement is ExtensionElement;
   }
 
   bool _isUnused(FileElementsUsage codeUsages, String path, Element element) =>
