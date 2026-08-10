@@ -17,16 +17,17 @@ void main() {
     });
 
     test(
-        'reports a default case and a wildcard pattern case in switch statements over sealed types',
+        'reports a default case and unguarded wildcard cases in switches over '
+        'sealed types, but not guarded wildcards or non-sealed switches',
         () async {
       final unit = await RuleTestHelper.resolveFromFile(_examplePath);
       final issues =
           AvoidNonExhaustiveSwitchOnSealedClassesRule().check(unit);
 
-      expect(issues, hasLength(3));
-      for (final issue in issues) {
-        expect(issue.message, contains('sealed type'));
-      }
+      RuleTestHelper.verifyIssues(
+        issues: issues,
+        startLines: [13, 22, 29],
+      );
     });
   });
 }

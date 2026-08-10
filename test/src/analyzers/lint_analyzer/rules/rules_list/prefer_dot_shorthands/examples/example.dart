@@ -1,3 +1,5 @@
+// @dart=3.10
+
 enum LogLevel { info, warning, error }
 
 class Point {
@@ -57,3 +59,51 @@ void mismatchedArgument() {
 void unnamedConstructorCall() {
   acceptPoint(Point(1, 2));
 }
+
+class ValueNotifier<T> {
+  ValueNotifier(T value);
+}
+
+T identity<T>(T value) => value;
+
+// Not flagged: the parameter is declared as a type parameter, so its type is
+// inferred from this very argument; a shorthand would have no context type.
+void inferredGenericArguments() {
+  print(ValueNotifier(LogLevel.info));
+  print(identity(LogLevel.error));
+}
+
+// Not flagged: an explicit const keeps the constructor call as-is.
+void constKeywordCall() {
+  acceptPoint(const Point.origin());
+}
+
+class Box<T> {
+  Box.empty();
+}
+
+void acceptBox(Box<int> box) {}
+
+// Not flagged: explicit type arguments on a named constructor call.
+void explicitConstructorTypeArguments() {
+  acceptBox(Box<int>.empty());
+}
+
+class Maker {
+  static Maker create<T>() => Maker();
+}
+
+void acceptMaker(Maker maker) {}
+
+// Not flagged: explicit type arguments on a static method call.
+void explicitMethodTypeArguments() {
+  acceptMaker(Maker.create<int>());
+}
+
+// Not flagged: the parameter type is a supertype of the accessed type, so a
+// dot shorthand would not resolve against it.
+void supertypeParameter() {
+  acceptObject(LogLevel.info);
+}
+
+void acceptObject(Object value) {}

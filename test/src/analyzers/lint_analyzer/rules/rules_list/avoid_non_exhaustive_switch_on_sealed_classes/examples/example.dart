@@ -49,3 +49,23 @@ String describeNotSealedWithDefault(NotSealed value) {
       return 'unknown';
   }
 }
+
+// A guarded wildcard doesn't satisfy exhaustiveness, so the compiler still
+// requires the remaining subtypes to be covered; there is no fallback to flag.
+String describeStatementWithGuardedWildcard(Shape shape, bool flag) {
+  switch (shape) {
+    case Circle():
+      return 'circle';
+    case _ when flag:
+      return 'flagged';
+    case Square():
+      return 'square';
+  }
+}
+
+String describeExpressionWithGuardedWildcard(Shape shape, bool flag) =>
+    switch (shape) {
+      Circle() => 'circle',
+      _ when flag => 'flagged',
+      Square() => 'square',
+    };

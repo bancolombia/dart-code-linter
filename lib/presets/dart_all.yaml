@@ -13,6 +13,7 @@ dart_code_linter:
     - avoid-missing-enum-constant-in-map
     - avoid-nested-conditional-expressions
     - avoid-non-ascii-symbols
+    - avoid-non-exhaustive-switch-on-sealed-classes
     - avoid-non-null-assertion
     - avoid-passing-async-when-sync-expected
     - avoid-redundant-async
@@ -40,6 +41,7 @@ dart_code_linter:
     - prefer-correct-identifier-length
     - prefer-correct-test-file-name
     - prefer-correct-type-name
+    - prefer-dot-shorthands
     - prefer-enums-by-name
     - prefer-first
     - prefer-immediate-return
