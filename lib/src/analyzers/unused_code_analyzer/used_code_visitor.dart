@@ -12,7 +12,10 @@ import 'models/file_elements_usage.dart';
 class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   final fileElementsUsage = FileElementsUsage();
 
-  UsedCodeVisitor();
+  final bool _recordClassMembers;
+
+  UsedCodeVisitor({bool recordClassMembers = false})
+      : _recordClassMembers = recordClassMembers;
 
   @override
   void visitImportDirective(ImportDirective node) {
@@ -97,6 +100,38 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     _recordIfExtensionMember(node.element);
 
     super.visitIndexExpression(node);
+  }
+
+  @override
+  void visitEnumConstantDeclaration(EnumConstantDeclaration node) {
+    // The constructor selector of an enum constant is not resolved like an
+    // ordinary identifier, so visitSimpleIdentifier never records it.
+    // `baseElement` unwraps the member produced by generic enums.
+    if (_recordClassMembers) {
+      final constructor = node.constructorElement?.baseElement;
+      if (constructor != null) {
+        _recordUsedElement(constructor);
+      }
+    }
+
+    super.visitEnumConstantDeclaration(node);
+  }
+
+  @override
+  void visitPatternField(PatternField node) {
+    // The member name in an object pattern is a plain token, not a
+    // SimpleIdentifier, so visitSimpleIdentifier never sees it.
+    final element = node.element;
+    _recordIfExtensionMember(element);
+    if (_recordClassMembers && element != null) {
+      final enclosingElement = element.enclosingElement;
+      if (enclosingElement is InterfaceElement ||
+          enclosingElement is ExtensionElement) {
+        _recordUsedElement(element);
+      }
+    }
+
+    super.visitPatternField(node);
   }
 
   @override
@@ -240,8 +275,15 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     if (enclosingElement is LibraryElement ||
         enclosingElement is LibraryFragment) {
       _recordUsedElement(element);
+    } else if (_recordClassMembers &&
+        enclosingElement is InterfaceElement) {
+      _recordUsedElement(element);
     } else if (enclosingElement is ExtensionElement) {
       _recordUsedExtension(enclosingElement);
+
+      if (_recordClassMembers) {
+        _recordUsedElement(element);
+      }
 
       return;
     } else if (element is MultiplyDefinedElement) {

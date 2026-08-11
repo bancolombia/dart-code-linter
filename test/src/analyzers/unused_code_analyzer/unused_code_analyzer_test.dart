@@ -181,6 +181,133 @@ void main() {
 
         expect(reporter, isA<UnusedCodeConsoleReporter>());
       });
+
+      group('analyze-private-members', () {
+        final privateMembersFolders = [
+          normalize(File('test/resources/unused_code_private_members_analyzer')
+              .absolute
+              .path),
+        ];
+
+        test('is disabled by default', () async {
+          final result = await analyzer.runCliAnalysis(
+            privateMembersFolders,
+            rootDirectory,
+            _createConfig(),
+          );
+
+          expect(result, isEmpty);
+        });
+
+        test('reports only unused private members when enabled', () async {
+          final result = await analyzer.runCliAnalysis(
+            privateMembersFolders,
+            rootDirectory,
+            _createConfig(analyzePrivateMembers: true),
+          );
+
+          final report = result.firstWhere(
+            (report) => report.path.endsWith('private_members.dart'),
+          );
+
+          final names = report.issues.map((issue) => issue.declarationName);
+
+          expect(
+            names,
+            unorderedEquals([
+              '_unusedField',
+              '_unusedMethod',
+              '_unusedGetter',
+              '_unusedSetter',
+              '_unusedExtensionGetter',
+              '_unusedExtensionMethod',
+            ]),
+          );
+          expect(names, isNot(contains('publicUnusedMethod')));
+          expect(names, isNot(contains('_usedField')));
+          expect(names, isNot(contains('_usedMethod')));
+          expect(names, isNot(contains('_usedGetter')));
+          expect(names, isNot(contains('_usedSetter')));
+          expect(names, isNot(contains('_setterBackingField')));
+          expect(names, isNot(contains('_usedExtensionGetter')));
+          expect(names, isNot(contains('_usedExtensionMethod')));
+        });
+
+        test('reports only unused private named constructors', () async {
+          final result = await analyzer.runCliAnalysis(
+            privateMembersFolders,
+            rootDirectory,
+            _createConfig(analyzePrivateMembers: true),
+          );
+
+          final report = result.firstWhere(
+            (report) => report.path.endsWith('private_constructors.dart'),
+          );
+
+          final names = report.issues.map((issue) => issue.declarationName);
+
+          expect(
+            names,
+            unorderedEquals([
+              'InstanceCreation._unusedNamed',
+              'FactoryRedirect._unusedInFactoryClass',
+              'GenerativeRedirect._unusedInRedirectClass',
+              'SuperBase._unusedInBase',
+              'TearOff._unusedInTearOffClass',
+              'SelectorEnum._unusedEnumCtor',
+              'Meters._unusedSecondary',
+            ]),
+          );
+
+          // Used via instance creation, factory redirect, `this.` redirect,
+          // `super.` invocation, tear-off and enum constant selector.
+          expect(names, isNot(contains('InstanceCreation._used')));
+          expect(names, isNot(contains('FactoryRedirect._impl')));
+          expect(names, isNot(contains('GenerativeRedirect._delegate')));
+          expect(names, isNot(contains('SuperBase._base')));
+          expect(names, isNot(contains('TearOff._tearOff')));
+          expect(names, isNot(contains('SelectorEnum._select')));
+          // Sole private constructor (prevent-instantiation pattern).
+          expect(names, isNot(contains('StaticOnly._')));
+          // Public constructors are out of scope.
+          expect(names, isNot(contains('PublicCtors.publicUnused')));
+          // Suppressed with an ignore comment.
+          expect(names, isNot(contains('SuppressedCtor._suppressed')));
+
+          expect(
+            report.issues
+                .map((issue) => issue.declarationType)
+                .toSet()
+                .single,
+            'constructor',
+          );
+        });
+
+        test(
+          'known limitation: a dead private override sharing a name with a '
+          'live ancestor member is not reported (see private_override.dart)',
+          () async {
+            final result = await analyzer.runCliAnalysis(
+              privateMembersFolders,
+              rootDirectory,
+              _createConfig(analyzePrivateMembers: true),
+            );
+
+            final report = result.firstWhereOrNull(
+              (report) => report.path.endsWith('private_override.dart'),
+            );
+
+            // Derived2 is instantiated (so the class itself isn't flagged),
+            // but Derived2._template2 is never called on it and is
+            // genuinely dead. It is NOT flagged: the name+library fallback
+            // in _isEqualElements treats it as used because Base2._template2
+            // (same name, same library) is used elsewhere. Tracked as a
+            // known limitation, not a regression to fix here. A file with no
+            // issues at all is omitted from the result set entirely.
+            expect(report, null);
+          },
+        );
+      });
     },
     testOn: 'posix',
   );
@@ -188,10 +315,12 @@ void main() {
 
 UnusedCodeConfig _createConfig({
   Iterable<String> analyzerExcludePatterns = const [],
+  bool analyzePrivateMembers = false,
 }) =>
     UnusedCodeConfig(
       excludePatterns: const [],
       analyzerExcludePatterns: analyzerExcludePatterns,
       isMonorepo: false,
       shouldPrintConfig: false,
+      analyzePrivateMembers: analyzePrivateMembers,
     );

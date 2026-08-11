@@ -40,13 +40,16 @@ class CheckUnusedCodeCommand extends BaseCommand {
     final folders = argResults.rest;
     final excludePath = argResults[FlagNames.exclude] as String;
     final reporterName = argResults[FlagNames.reporter] as String;
-    final isMonorepo = argResults[FlagNames.isMonorepo] as bool;
-    final shouldPrintConfig = argResults[FlagNames.printConfig] as bool;
+    final isMonorepo = _boolFlagOrNull(FlagNames.isMonorepo);
+    final shouldPrintConfig = _boolFlagOrNull(FlagNames.printConfig);
+    final analyzePrivateMembers =
+        _boolFlagOrNull(FlagNames.analyzePrivateMembers);
 
     final config = ConfigBuilder.getUnusedCodeConfigFromArgs(
       [excludePath],
       isMonorepo: isMonorepo,
       shouldPrintConfig: shouldPrintConfig,
+      analyzePrivateMembers: analyzePrivateMembers,
     );
 
     final unusedCodeResult = await _analyzer.runCliAnalysis(
@@ -75,10 +78,15 @@ class CheckUnusedCodeCommand extends BaseCommand {
     }
   }
 
+  /// `null` means not passed, distinct from an explicit `--no-...`.
+  bool? _boolFlagOrNull(String name) =>
+      argResults.wasParsed(name) ? argResults[name] as bool : null;
+
   void _addFlags() {
     _usesReporterOption();
     addCommonFlags();
     _usesIsMonorepoOption();
+    _usesAnalyzePrivateMembersOption();
     _usesExitOption();
   }
 
@@ -104,6 +112,16 @@ class CheckUnusedCodeCommand extends BaseCommand {
       ..addFlag(
         FlagNames.isMonorepo,
         help: 'Treat all exported code as unused by default.',
+      );
+  }
+
+  void _usesAnalyzePrivateMembersOption() {
+    argParser
+      ..addSeparator('')
+      ..addFlag(
+        FlagNames.analyzePrivateMembers,
+        help: 'Also report unused private members in type declarations '
+            '(methods, fields, getters, setters and named constructors).',
       );
   }
 
