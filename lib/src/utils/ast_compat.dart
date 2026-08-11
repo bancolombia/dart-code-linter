@@ -8,6 +8,7 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/syntactic_entity.dart';
 import 'package:analyzer/dart/ast/token.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:meta/meta.dart';
 
 /// A view of a named-argument-like node (`name: expression`).
@@ -213,4 +214,53 @@ String? _firstIdentifierLexeme(AstNode node) {
     }
   }
   return null;
+}
+
+/// Returns the [FormalParameterElement] that [expression] is bound to as a
+/// call argument, across analyzer versions.
+///
+/// `Expression.correspondingParameter` alone only resolves positional
+/// arguments on every row: for named arguments, analyzer 10–12 wrap the
+/// expression in `NamedExpression` (an `Expression`, so the built-in getter
+/// sees through it via its own parent-is-`ArgumentList` check), but analyzer
+/// 13 wraps it in `NamedArgument` (an `Argument`, not an `Expression` — a type
+/// that doesn't exist before 13), so the built-in getter returns `null`. This
+/// falls back to a structural, name-based lookup against the enclosing call's
+/// resolved parameters using the version-independent [asNamedArgument] view.
+FormalParameterElement? correspondingParameterOf(Expression expression) {
+  final direct = expression.correspondingParameter;
+  if (direct != null) {
+    return direct;
+  }
+
+  final named = asNamedArgument(expression.parent);
+  if (named == null) {
+    return null;
+  }
+
+  final argumentList = expression.parent?.parent;
+  if (argumentList is! ArgumentList) {
+    return null;
+  }
+
+  final parameters = _invocationParameters(argumentList.parent);
+  for (final parameter in parameters) {
+    if (parameter.name == named.name) {
+      return parameter;
+    }
+  }
+
+  return null;
+}
+
+List<FormalParameterElement> _invocationParameters(AstNode? invocation) {
+  final element = switch (invocation) {
+    MethodInvocation(:final methodName) =>
+      methodName.element as ExecutableElement?,
+    InstanceCreationExpression(:final constructorName) =>
+      constructorName.element,
+    _ => null,
+  };
+
+  return element?.formalParameters ?? const [];
 }

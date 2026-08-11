@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:dart_code_linter/src/utils/ast_compat.dart';
 import 'package:test/test.dart';
+
+import '../helpers/file_resolver.dart';
 
 CompilationUnit _parse(String source) => parseString(
       content: source,
@@ -259,13 +263,88 @@ void main() {
 
       for (final source in sources) {
         final node = parseMethod(source);
-        // ignore: deprecated_member_use
         expect(
           isAbstractMethod(node),
+          // ignore: deprecated_member_use
           equals(node.isAbstract),
           reason: 'Diverged from analyzer isAbstract for: $source',
         );
       }
+    });
+  });
+
+  group('correspondingParameterOf', () {
+    // Unlike the other helpers, correspondingParameterOf needs resolved
+    // elements, so the fixture goes through FileResolver instead of
+    // parseString.
+    const fixturePath =
+        'test/src/utils/corresponding_parameter_of_fixture.dart';
+    const fixtureContent = '''
+class Config {
+  Config({int? retries});
+}
+
+void send(int attempts, {String? label}) {}
+
+void main() {
+  send(1, label: 'x');
+  Config(retries: 3);
+  final sum = 1 + 2;
+  print(sum);
+}
+''';
+
+    late CompilationUnit unit;
+
+    setUpAll(() async {
+      final file = File(fixturePath)..writeAsStringSync(fixtureContent);
+      try {
+        unit = (await FileResolver.resolve(fixturePath)).unit;
+      } finally {
+        file.deleteSync();
+      }
+    });
+
+    test('resolves a positional argument to its parameter', () {
+      final call = _firstOfType<MethodInvocation>(unit);
+      final positional = unwrapArgumentExpression(
+        call.argumentList.arguments.first,
+      )!;
+
+      final parameter = correspondingParameterOf(positional);
+
+      expect(parameter, isNotNull);
+      expect(parameter!.name, equals('attempts'));
+    });
+
+    test('resolves a named argument to its parameter', () {
+      final call = _firstOfType<MethodInvocation>(unit);
+      final named = unwrapArgumentExpression(
+        call.argumentList.arguments.last,
+      )!;
+
+      final parameter = correspondingParameterOf(named);
+
+      expect(parameter, isNotNull);
+      expect(parameter!.name, equals('label'));
+    });
+
+    test('resolves a named constructor argument to its parameter', () {
+      final creation = _firstOfType<InstanceCreationExpression>(unit);
+      final named = unwrapArgumentExpression(
+        creation.argumentList.arguments.first,
+      )!;
+
+      final parameter = correspondingParameterOf(named);
+
+      expect(parameter, isNotNull);
+      expect(parameter!.name, equals('retries'));
+    });
+
+    test('returns null for an expression that is not a call argument', () {
+      final binary = _firstOfType<BinaryExpression>(unit);
+
+      expect(correspondingParameterOf(binary), isNull);
     });
   });
 
