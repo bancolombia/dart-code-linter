@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-
-import 'package:path/path.dart' as p;
 
 import '../analyzers/lint_analyzer/lint_config.dart';
 import '../analyzers/lint_analyzer/models/severity.dart';
