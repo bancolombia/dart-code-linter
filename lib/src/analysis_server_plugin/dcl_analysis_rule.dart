@@ -7,13 +7,15 @@ import 'package:analyzer/error/error.dart';
 
 import '../analyzers/lint_analyzer/models/internal_resolved_unit_result.dart';
 import '../analyzers/lint_analyzer/rules/models/rule.dart';
+import '../utils/exclude_utils.dart';
+import 'rule_config_loader.dart';
 
-/// Bridges a DCL [Rule] into the new [AnalysisRule] interface required by
-/// `analysis_server_plugin` (Dart ≥ 3.9 / Dart Analysis Server plugin API).
+/// Bridges a DCL [Rule] into the [AnalysisRule] interface required by
+/// `analysis_server_plugin`.
 ///
-/// Each DCL rule is wrapped in one [DclAnalysisRule]. The wrapper visits every
-/// [CompilationUnit], delegates analysis to the underlying DCL rule via
-/// `Rule.check`, and reports the returned issues using [reportAtOffset].
+/// Each wrapper visits every [CompilationUnit], loads full rule options from
+/// the active analysis options selected by Analyzer, delegates analysis to
+/// [Rule.check], and reports issues using [reportAtOffset].
 ///
 /// The [LintCode.problemMessage] uses the `{0}` placeholder so that the
 /// per-issue message from DCL is forwarded verbatim to the IDE/CLI.
@@ -40,20 +42,82 @@ final class DclAnalysisRule extends AnalysisRule {
     RuleVisitorRegistry registry,
     RuleContext context,
   ) {
-    registry.addCompilationUnit(this, _DclVisitor(this, context));
+    final packageRoot = context.package?.root.path;
+    var configuredRule = _dclRule;
+    Iterable<String> rulesExcludes = const [];
+    String? configError;
+    if (packageRoot != null) {
+      try {
+        final loaded = loadAnalysisServerRule(packageRoot, _dclRule.id);
+        rulesExcludes = loaded.rulesExcludes;
+        if (loaded.rule != null) {
+          configuredRule = loaded.rule!;
+        } else if (_dclRule.requiresConfig) {
+          configError = "'${_dclRule.id}' requires configuration under "
+              "'dart_code_linter.rules'.";
+        }
+      } on FormatException catch (error) {
+        configError = error.message;
+      }
+    }
+    registry.addCompilationUnit(
+      this,
+      _DclVisitor(
+        this,
+        context,
+        configuredRule,
+        configError,
+        packageRoot,
+        rulesExcludes,
+      ),
+    );
   }
 }
 
 class _DclVisitor extends SimpleAstVisitor<void> {
   final DclAnalysisRule _rule;
   final RuleContext _context;
+  final Rule _dclRule;
+  final String? _configError;
+  final String? _packageRoot;
+  final Iterable<String> _rulesExcludes;
 
-  _DclVisitor(this._rule, this._context);
+  _DclVisitor(
+    this._rule,
+    this._context,
+    this._dclRule,
+    this._configError,
+    this._packageRoot,
+    this._rulesExcludes,
+  );
 
   @override
   void visitCompilationUnit(CompilationUnit node) {
     final contextUnit = _context.currentUnit;
     if (contextUnit == null) {
+      return;
+    }
+
+    final configError = _configError;
+    if (configError != null) {
+      _rule.reportAtOffset(0, 0, arguments: [configError, '']);
+      return;
+    }
+
+    final packageRoot = _packageRoot;
+    if (packageRoot != null &&
+        (!isIncluded(
+              contextUnit.file.path,
+              createAbsolutePatterns(_dclRule.includes, packageRoot),
+            ) ||
+            isExcluded(
+              contextUnit.file.path,
+              createAbsolutePatterns(_dclRule.excludes, packageRoot),
+            ) ||
+            isExcluded(
+              contextUnit.file.path,
+              createAbsolutePatterns(_rulesExcludes, packageRoot),
+            ))) {
       return;
     }
 
@@ -64,7 +128,7 @@ class _DclVisitor extends SimpleAstVisitor<void> {
       node.lineInfo,
     );
 
-    for (final issue in _rule._dclRule.check(source)) {
+    for (final issue in _dclRule.check(source)) {
       _rule.reportAtOffset(
         issue.location.start.offset,
         issue.location.length,

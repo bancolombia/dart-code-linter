@@ -7,20 +7,22 @@ import 'dcl_analysis_rule.dart';
 
 /// The `analysis_server_plugin` entry-point for Dart Code Linter.
 ///
-/// This plugin registers all DCL lint rules with the [PluginRegistry] so they
-/// are picked up by the Dart Analysis Server (Dart ≥ 3.9). Rules that require
-/// mandatory user configuration (e.g. `avoid-banned-imports`, `ban-name`) are
-/// skipped here; they can still be used via the legacy `analyzer.plugins`
-/// mechanism or future per-rule configuration support.
+/// are picked up by the Dart Analysis Server (Dart ≥ 3.9). Analyzer-owned
+/// scalar diagnostics control enablement and IDE severity. Full DCL severity
+/// and parameters are loaded from the active `dart_code_linter.rules`
+/// configuration when each rule registers its processors.
 ///
 /// **Usage in `analysis_options.yaml`:**
 /// ```yaml
 /// plugins:
 ///   dart_code_linter:
 ///     diagnostics:
-///       avoid-dynamic: true
-///       prefer-trailing-comma: true
-///       # … add any DCL rule ID to enable it
+///       no-magic-number: warning
+/// dart_code_linter:
+///   rules:
+///     - no-magic-number:
+///         severity: warning
+///         allowed: [42]
 /// ```
 final class DartCodeLinterPlugin extends Plugin {
   @override
@@ -37,22 +39,14 @@ final class DartCodeLinterPlugin extends Plugin {
   }
 }
 
-/// Attempts to instantiate a DCL [Rule] with an empty configuration map.
+/// Instantiates a registration placeholder with default configuration.
 ///
-/// Rules marked with [Rule.requiresConfig] need mandatory user-supplied
-/// configuration values and cannot be instantiated with an empty map, so they
-/// are skipped (returns `null`).
+/// [DclAnalysisRule] replaces it with package-supplied options before analysis.
 Rule? _tryCreateRule(String id) {
   // getRulesById only includes IDs present in the config map, so we call it
   // with a single-entry map to get one rule at a time with an empty config.
   try {
-    final rules = getRulesById({id: {}});
-    final rule = rules.firstOrNull;
-    if (rule == null || rule.requiresConfig) {
-      return null;
-    }
-
-    return rule;
+    return getRulesById({id: {}}).firstOrNull;
   } on Exception catch (_) {
     // If instantiation fails (e.g. the rule validates its config eagerly),
     // skip it gracefully so other rules still load.
