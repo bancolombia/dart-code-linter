@@ -24,7 +24,7 @@ import '../utils/analyzer_utils.dart';
     return (rule: null, rulesExcludes: config.excludeForRulesPatterns);
   }
 
-  _validateSeverity(ruleId, ruleConfig, packageRoot);
+  _validateSeverity(ruleId, ruleConfig, config.analysisOptionsPath);
   try {
     return (
       rule: getRulesById({ruleId: ruleConfig}).firstOrNull,
@@ -33,7 +33,7 @@ import '../utils/analyzer_utils.dart';
   } on Object catch (error) {
     throw FormatException(
       "Invalid configuration for '$ruleId': $error",
-      p.join(packageRoot, 'analysis_options.yaml'),
+      config.analysisOptionsPath,
     );
   }
 }
@@ -103,7 +103,7 @@ void _validateResolvedRules(Map<String, Object> options, String source) {
 void _validateSeverity(
   String ruleId,
   Map<String, Object> config,
-  String packageRoot,
+  String? source,
 ) {
   final severity = config['severity'];
   final validSeverity = severity is String &&
@@ -112,7 +112,7 @@ void _validateSeverity(
   if (severity != null && !validSeverity) {
     throw FormatException(
       "Invalid severity '$severity' for '$ruleId'.",
-      p.join(packageRoot, 'analysis_options.yaml'),
+      source,
     );
   }
 }

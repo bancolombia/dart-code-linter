@@ -116,6 +116,34 @@ dart_code_linter:
     expect(rule?.toJson()['allowed'], [42]);
   });
 
+  test('reports ancestor analysis options as invalid severity source', () {
+    final workspace = Directory.systemTemp.createTempSync('dcl-workspace-');
+    addTearDown(() => workspace.deleteSync(recursive: true));
+
+    final package = Directory('${workspace.path}/package')..createSync();
+    _writePubspec(package);
+    final optionsFile = File('${workspace.path}/analysis_options.yaml')
+      ..writeAsStringSync('''
+dart_code_linter:
+  rules:
+    - no-magic-number:
+        severity: fatal
+''');
+
+    expect(
+      () => loadAnalysisServerRule(package.path, 'no-magic-number').rule,
+      throwsA(
+        isA<FormatException>()
+            .having((error) => error.source, 'source', optionsFile.path)
+            .having(
+              (error) => error.message,
+              'message',
+              contains("Invalid severity 'fatal' for 'no-magic-number'"),
+            ),
+      ),
+    );
+  });
+
   test('loads inherited DCL configuration from extends', () {
     File('${project.path}/dcl_base.yaml').writeAsStringSync('''
 dart_code_linter:
