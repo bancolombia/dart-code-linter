@@ -10,6 +10,8 @@ on:
     paths:
       - 'lib/**'
       - 'tools/**'
+      - 'test/**'
+      - '.github/workflows/build.yaml'
   
 jobs:
   build:
@@ -28,6 +30,21 @@ jobs:
         run: dart pub get
       - name: Run tests
         run: dart test
+
+  dart-3-13-plugin-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
+      - name: Setup Flutter
+        uses: bancolombia/flutter-setup-action@v1.1
+        with:
+          channel: 'stable'
+          flutter-version: '3.47.0'
+      - name: Install dependencies
+        run: dart pub get
+      - name: Test Dart 3.13 plugin configuration
+        run: DART_3_13="$(command -v dart)" dart test test/integration/dart_3_13_plugin_config_test.dart -r expanded
   
   pana:
     needs: [build]
