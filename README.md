@@ -18,7 +18,7 @@ dart pub add --dev dart_code_linter
 
 ## Basic configuration
 
-Add configuration to `analysis_options.yaml` and reload your IDE to allow the analyzer discover the plugin config.
+Add configuration `analysis_options.yaml` and reload IDE allow the analyzer discover plugin config.
 
 ### Basic config example
 
