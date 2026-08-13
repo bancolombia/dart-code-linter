@@ -18,7 +18,8 @@ dart pub add --dev dart_code_linter
 
 ## Basic configuration
 
-Add configuration `analysis_options.yaml` and reload IDE allow the analyzer discover plugin config.
+Add configuration to `analysis_options.yaml` and reload IDE to allow the analyzer to discover the plugin config.
+
 
 ### Basic config example
 
@@ -86,11 +87,11 @@ dart_code_linter:
 
 DCL can be used as a plugin for the Dart `analyzer` [package](https://pub.dev/packages/analyzer) providing additional rules. All issues produced by rules or anti-patterns will be highlighted in the IDE.
 
-Depending on Dart SDK version, configure plugin using one of these forms.
+Depending on your Dart SDK version, you can configure the plugin in two ways:
 
 #### 1. Analysis Server Plugin (Recommended for Dart >= 3.9)
 
-DCL supports the new Dart Analysis Server plugin protocol (`analysis_server_plugin`). To use it, add the plugin configuration under the top-level `plugins` key in `analysis_options.yaml`:
+DCL supports the new Dart Analysis Server plugin protocol (`analysis_server_plugin`). To use it, add plugin configuration under the top-level `plugins` key in `analysis_options.yaml`:
 
 ```yaml title="analysis_options.yaml"
 plugins:
@@ -111,9 +112,9 @@ Top-level `plugins.dart_code_linter.diagnostics` controls IDE enablement and sev
 
 Dart 3.13 accepts only scalar diagnostic values in `plugins.dart_code_linter.diagnostics`:
 
-- `true`: enable rule with its analyzer default severity;
-- `false`: disable rule in the IDE;
-- `info`, `warning`, or `error`: enable rule with that IDE severity.
+- `true`: enable the rule with its analyzer default severity.
+- `false`: disable the rule in the IDE.
+- `info`, `warning`, or `error`: enable the rule with that IDE severity.
 
 Do not put a map below `plugins.dart_code_linter.diagnostics.<rule>` on Flutter 3.47 / Dart 3.13. The analyzer rejects that shape with `invalid_section_format` before the plugin runs. Put rule maps under `dart_code_linter.rules` instead.
 
@@ -121,7 +122,7 @@ Rules with mandatory configuration, such as `avoid-banned-imports` and `ban-name
 
 #### 2. Legacy Analyzer Plugin (Dart < 3.9)
 
-Configure the plugin under `analyzer` in `analysis_options.yaml`:
+Configure the plugin under `analyzer` in your `analysis_options.yaml`:
 
 ```yaml title="analysis_options.yaml"
 analyzer:
