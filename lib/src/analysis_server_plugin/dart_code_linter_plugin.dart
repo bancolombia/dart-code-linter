@@ -7,7 +7,8 @@ import 'dcl_analysis_rule.dart';
 
 /// The `analysis_server_plugin` entry-point for Dart Code Linter.
 ///
-/// are picked up by the Dart Analysis Server (Dart ≥ 3.9). Analyzer-owned
+/// This plugin registers all DCL lint rules so they are picked up by the Dart
+/// Analysis Server (Dart ≥ 3.9). Analyzer-owned
 /// scalar diagnostics control enablement and IDE severity. Full DCL severity
 /// and parameters are loaded from the active `dart_code_linter.rules`
 /// configuration when each rule registers its processors.
