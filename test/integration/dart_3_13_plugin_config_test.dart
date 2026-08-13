@@ -137,6 +137,22 @@ dart_code_linter:
 ''');
     expect(rulesExcluded.output, isNot(contains('avoid-dynamic')));
 
+    final missingRequiredConfigExcluded = await _analyze(dart, project, '''
+plugins:
+  dart_code_linter:
+    path: ${_yamlString(packageRoot)}
+    diagnostics:
+      ban-name: true
+
+dart_code_linter:
+  rules-exclude:
+    - lib/**
+''');
+    expect(
+      missingRequiredConfigExcluded.output,
+      isNot(contains('ban-name')),
+    );
+
     final invalid = await _analyze(dart, project, '''
 plugins:
   dart_code_linter:

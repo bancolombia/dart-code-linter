@@ -98,12 +98,6 @@ class _DclVisitor extends SimpleAstVisitor<void> {
       return;
     }
 
-    final configError = _configError;
-    if (configError != null) {
-      _rule.reportAtOffset(0, 0, arguments: [configError, '']);
-      return;
-    }
-
     final packageRoot = _packageRoot;
     if (packageRoot != null &&
         (!isIncluded(
@@ -118,6 +112,12 @@ class _DclVisitor extends SimpleAstVisitor<void> {
               contextUnit.file.path,
               createAbsolutePatterns(_rulesExcludes, packageRoot),
             ))) {
+      return;
+    }
+
+    final configError = _configError;
+    if (configError != null) {
+      _rule.reportAtOffset(0, 0, arguments: [configError, '']);
       return;
     }
 
