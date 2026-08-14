@@ -89,7 +89,7 @@ DCL can be used as a plugin for the Dart `analyzer` [package](https://pub.dev/pa
 
 Depending on your Dart SDK version, you can configure the plugin in two ways:
 
-#### 1. Analysis Server Plugin (Recommended for Dart >= 3.9)
+#### 1. Analysis Server Plugin (Recommended for Dart >= 3.10)
 
 DCL supports the new Dart Analysis Server plugin protocol (`analysis_server_plugin`). To use it, add plugin configuration under the top-level `plugins` key in `analysis_options.yaml`:
 
