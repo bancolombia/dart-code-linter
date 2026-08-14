@@ -31,8 +31,19 @@ jobs:
       - name: Run tests
         run: dart test
 
-  dart-3-13-plugin-config:
+  plugin-config-compatibility:
+    name: Plugin config (${{ matrix.runtime }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runtime: Dart 3.9 / Flutter 3.35
+            flutter_version: '3.35.0'
+            scalar_diagnostics: 'false'
+          - runtime: Dart 3.13 / Flutter 3.47
+            flutter_version: '3.47.0'
+            scalar_diagnostics: 'true'
     steps:
       - uses: actions/checkout@v6
       - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
@@ -40,11 +51,14 @@ jobs:
         uses: bancolombia/flutter-setup-action@v1.1
         with:
           channel: 'stable'
-          flutter-version: '3.47.0'
+          flutter-version: ${{ matrix.flutter_version }}
       - name: Install dependencies
         run: dart pub get
-      - name: Test Dart 3.13 plugin configuration
-        run: DART_3_13="$(command -v dart)" dart test test/integration/dart_3_13_plugin_config_test.dart -r expanded
+      - name: Test plugin configuration compatibility
+        run: |
+          DCL_PLUGIN_CONFIG_DART="$(command -v dart)" \
+          DCL_PLUGIN_CONFIG_SCALAR_DIAGNOSTICS="${{ matrix.scalar_diagnostics }}" \
+            dart test test/integration/analysis_server_plugin_config_test.dart -r expanded
   
   pana:
     needs: [build]

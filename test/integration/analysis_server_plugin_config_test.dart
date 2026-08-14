@@ -4,19 +4,19 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
-  final dart = Platform.environment['DART_3_13'];
+  final dart = Platform.environment['DCL_PLUGIN_CONFIG_DART'];
   final skip =
-      dart == null ? 'Set DART_3_13 to a Dart 3.13 executable.' : false;
+      dart == null ? 'Set DCL_PLUGIN_CONFIG_DART to a Dart executable.' : false;
 
-  test('Dart 3.13 supports split plugin and DCL rule configuration', () async {
-    final project = Directory.systemTemp.createTempSync('dcl-dart-3-13-');
+  test('supports plugin and DCL rule configuration across runtimes', () async {
+    final project = Directory.systemTemp.createTempSync('dcl-plugin-config-');
     addTearDown(() => project.deleteSync(recursive: true));
 
     final packageRoot = p.normalize(Directory.current.absolute.path);
     File(p.join(project.path, 'pubspec.yaml')).writeAsStringSync('''
-name: dcl_dart_3_13_fixture
+name: dcl_plugin_config_fixture
 environment:
-  sdk: ^3.13.0
+  sdk: ^3.9.0
 dev_dependencies:
   dart_code_linter:
     path: ${_yamlString(packageRoot)}
@@ -32,7 +32,9 @@ void check(dynamic value) {
         workingDirectory: project.path);
     expect(pubGet.exitCode, 0, reason: '${pubGet.stdout}\n${pubGet.stderr}');
 
-    final structured = await _analyze(dart, project, '''
+    if (Platform.environment['DCL_PLUGIN_CONFIG_SCALAR_DIAGNOSTICS'] ==
+        'true') {
+      final structured = await _analyze(dart, project, '''
 plugins:
   dart_code_linter:
     path: ${_yamlString(packageRoot)}
@@ -41,7 +43,8 @@ plugins:
         severity: warning
         allowed: [42]
 ''');
-    expect(structured.output, contains('invalid_section_format'));
+      expect(structured.output, contains('invalid_section_format'));
+    }
 
     final enabled = await _analyze(dart, project, '''
 plugins:
