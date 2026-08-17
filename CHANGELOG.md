@@ -8,6 +8,11 @@
 - Document the `--analyze-private-members` flag and the `unused-code.analyze-private-members` analysis-options key in the README, including their precedence and known limitations.
 - Extend the private members test coverage to mixin, enum and extension type members, static members, and member level `// ignore: unused-code` suppressions.
 
+## 4.2.0
+- Add the `avoid-non-configurable-callbacks-in-init-state` rule, which flags a `State.initState` that configures a widget-supplied object (e.g. `widget.controller.setNavigationDelegate(...)`) with a callback object whose named callbacks never reference the widget's own fields — a sign the behavior is fully hardcoded with no way for callers of the widget to customize it.
+- Add the `avoid-non-exhaustive-switch-on-sealed-classes` rule, which flags a `default`/wildcard (`_`) case in a `switch` statement or expression over a sealed type. Relying on a fallback case defeats the compiler's exhaustiveness checking for sealed hierarchies, so newly added subtypes can silently fall through instead of forcing an explicit decision at each call site.
+- Add the `prefer-dot-shorthands` rule (with auto-fix), which flags enum/static member access, static method calls, and named constructor calls that repeat a type name already inferable from context (a call argument's declared parameter type, or an explicitly typed variable's initializer) — Dart 3.10's dot-shorthand syntax lets these collapse to `.value` instead of `Type.value`. The rule only fires on files whose language version is 3.10 or later, since the shorthand syntax does not compile below that.
+
 ## 4.1.9
 - Add opt-in detection of unused private members in type declarations (methods, fields, getters, setters and named constructors) to `check-unused-code`. Private members cannot be referenced from outside the declaring library, which rules out the reflection and cross-library false positives that make public members unreliable to analyze. Mirroring the SDK's `unused_element` semantics, a sole private constructor is never reported: it is the intentional prevent-instantiation/extension pattern (an entirely unused class is still reported by the class-level check). Enabled via the `--analyze-private-members` CLI flag or the `unused-code.analyze-private-members` analysis-options key; disabled by default.
 

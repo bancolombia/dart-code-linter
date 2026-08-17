@@ -21,6 +21,7 @@ These rules apply to all Dart code.
 | `avoid-missing-enum-constant-in-map` | Ensure all enum constants are present in map literals |
 | `avoid-nested-conditional-expressions` | Limit nesting of conditional (ternary) expressions |
 | `avoid-non-ascii-symbols` | Avoid non-ASCII symbols in source code |
+| `avoid-non-exhaustive-switch-on-sealed-classes` | Avoid a default/wildcard case in a switch over a sealed type |
 | `avoid-non-null-assertion` | Avoid using the `!` non-null assertion operator |
 | `avoid-passing-async-when-sync-expected` | Warn when async functions are passed where sync is expected |
 | `avoid-redundant-async` | Remove unnecessary `async` keyword from functions |
@@ -54,6 +55,7 @@ These rules apply to all Dart code.
 | `prefer-correct-identifier-length` | Enforce min/max length for identifiers |
 | `prefer-correct-test-file-name` | Enforce test file naming conventions |
 | `prefer-correct-type-name` | Enforce type naming conventions |
+| `prefer-dot-shorthands` | Prefer dot shorthands (`.value`) over repeating a type name inferable from context |
 | `prefer-enums-by-name` | Prefer using `byName` for enum lookups |
 | `prefer-first` | Prefer `.first` over `.elementAt(0)` or `[0]` |
 | `prefer-first-or-null` | Prefer `.firstOrNull` over manual null checks |
@@ -77,6 +79,7 @@ These rules apply specifically to Flutter code.
 | `always-remove-listener` | Ensure listeners are removed in dispose methods |
 | `avoid-border-all` | Avoid `Border.all` constructor; use `Border.fromBorderSide` |
 | `avoid-expanded-as-spacer` | Avoid using `Expanded` with empty `Container` as spacer |
+| `avoid-non-configurable-callbacks-in-init-state` | Avoid configuring a widget-supplied object in `initState` with fully hardcoded callbacks that never reference the widget's own fields |
 | `avoid-returning-widgets` | Avoid returning widgets from methods; extract to separate widgets |
 | `avoid-shrink-wrap-in-lists` | Avoid `shrinkWrap` in scrollable lists for performance |
 | `avoid-unnecessary-setstate` | Avoid unnecessary `setState` calls |
