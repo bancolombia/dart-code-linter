@@ -7,6 +7,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 
 import '../../utils/flutter_types_utils.dart';
+import 'element_utils.dart';
 import 'models/file_elements_usage.dart';
 
 // Copied from https://github.com/dart-lang/sdk/blob/main/pkg/analyzer/lib/src/error/imports_verifier.dart#L15
@@ -123,21 +124,27 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
-    _recordDynamicUsage(node.methodName);
+    if (node.realTarget?.staticType is! RecordType) {
+      _recordDynamicUsage(node.methodName);
+    }
 
     super.visitMethodInvocation(node);
   }
 
   @override
   void visitPropertyAccess(PropertyAccess node) {
-    _recordDynamicUsage(node.propertyName);
+    if (node.realTarget.staticType is! RecordType) {
+      _recordDynamicUsage(node.propertyName);
+    }
 
     super.visitPropertyAccess(node);
   }
 
   @override
   void visitPrefixedIdentifier(PrefixedIdentifier node) {
-    _recordDynamicUsage(node.identifier);
+    if (node.prefix.staticType is! RecordType) {
+      _recordDynamicUsage(node.identifier);
+    }
 
     super.visitPrefixedIdentifier(node);
   }
@@ -163,12 +170,8 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     // SimpleIdentifier, so visitSimpleIdentifier never sees it.
     final element = node.element;
     _recordIfExtensionMember(element);
-    if (_recordClassMembers && element != null) {
-      final enclosingElement = element.enclosingElement;
-      if (enclosingElement is InterfaceElement ||
-          enclosingElement is ExtensionElement) {
-        _recordUsedElement(element);
-      }
+    if (_recordClassMembers && element != null && isMemberElement(element)) {
+      _recordUsedElement(element);
     }
 
     super.visitPatternField(node);
@@ -276,9 +279,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     // `baseElement` unwraps the member produced by a generic instantiation, so
     // the recorded element is the declaration itself.
     final baseElement = element.baseElement;
-    final enclosingElement = baseElement.enclosingElement;
-    if (enclosingElement is InterfaceElement ||
-        enclosingElement is ExtensionElement) {
+    if (isMemberElement(baseElement)) {
       _recordUsedElement(baseElement);
     }
   }
@@ -287,6 +288,11 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   ///
   /// Such a reference resolves to no element, so there is nothing to record in
   /// [FileElementsUsage.elements], but it can reach any member of that name.
+  ///
+  /// Callers must not call this for a record field access: a record field
+  /// also resolves to no element (records carry no [Element] for their
+  /// fields at all), but it is a fully statically typed reference rather than
+  /// a dynamic one, so it must not be treated the same way.
   void _recordDynamicUsage(SimpleIdentifier identifier) {
     if (_recordClassMembers && identifier.element == null) {
       fileElementsUsage.dynamicallyUsedNames.add(identifier.name);

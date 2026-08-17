@@ -53,18 +53,6 @@ bool isEntrypoint(String name, NodeList<Annotation> metadata) =>
 
 const _flutterInternalEntryFunctions = {'registerPlugins', 'testExecutable'};
 
-/// Whether [metadata] carries `@JS`, which marks an `external` binding that
-/// Dart calls into JavaScript.
-///
-/// Deliberately not `Metadata.hasJS`: that resolves the annotation's library,
-/// and it only learned about `dart:js_interop` in analyzer 13
-/// (`ElementAnnotation.isJS` matches `package:js` alone on 10 to 12), so it
-/// silently misses modern interop code on the lower half of the supported
-/// range. Matching by name behaves the same on every supported analyzer and
-/// covers both `package:js` and `dart:js_interop`.
-bool hasJSAnnotation(Iterable<Annotation> metadata) =>
-    metadata.any((annotation) => _annotationName(annotation) == 'JS');
-
 /// Whether [metadata] carries `@JSExport`, which marks Dart members that
 /// JavaScript calls through `createJSInteropWrapper`.
 ///
@@ -75,13 +63,22 @@ bool hasJSAnnotation(Iterable<Annotation> metadata) =>
 /// Note this is the opposite direction from `@JS`, whose members are `external`
 /// bindings that Dart calls into JavaScript.
 bool hasJSExportAnnotation(Iterable<Annotation> metadata) =>
-    metadata.any((annotation) => _annotationName(annotation) == 'JSExport');
+    metadata.any((annotation) => annotationName(annotation) == 'JSExport');
 
 /// The last component of an annotation's name, so that a prefixed annotation
 /// matches as well: for `@js.JSExport()` after `import 'dart:js_interop' as
 /// js;`, [Annotation.name] is a [PrefixedIdentifier] whose own `name` would be
 /// `'js.JSExport'` rather than `'JSExport'`.
-String _annotationName(Annotation annotation) {
+///
+/// Matching an annotation by name this way, rather than resolving it to an
+/// element and checking its declaring library, is what `hasJSExportAnnotation`
+/// and the JS interop check in `_isReachableWithoutReference` rely on for
+/// `@JS`: `ElementAnnotation.isJS` only learned about `dart:js_interop` in
+/// analyzer 13 (it matches `package:js` alone on 10 to 12), so it would
+/// silently miss modern interop code on the lower half of the supported
+/// range. Name matching behaves the same on every supported analyzer and
+/// covers both `package:js` and `dart:js_interop`.
+String annotationName(Annotation annotation) {
   final name = annotation.name;
 
   return name is PrefixedIdentifier ? name.identifier.name : name.name;
@@ -92,7 +89,7 @@ bool hasEntryPointPragma(Iterable<Annotation> metadata) =>
     metadata.where((annotation) {
       final arguments = annotation.arguments;
 
-      return annotation.name.name == 'pragma' &&
+      return annotationName(annotation) == 'pragma' &&
           arguments != null &&
           arguments.arguments
               .where((argument) =>

@@ -549,6 +549,56 @@ void main() {
           expect(names, isNot(contains('+')));
         });
 
+        test(
+          'still reports unused members of a file that is re-exported by a '
+          "barrel, even though the file's own top level declarations are "
+          'exempt',
+          () {
+            final names = namesFor('reexported_members.dart');
+
+            expect(names, ['deadMethod']);
+
+            // Exempt because the file is exported: reachable through the
+            // package's public API, which whole-program usage tracking
+            // cannot see into.
+            expect(names, isNot(contains('useReexportedApi')));
+            expect(names, isNot(contains('ReexportedApi')));
+          },
+        );
+
+        test(
+          'reports a method that only shares its name with an unrelated '
+          "record field access, since the field has no element of its own "
+          'to be mistaken for a dynamic target',
+          () {
+            final names = namesFor('record_field_access.dart');
+
+            expect(names, contains('name'));
+          },
+        );
+
+        test(
+          'reports a dead instance method that only shares its name with an '
+          'unrelated static member on a supertype, since statics are never '
+          'inherited',
+          () {
+            final names = namesFor('static_name_collision.dart');
+
+            expect(names, contains('log'));
+          },
+        );
+
+        test(
+          'does not report a member annotated with vm:entry-point through a '
+          'prefixed import',
+          () {
+            final names = namesFor('prefixed_entry_point_pragma.dart');
+
+            expect(names, ['deadControl']);
+            expect(names, isNot(contains('calledFromNative')));
+          },
+        );
+
         test('records operator, call and extension member usages', () {
           final names = namesFor('operators_and_extensions.dart');
 

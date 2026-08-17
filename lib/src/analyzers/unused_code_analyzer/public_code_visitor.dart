@@ -242,14 +242,24 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
       // Exported to JavaScript either by the enclosing type, which wraps only
       // its instance members, or by this member's own annotation.
       (_enclosingIsJSExported && _isInstanceMember(node)) ||
-      hasJSExportAnnotation(node.metadata) ||
-      // A `@JS` binding is the one entry here that is not about reachability:
-      // its callers are Dart-side and visible, so an unreferenced one is
-      // reportable in principle. Skipped anyway, because an interop binding
-      // surface is normally written complete on purpose and reporting the
-      // unused part of it is noise rather than a finding. Pinned by the
-      // `js_binding_members.dart` fixture.
-      hasJSAnnotation(node.metadata);
+      _hasJSInteropAnnotation(node.metadata);
+
+  /// Whether [metadata] carries `@JSExport` or `@JS`, checked in a single
+  /// pass over [metadata] rather than two.
+  ///
+  /// `@JSExport` marks a member JavaScript calls through
+  /// `createJSInteropWrapper`. `@JS` is the one case here that is not about
+  /// reachability: its callers are Dart-side and visible, so an unreferenced
+  /// one is reportable in principle. Skipped anyway, because an interop
+  /// binding surface is normally written complete on purpose and reporting
+  /// the unused part of it is noise rather than a finding. Pinned by the
+  /// `js_binding_members.dart` fixture.
+  bool _hasJSInteropAnnotation(Iterable<Annotation> metadata) => metadata.any(
+        (annotation) => switch (annotationName(annotation)) {
+          'JSExport' || 'JS' => true,
+          _ => false,
+        },
+      );
 
   /// Whether [node] declares an instance member, the only kind that a class
   /// level `@JSExport` wraps.
@@ -286,13 +296,24 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
       _inheritedNames.putIfAbsent(element, () {
         final names = <String?>{};
 
+        // Statics are excluded: they are never inherited, so a static member
+        // on a supertype does not put a same-named instance member on this
+        // type in reach of dispatch on the supertype.
         for (final supertype in element.allSupertypes) {
           final supertypeElement = supertype.element;
           names
-            ..addAll(supertypeElement.methods.map((member) => member.name))
-            ..addAll(supertypeElement.getters.map((member) => member.name))
-            ..addAll(supertypeElement.setters.map((member) => member.name))
-            ..addAll(supertypeElement.fields.map((member) => member.name));
+            ..addAll(supertypeElement.methods
+                .where((member) => !member.isStatic)
+                .map((member) => member.name))
+            ..addAll(supertypeElement.getters
+                .where((member) => !member.isStatic)
+                .map((member) => member.name))
+            ..addAll(supertypeElement.setters
+                .where((member) => !member.isStatic)
+                .map((member) => member.name))
+            ..addAll(supertypeElement.fields
+                .where((member) => !member.isStatic)
+                .map((member) => member.name));
         }
 
         return names.nonNulls.toSet();
@@ -318,6 +339,6 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
         metadata.hasVisibleForTesting;
     // The JS interop annotations are handled in
     // [_isReachableWithoutReference] instead of here, by name rather than
-    // through the resolved element. See [hasJSAnnotation].
+    // through the resolved element. See [_hasJSInteropAnnotation].
   }
 }
