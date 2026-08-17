@@ -20,23 +20,31 @@ from pathlib import Path
 # analyzer major spanned by the pubspec range (>=10.0.0 <15.0.0), plus a second
 # 13.x row to straddle the namePart reshape (see the 13.3.0 entry).
 # Each entry: (analyzer_version, analyzer_plugin_version, extra_overrides).
-# `extra_overrides` lets us pin test/test_core/test_api when a given analyzer
-# version requires a newer test stack than the lowest-allowed by pubspec.
+# `extra_overrides` pins whatever else a row needs on top of the analyzer pair.
+
+# The test runner stack, pinned on every row rather than left to resolution:
+# pubspec.lock is gitignored, so an unpinned row inherits whatever lock happens
+# to be lying around, and a clean checkout fails inside test_core itself, which
+# looks nothing like a code regression.
+#
+# There is no slack in the value. test_core 0.6.18 is both the floor (analyzer
+# 13+ fails on NodeList<Argument> below it) and the ceiling (0.6.19 fails against
+# analyzer 10 with "'NamedArgument' isn't a type"), so a bump breaks one end.
+TEST_STACK = {
+    "test": "1.31.1",
+    "test_core": "0.6.18",
+    "test_api": "0.7.12",
+}
+
 VERSION_PAIRS = [
     # 10.x: the pubspec floor. .0.1 patch is the lowest that resolves with meta 1.17.0.
-    ("10.0.1", "0.14.1", {"analysis_server_plugin": "0.3.7"}),
-    ("11.0.0", "0.14.5", {"analysis_server_plugin": "0.3.11"}),  # 11.x
-    ("12.1.0", "0.14.8", {"analysis_server_plugin": "0.3.14"}),  # 12.x
+    ("10.0.1", "0.14.1", {**TEST_STACK, "analysis_server_plugin": "0.3.7"}),
+    ("11.0.0", "0.14.5", {**TEST_STACK, "analysis_server_plugin": "0.3.11"}),  # 11.x
+    ("12.1.0", "0.14.8", {**TEST_STACK, "analysis_server_plugin": "0.3.14"}),  # 12.x
     (
         "13.0.0",
         "0.14.9",
-        {
-            "analysis_server_plugin": "0.3.15",
-            # analyzer 13 needs the bumped test stack (NodeList<Argument>).
-            "test": "1.31.1",
-            "test_core": "0.6.18",
-            "test_api": "0.7.12",
-        },
+        {**TEST_STACK, "analysis_server_plugin": "0.3.15"},
     ),
     (
         # 13.1+ deprecated ExtensionTypeDeclaration.primaryConstructor in favour
@@ -46,12 +54,7 @@ VERSION_PAIRS = [
         # ast_compat.isAbstractMethod stay valid on both.
         "13.3.0",
         "0.14.12",
-        {
-            "analysis_server_plugin": "0.3.18",
-            "test": "1.31.1",
-            "test_core": "0.6.18",
-            "test_api": "0.7.12",
-        },
+        {**TEST_STACK, "analysis_server_plugin": "0.3.18"},
     ),
     (
         # 14.x requires dart_style 3.1.11+ (transitive via analyzer_plugin),
@@ -59,14 +62,14 @@ VERSION_PAIRS = [
         # pinned here; pub resolves it automatically off analyzer_plugin.
         "14.0.0",
         "0.14.13",
-        {"analysis_server_plugin": "0.3.19"},
+        {**TEST_STACK, "analysis_server_plugin": "0.3.19"},
     ),
     (
         # Upper boundary of the current <15.0.0 ceiling: latest 14.x patch,
         # which is what `dart pub upgrade` actually resolves to today.
         "14.1.0",
         "0.14.14",
-        {"analysis_server_plugin": "0.3.20"},
+        {**TEST_STACK, "analysis_server_plugin": "0.3.20"},
     ),
 ]
 
