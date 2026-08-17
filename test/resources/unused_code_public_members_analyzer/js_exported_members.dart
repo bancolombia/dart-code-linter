@@ -15,10 +15,15 @@ class ExportedService {
 
   int get currentValue => 1;
 
-  // Statics are never wrapped, so this one really is dead. It is skipped
-  // anyway: the skip is applied per enclosing class, not per member kind.
-  // Deliberate false negative, documented in the README.
-  static int unusedStatic() => 2;
+  int exportedField = 3;
+
+  // A class level `@JSExport` wraps only *instance* members, so these statics
+  // are not reachable from JavaScript and are still dead code. Both member
+  // kinds are here on purpose: methods and fields report staticness through
+  // different AST nodes.
+  static int unusedStatic() => 4;
+
+  static int unusedStaticField = 5;
 }
 
 class PartiallyExported {

@@ -493,6 +493,8 @@ void main() {
           expect(
             names,
             unorderedEquals([
+              'unusedStatic',
+              'unusedStaticField',
               'unusedMember',
               'prefixUnusedMember',
               'alsoUnused',
@@ -503,13 +505,16 @@ void main() {
           // `@JSExport`, so JavaScript reaches these with no Dart reference.
           expect(names, isNot(contains('handleEvent')));
           expect(names, isNot(contains('currentValue')));
+          expect(names, isNot(contains('exportedField')));
           // Exported by its own member level annotation instead.
           expect(names, isNot(contains('exportedMember')));
           // Annotated through an import prefix (`@js.JSExport()`).
           expect(names, isNot(contains('prefixExportedMember')));
-          // A static is never wrapped, so this is a deliberate false negative:
-          // the skip applies per enclosing class, not per member kind.
-          expect(names, isNot(contains('unusedStatic')));
+          // A class level `@JSExport` wraps only instance members, so statics
+          // in an exported class are still reported. Both kinds are checked:
+          // methods and fields carry staticness on different AST nodes.
+          expect(names, contains('unusedStatic'));
+          expect(names, contains('unusedStaticField'));
         });
 
         test('records unary operator and increment usages', () {

@@ -239,12 +239,25 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
       _isDeclaredBySupertype(element) ||
       _hasReachabilityAnnotation(element) ||
       hasEntryPointPragma(node.metadata) ||
-      // Exported to JavaScript either by this member or by the enclosing type.
-      // The enclosing annotation only covers instance members, so skipping
-      // statics too is an over-approximation, kept deliberately: it errs
-      // towards reporting less, which is the safe direction here.
-      _enclosingIsJSExported ||
+      // Exported to JavaScript either by the enclosing type, which wraps only
+      // its instance members, or by this member's own annotation.
+      (_enclosingIsJSExported && _isInstanceMember(node)) ||
       hasJSExportAnnotation(node.metadata);
+
+  /// Whether [node] declares an instance member, the only kind that a class
+  /// level `@JSExport` wraps.
+  ///
+  /// The `JSExport` doc says only *concrete* instance members are wrapped. An
+  /// abstract one is not treated specially here: on a class being instance
+  /// wrapped that is a strange thing to write, and an abstract member is
+  /// normally implemented by a subtype, which [_isDeclaredBySupertype] already
+  /// covers from the other side.
+  bool _isInstanceMember(AnnotatedNode node) => switch (node) {
+        MethodDeclaration() => !node.isStatic,
+        FieldDeclaration() => !node.isStatic,
+        // Enum constants and constructors are never instance members.
+        _ => false,
+      };
 
   /// Whether a supertype declares a member of the same name.
   ///
