@@ -282,10 +282,17 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
   /// to the supertype's declaration rather than to this one, so no recorded
   /// usage ever points here. Every `toString`, `hashCode` and `noSuchMethod` is
   /// covered by this, since `Object` is a supertype of everything.
+  ///
+  /// A constructor is never declared by a supertype in this sense: a
+  /// constructor's name lives in a separate namespace from instance members,
+  /// so a supertype method or field of the same name is unrelated and must
+  /// not exempt a dead named constructor.
   bool _isDeclaredBySupertype(Element element) {
     final enclosingElement = element.enclosingElement;
     final name = element.name;
-    if (enclosingElement is! InterfaceElement || name == null) {
+    if (element is ConstructorElement ||
+        enclosingElement is! InterfaceElement ||
+        name == null) {
       return false;
     }
 

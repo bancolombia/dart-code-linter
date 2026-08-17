@@ -589,6 +589,17 @@ void main() {
         );
 
         test(
+          'reports a dead named constructor that only shares its name with '
+          'an unrelated instance method on a supertype, since constructors '
+          'and instance members are separate namespaces',
+          () {
+            final names = namesFor('constructor_supertype_collision.dart');
+
+            expect(names, contains('Derived.build'));
+          },
+        );
+
+        test(
           'does not report a member annotated with vm:entry-point through a '
           'prefixed import',
           () {
@@ -664,6 +675,71 @@ void main() {
           expect(names, isNot(contains('call')));
         });
       });
+
+      group(
+        'operator usages are bridged across a conditional import',
+        () {
+          test(
+            'does not report the unselected sibling of an operator that is '
+            'used only through the conditionally imported declaration',
+            () async {
+              final folders = [
+                normalize(File(
+                  'test/resources/unused_code_conditional_operator_member_analyzer',
+                ).absolute.path),
+              ];
+
+              final result = await analyzer.runCliAnalysis(
+                folders,
+                rootDirectory,
+                _createConfig(analyzePublicMembers: true),
+              );
+
+              final report = result.firstWhereOrNull(
+                (report) => report.path.endsWith('conditional_impl.dart'),
+              );
+
+              expect(
+                report?.issues.map((issue) => issue.declarationName) ?? [],
+                isNot(contains('+')),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'member usages do not mask top level declarations through a '
+        'conditional import',
+        () {
+          test(
+            'reports a dead top level declaration that shares a name and '
+            'kind with a used member reached through a conditional import',
+            () async {
+              final folders = [
+                normalize(File(
+                  'test/resources/unused_code_conditional_masked_top_level_analyzer',
+                ).absolute.path),
+              ];
+
+              final result = await analyzer.runCliAnalysis(
+                folders,
+                rootDirectory,
+                _createConfig(),
+              );
+
+              final report = result.firstWhere(
+                (report) => report.path.endsWith('conditional_impl.dart'),
+              );
+
+              expect(
+                report.issues.map((issue) => issue.declarationName),
+                contains('value'),
+              );
+            },
+          );
+        },
+      );
 
       group('member usages do not mask top level declarations', () {
         final maskedFolders = [

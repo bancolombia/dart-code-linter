@@ -280,6 +280,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     // the recorded element is the declaration itself.
     final baseElement = element.baseElement;
     if (isMemberElement(baseElement)) {
+      _recordConditionalElement(baseElement);
       _recordUsedElement(baseElement);
     }
   }

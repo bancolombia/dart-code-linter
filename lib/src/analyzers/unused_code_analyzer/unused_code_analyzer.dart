@@ -247,7 +247,8 @@ class UnusedCodeAnalyzer {
     // member dispatch never resolves to a library level declaration, so the
     // fallback was never needed across that boundary. Member to member
     // matching stays loose, since that is what keeps overrides from being
-    // reported.
+    // reported. `_isUnused`'s conditional import fallback carries the same
+    // member-ness guard for the same reason.
     return usedLibrary != null &&
         declaredSource != null &&
         isMemberElement(left) == rightIsMember &&
@@ -278,7 +279,8 @@ class UnusedCodeAnalyzer {
             entry.key.contains(path) &&
             entry.value.any((usedElement) =>
                 _isUsed(usedElement, element, elementIsMember) ||
-                (usedElement.name == element.name &&
+                (isMemberElement(usedElement) == elementIsMember &&
+                    usedElement.name == element.name &&
                     usedElement.kind == element.kind))) &&
         !codeUsages.elements.any(
             (usedElement) => _isUsed(usedElement, element, elementIsMember)) &&
