@@ -41,8 +41,27 @@ int useCallable() => Callable()(1);
 
 int useExtension() => 1.doubled;
 
+class Wrapper {
+  int value = 0;
+}
+
+extension WrapperMath on Wrapper {
+  Wrapper operator +(int other) => this..value += other;
+}
+
+// `wrapper += 1` reaches the extension's `operator +` only through the
+// compound assignment's combiner. Both the member and the extension itself
+// are only marked used through it.
+Wrapper useExtensionCompound() {
+  var wrapper = Wrapper();
+  wrapper += 1;
+
+  return wrapper;
+}
+
 void main() {
   useOperators();
   useCallable();
   useExtension();
+  useExtensionCompound();
 }

@@ -539,6 +539,16 @@ void main() {
           expect(names, isNot(contains('+')));
         });
 
+        test('records the combiner of a compound assignment', () {
+          final names = namesFor('compound_assignment.dart');
+
+          // `-` is the control: declared and never reached.
+          expect(names, ['-']);
+
+          // `accumulator += 2` reaches `operator +` through the combiner.
+          expect(names, isNot(contains('+')));
+        });
+
         test('records operator, call and extension member usages', () {
           final names = namesFor('operators_and_extensions.dart');
 
@@ -552,6 +562,56 @@ void main() {
           expect(names, isNot(contains('==')));
           expect(names, isNot(contains('hashCode')));
           expect(names, isNot(contains('doubled')));
+          // `wrapper += 1` reaches the extension's `operator +` through the
+          // compound assignment's combiner, which also marks the extension
+          // declaration itself used.
+          expect(names, isNot(contains('WrapperMath')));
+        });
+      });
+
+      group('dynamic operator usages', () {
+        final dynamicOperatorsFolders = [
+          normalize(
+              File('test/resources/unused_code_dynamic_operators_analyzer')
+                  .absolute
+                  .path),
+        ];
+
+        // In its own folder because dynamically used names are matched
+        // program-wide: the `~host` in the fixture would otherwise defuse the
+        // `~` control member of unary_operators.dart.
+        test('does not report operators reached through a dynamic target',
+            () async {
+          final result = await analyzer.runCliAnalysis(
+            dynamicOperatorsFolders,
+            rootDirectory,
+            _createConfig(analyzePublicMembers: true),
+          );
+
+          final names = result
+              .firstWhere(
+                (report) => report.path.endsWith('dynamic_operators.dart'),
+              )
+              .issues
+              .map((issue) => issue.declarationName);
+
+          // `%` is the control: declared and never reached, so it is the one
+          // member reported.
+          expect(names, ['%']);
+
+          // One operator per expression kind on a `dynamic` target: binary,
+          // postfix increment, compound assignment combiner, unary minus,
+          // tilde, index read, index write and implicit `call`. The reported
+          // name of a unary minus is its display name `unary-`.
+          expect(names, isNot(contains('~/')));
+          expect(names, isNot(contains('+')));
+          expect(names, isNot(contains('*')));
+          expect(names, isNot(contains('unary-')));
+          expect(names, isNot(contains('-')));
+          expect(names, isNot(contains('~')));
+          expect(names, isNot(contains('[]')));
+          expect(names, isNot(contains('[]=')));
+          expect(names, isNot(contains('call')));
         });
       });
 

@@ -1,8 +1,10 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 import '../../utils/flutter_types_utils.dart';
 import 'models/file_elements_usage.dart';
@@ -79,6 +81,9 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitAssignmentExpression(AssignmentExpression node) {
     _recordAssignmentTarget(node, node.leftHandSide);
+    // `a += b` reaches the combiner `operator +` without naming it.
+    _recordMemberUsage(node.element);
+    _recordDynamicOperator(node.element, _assignmentOperatorName(node.operator));
 
     super.visitAssignmentExpression(node);
   }
@@ -86,6 +91,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitBinaryExpression(BinaryExpression node) {
     _recordMemberUsage(node.element);
+    _recordDynamicOperator(node.element, _binaryOperatorName(node.operator));
 
     super.visitBinaryExpression(node);
   }
@@ -93,6 +99,11 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitFunctionExpressionInvocation(FunctionExpressionInvocation node) {
     _recordMemberUsage(node.element);
+    // An invocation of an unknown type reaches any `call` member. One of an
+    // actual function type reaches none, so it records nothing.
+    if (node.function.staticType is DynamicType) {
+      _recordDynamicOperator(node.element, 'call');
+    }
 
     super.visitFunctionExpressionInvocation(node);
   }
@@ -100,6 +111,12 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitIndexExpression(IndexExpression node) {
     _recordMemberUsage(node.element);
+    if (node.inGetterContext()) {
+      _recordDynamicOperator(node.element, '[]');
+    }
+    if (node.inSetterContext()) {
+      _recordDynamicOperator(node.element, '[]=');
+    }
 
     super.visitIndexExpression(node);
   }
@@ -162,6 +179,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     _recordAssignmentTarget(node, node.operand);
     // `a++` reaches `operator +` without naming it.
     _recordMemberUsage(node.element);
+    _recordDynamicOperator(node.element, _incrementOperatorName(node.operator));
 
     super.visitPostfixExpression(node);
   }
@@ -170,6 +188,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   void visitPrefixExpression(PrefixExpression node) {
     _recordAssignmentTarget(node, node.operand);
     _recordMemberUsage(node.element);
+    _recordDynamicOperator(node.element, _prefixOperatorName(node.operator));
 
     super.visitPrefixExpression(node);
   }
@@ -272,6 +291,71 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     if (_recordClassMembers && identifier.element == null) {
       fileElementsUsage.dynamicallyUsedNames.add(identifier.name);
     }
+  }
+
+  /// Records an operator or `call` reached on a target of an unknown type.
+  ///
+  /// Mirrors [_recordDynamicUsage] for expressions that reach a member without
+  /// an identifier: [name] is the member name the expression reaches (`+`,
+  /// `[]=`, `call`), or `null` when the operator is not user-definable (`&&`,
+  /// `!`, a plain `=`) and reaches no member at all.
+  void _recordDynamicOperator(Element? element, String? name) {
+    if (_recordClassMembers && element == null && name != null) {
+      fileElementsUsage.dynamicallyUsedNames.add(name);
+    }
+  }
+
+  /// The member name a binary expression reaches: `a != b` reaches
+  /// `operator ==`, every other user-definable operator reaches the member
+  /// named by its own lexeme, and the rest (`&&`, `||`, `??`) reach no member.
+  static String? _binaryOperatorName(Token operator) {
+    if (operator.type == TokenType.BANG_EQ) {
+      return '==';
+    }
+
+    return operator.type.isUserDefinableOperator ? operator.lexeme : null;
+  }
+
+  /// The member name a compound assignment reaches through its combiner:
+  /// `a += b` reaches `operator +`. A plain `=` and `??=` reach no member.
+  static String? _assignmentOperatorName(Token operator) {
+    if (operator.type == TokenType.EQ ||
+        operator.type == TokenType.QUESTION_QUESTION_EQ) {
+      return null;
+    }
+
+    final lexeme = operator.lexeme;
+
+    return lexeme.substring(0, lexeme.length - 1);
+  }
+
+  /// The member name a prefix expression reaches: `-a` reaches the unary
+  /// minus, whose [Element.name] is `-` just like the binary one (`unary-` is
+  /// only its lookup and display name), `~a` reaches `~`, the increments reach
+  /// the binary `+`/`-` they desugar to, and `!a` reaches no member.
+  static String? _prefixOperatorName(Token operator) {
+    if (operator.type == TokenType.MINUS) {
+      return '-';
+    }
+    if (operator.type == TokenType.TILDE) {
+      return '~';
+    }
+
+    return _incrementOperatorName(operator);
+  }
+
+  /// The member name an increment or decrement reaches: `a++` desugars to the
+  /// binary `+`, `a--` to the binary `-`. The other postfix operator, the null
+  /// assertion `!`, reaches no member.
+  static String? _incrementOperatorName(Token operator) {
+    if (operator.type == TokenType.PLUS_PLUS) {
+      return '+';
+    }
+    if (operator.type == TokenType.MINUS_MINUS) {
+      return '-';
+    }
+
+    return null;
   }
 
   /// Records every constant of [element] as used.

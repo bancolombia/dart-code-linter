@@ -322,7 +322,9 @@ used through a reference are skipped rather than reported:
   from native code, so members still need their own pragma and are otherwise
   reported.
 - Members whose name is invoked or read somewhere on a target of an unknown
-  (`dynamic`) type.
+  (`dynamic`) type. Operators count too: a `host + 1`, `host[0] = 1` or
+  `host(1)` on a `dynamic` target keeps every `operator +`, `operator []=` and
+  `call` member, since any of them could be the one reached.
 - `toJson`, which `json.encode` calls by convention rather than by reference.
 - Enum constants of an enum whose `values` is referenced anywhere, since
   iteration, `byName` and name based deserialization reach the constants without
