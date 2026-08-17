@@ -314,6 +314,12 @@ used through a reference are skipped rather than reported:
 - Members annotated `@override`, `@mustBeOverridden`, `@visibleForOverriding`,
   `@redeclare`, `@protected`, `@visibleForTesting`, `@JS`, or
   `@pragma('vm:entry-point')`.
+- Members exported to JavaScript with `@JSExport`, which JavaScript calls
+  through `createJSInteropWrapper`. This one also counts when the annotation
+  sits on the enclosing class, since that exports every instance member. Note
+  that a `@pragma('vm:entry-point')` on the enclosing class does *not* work the
+  same way: it only permits allocation from native code, so members still need
+  their own pragma and are otherwise reported.
 - Members whose name is invoked or read somewhere on a target of an unknown
   (`dynamic`) type.
 - `toJson`, which `json.encode` calls by convention rather than by reference.

@@ -53,6 +53,28 @@ bool isEntrypoint(String name, NodeList<Annotation> metadata) =>
 
 const _flutterInternalEntryFunctions = {'registerPlugins', 'testExecutable'};
 
+/// Whether [metadata] carries `@JSExport`, which marks Dart members that
+/// JavaScript calls through `createJSInteropWrapper`.
+///
+/// Valid both on an individual instance member and on the enclosing class, in
+/// which case it covers every instance member of that class. See the `JSExport`
+/// doc in `dart:js_interop`.
+///
+/// Note this is the opposite direction from `@JS`, whose members are `external`
+/// bindings that Dart calls into JavaScript.
+bool hasJSExportAnnotation(Iterable<Annotation> metadata) =>
+    metadata.any((annotation) => _annotationName(annotation) == 'JSExport');
+
+/// The last component of an annotation's name, so that a prefixed annotation
+/// matches as well: for `@js.JSExport()` after `import 'dart:js_interop' as
+/// js;`, [Annotation.name] is a [PrefixedIdentifier] whose own `name` would be
+/// `'js.JSExport'` rather than `'JSExport'`.
+String _annotationName(Annotation annotation) {
+  final name = annotation.name;
+
+  return name is PrefixedIdentifier ? name.identifier.name : name.name;
+}
+
 /// See https://github.com/dart-lang/sdk/blob/master/runtime/docs/compiler/aot/entry_point_pragma.md
 bool hasEntryPointPragma(Iterable<Annotation> metadata) =>
     metadata.where((annotation) {

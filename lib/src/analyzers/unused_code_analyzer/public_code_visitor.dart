@@ -49,6 +49,7 @@ class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
         topLevelElements,
         _suppression,
         _pattern,
+        enclosingMetadata: node.metadata,
         analyzePrivateMembers: _analyzePrivateMembers,
         analyzePublicMembers: _analyzePublicMembers,
       ));
@@ -119,6 +120,17 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
   final bool _analyzePrivateMembers;
   final bool _analyzePublicMembers;
 
+  /// Whether the enclosing type carries `@JSExport`, which exports every one of
+  /// its instance members to JavaScript.
+  ///
+  /// This is the one annotation worth reading off the enclosing declaration.
+  /// `@pragma('vm:entry-point')` deliberately is not: on a class it only means
+  /// the class may be allocated from native or VM code, and each member still
+  /// needs its own pragma to be retained, so walking up for it would hide
+  /// genuinely dead members. See
+  /// https://github.com/dart-lang/sdk/blob/master/runtime/docs/compiler/aot/entry_point_pragma.md
+  final bool _enclosingIsJSExported;
+
   /// Names of all members declared by supertypes, computed on first use.
   final Map<InterfaceElement, Set<String>> _inheritedNames = {};
 
@@ -126,9 +138,11 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
     this._elements,
     this._suppression,
     this._pattern, {
+    required Iterable<Annotation> enclosingMetadata,
     required bool analyzePrivateMembers,
     required bool analyzePublicMembers,
-  })  : _analyzePrivateMembers = analyzePrivateMembers,
+  })  : _enclosingIsJSExported = hasJSExportAnnotation(enclosingMetadata),
+        _analyzePrivateMembers = analyzePrivateMembers,
         _analyzePublicMembers = analyzePublicMembers;
 
   @override
@@ -224,7 +238,13 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
       _conventionallyCalledNames.contains(element.name) ||
       _isDeclaredBySupertype(element) ||
       _hasReachabilityAnnotation(element) ||
-      hasEntryPointPragma(node.metadata);
+      hasEntryPointPragma(node.metadata) ||
+      // Exported to JavaScript either by this member or by the enclosing type.
+      // The enclosing annotation only covers instance members, so skipping
+      // statics too is an over-approximation, kept deliberately: it errs
+      // towards reporting less, which is the safe direction here.
+      _enclosingIsJSExported ||
+      hasJSExportAnnotation(node.metadata);
 
   /// Whether a supertype declares a member of the same name.
   ///
@@ -276,8 +296,16 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
         metadata.hasVisibleForOverriding ||
         metadata.hasProtected ||
         metadata.hasVisibleForTesting ||
-        // `@JS` members are called from JavaScript. Not covered by a fixture:
-        // it needs `package:js`, which this package does not depend on.
+        // `@JS` members are `external` bindings that Dart calls *into*
+        // JavaScript, so unlike the annotations above, their callers are
+        // Dart-side and this analysis can see them. An unreferenced one is
+        // therefore reportable in principle; it is skipped anyway because an
+        // interop binding surface is usually written complete on purpose, and
+        // reporting the unused part of it is noise rather than a finding.
+        //
+        // `@JSExport` is the annotation that genuinely hides callers, and it is
+        // handled in [_isReachableWithoutReference] instead, because it counts
+        // on the enclosing class too.
         metadata.hasJS;
   }
 }

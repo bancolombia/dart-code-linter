@@ -464,7 +464,52 @@ void main() {
         });
 
         test('does not report members annotated as reachable', () {
-          expect(namesFor('annotated_members.dart'), ['plainUnused']);
+          final names = namesFor('annotated_members.dart');
+
+          expect(names, unorderedEquals(['plainUnused', 'notAnEntryPoint']));
+        });
+
+        // Characterization test, green on arrival: it pins the SDK semantics
+        // that a type level `vm:entry-point` covers allocation only, so that
+        // the deliberate asymmetry with `@JSExport` (which does cover the whole
+        // class) is not "fixed" into a false negative later.
+        test(
+          'characterization: a type level vm:entry-point pragma does not '
+          'protect its members',
+          () {
+            final names = namesFor('annotated_members.dart');
+
+            // No pragma of its own, so still dead code despite the class
+            // carrying one.
+            expect(names, contains('notAnEntryPoint'));
+            // Carries its own pragma, so it is retained.
+            expect(names, isNot(contains('calledFromNative')));
+          },
+        );
+
+        test('does not report members exported to JavaScript', () {
+          final names = namesFor('js_exported_members.dart');
+
+          expect(
+            names,
+            unorderedEquals([
+              'unusedMember',
+              'prefixUnusedMember',
+              'alsoUnused',
+            ]),
+          );
+
+          // Wrapped by `createJSInteropWrapper` because the class carries
+          // `@JSExport`, so JavaScript reaches these with no Dart reference.
+          expect(names, isNot(contains('handleEvent')));
+          expect(names, isNot(contains('currentValue')));
+          // Exported by its own member level annotation instead.
+          expect(names, isNot(contains('exportedMember')));
+          // Annotated through an import prefix (`@js.JSExport()`).
+          expect(names, isNot(contains('prefixExportedMember')));
+          // A static is never wrapped, so this is a deliberate false negative:
+          // the skip applies per enclosing class, not per member kind.
+          expect(names, isNot(contains('unusedStatic')));
         });
 
         test('records unary operator and increment usages', () {

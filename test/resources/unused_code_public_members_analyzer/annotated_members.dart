@@ -25,6 +25,21 @@ class AnnotatedMembers {
   void plainUnused() {}
 }
 
+// A type level `@pragma('vm:entry-point')` means only that the class may be
+// allocated directly from native or VM code. It does NOT retain members: each
+// one needs its own pragma. So a member without one is still dead code and has
+// to be reported, which is the opposite of how `@JSExport` behaves on a class.
+// See
+// https://github.com/dart-lang/sdk/blob/master/runtime/docs/compiler/aot/entry_point_pragma.md
+@pragma('vm:entry-point')
+class NativeAllocated {
+  @pragma('vm:entry-point')
+  void calledFromNative() {}
+
+  void notAnEntryPoint() {}
+}
+
 void main() {
   AnnotatedMembers();
+  NativeAllocated();
 }
