@@ -53,6 +53,18 @@ bool isEntrypoint(String name, NodeList<Annotation> metadata) =>
 
 const _flutterInternalEntryFunctions = {'registerPlugins', 'testExecutable'};
 
+/// Whether [metadata] carries `@JS`, which marks an `external` binding that
+/// Dart calls into JavaScript.
+///
+/// Deliberately not `Metadata.hasJS`: that resolves the annotation's library,
+/// and it only learned about `dart:js_interop` in analyzer 13
+/// (`ElementAnnotation.isJS` matches `package:js` alone on 10 to 12), so it
+/// silently misses modern interop code on the lower half of the supported
+/// range. Matching by name behaves the same on every supported analyzer and
+/// covers both `package:js` and `dart:js_interop`.
+bool hasJSAnnotation(Iterable<Annotation> metadata) =>
+    metadata.any((annotation) => _annotationName(annotation) == 'JS');
+
 /// Whether [metadata] carries `@JSExport`, which marks Dart members that
 /// JavaScript calls through `createJSInteropWrapper`.
 ///

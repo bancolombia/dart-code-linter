@@ -487,6 +487,18 @@ void main() {
           },
         );
 
+        // Characterization test for the one skip reason that is a judgement
+        // call rather than a reachability fact: a `@JS` binding's callers are
+        // Dart-side and visible here, so it is reportable in principle and is
+        // skipped only to avoid flagging the unused part of an interop surface.
+        test('does not report members bound to JavaScript with @JS', () {
+          final names = namesFor('js_binding_members.dart');
+
+          // `clear` is the control: equally unreferenced, but unannotated.
+          expect(names, ['clear']);
+          expect(names, isNot(contains('writeLine')));
+        });
+
         test('does not report members exported to JavaScript', () {
           final names = namesFor('js_exported_members.dart');
 

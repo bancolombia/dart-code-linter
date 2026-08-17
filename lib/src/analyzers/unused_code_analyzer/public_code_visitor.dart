@@ -242,7 +242,14 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
       // Exported to JavaScript either by the enclosing type, which wraps only
       // its instance members, or by this member's own annotation.
       (_enclosingIsJSExported && _isInstanceMember(node)) ||
-      hasJSExportAnnotation(node.metadata);
+      hasJSExportAnnotation(node.metadata) ||
+      // A `@JS` binding is the one entry here that is not about reachability:
+      // its callers are Dart-side and visible, so an unreferenced one is
+      // reportable in principle. Skipped anyway, because an interop binding
+      // surface is normally written complete on purpose and reporting the
+      // unused part of it is noise rather than a finding. Pinned by the
+      // `js_binding_members.dart` fixture.
+      hasJSAnnotation(node.metadata);
 
   /// Whether [node] declares an instance member, the only kind that a class
   /// level `@JSExport` wraps.
@@ -308,17 +315,9 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
         metadata.hasMustBeOverridden ||
         metadata.hasVisibleForOverriding ||
         metadata.hasProtected ||
-        metadata.hasVisibleForTesting ||
-        // `@JS` members are `external` bindings that Dart calls *into*
-        // JavaScript, so unlike the annotations above, their callers are
-        // Dart-side and this analysis can see them. An unreferenced one is
-        // therefore reportable in principle; it is skipped anyway because an
-        // interop binding surface is usually written complete on purpose, and
-        // reporting the unused part of it is noise rather than a finding.
-        //
-        // `@JSExport` is the annotation that genuinely hides callers, and it is
-        // handled in [_isReachableWithoutReference] instead, because it counts
-        // on the enclosing class too.
-        metadata.hasJS;
+        metadata.hasVisibleForTesting;
+    // The JS interop annotations are handled in
+    // [_isReachableWithoutReference] instead of here, by name rather than
+    // through the resolved element. See [hasJSAnnotation].
   }
 }
