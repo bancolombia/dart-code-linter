@@ -90,7 +90,7 @@ class UnusedCodeAnalyzer {
 
         final codeUsage = _analyzeFileCodeUsages(
           unit,
-          unusedCodeAnalysisConfig.analyzePrivateMembers,
+          unusedCodeAnalysisConfig,
         );
         if (codeUsage != null) {
           codeUsages.merge(codeUsage);
@@ -100,7 +100,7 @@ class UnusedCodeAnalyzer {
             .any((pattern) => pattern.matches(filePath))) {
           publicCode[filePath] = _analyzeFilePublicCode(
             unit,
-            unusedCodeAnalysisConfig.analyzePrivateMembers,
+            unusedCodeAnalysisConfig,
           );
         }
       }
@@ -133,11 +133,11 @@ class UnusedCodeAnalyzer {
 
   FileElementsUsage? _analyzeFileCodeUsages(
     SomeResolvedUnitResult unit,
-    bool analyzePrivateMembers,
+    UnusedCodeAnalysisConfig config,
   ) {
     if (unit is ResolvedUnitResult) {
       final visitor =
-          UsedCodeVisitor(recordClassMembers: analyzePrivateMembers);
+          UsedCodeVisitor(recordClassMembers: config.analyzeMembers);
       unit.unit.visitChildren(visitor);
 
       return visitor.fileElementsUsage;
@@ -148,7 +148,7 @@ class UnusedCodeAnalyzer {
 
   Set<Element> _analyzeFilePublicCode(
     SomeResolvedUnitResult unit,
-    bool analyzePrivateMembers,
+    UnusedCodeAnalysisConfig config,
   ) {
     if (unit is ResolvedUnitResult) {
       final suppression = Suppression(unit.content, unit.lineInfo);
@@ -160,7 +160,8 @@ class UnusedCodeAnalyzer {
       final visitor = PublicCodeVisitor(
         suppression,
         _ignoreName,
-        analyzePrivateMembers: analyzePrivateMembers,
+        analyzePrivateMembers: config.analyzePrivateMembers,
+        analyzePublicMembers: config.analyzePublicMembers,
       );
       unit.unit.visitChildren(visitor);
 
@@ -228,6 +229,19 @@ class UnusedCodeAnalyzer {
             .contains(declaredSource.fullName);
   }
 
+  /// Whether [element] is a member that some invocation on an unknown type
+  /// could reach.
+  ///
+  /// Only members are considered: a reference on a target, dynamic or not, can
+  /// never resolve to a library level declaration.
+  bool _isUsedDynamically(FileElementsUsage codeUsages, Element element) {
+    final name = element.name;
+
+    return name != null &&
+        _isMember(element) &&
+        codeUsages.dynamicallyUsedNames.contains(name);
+  }
+
   /// Whether [element] is declared inside a type or an extension rather than
   /// at the library level.
   ///
@@ -247,6 +261,7 @@ class UnusedCodeAnalyzer {
   }
 
   bool _isUnused(FileElementsUsage codeUsages, String path, Element element) =>
+      !_isUsedDynamically(codeUsages, element) &&
       !codeUsages.conditionalElements.entries.any((entry) =>
           entry.key.contains(path) &&
           entry.value.any((usedElement) =>

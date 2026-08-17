@@ -280,17 +280,53 @@ dart_code_linter:
     analyze-private-members: true
 ```
 
-The CLI flag wins over the `analysis_options.yaml` value when both are set.
-Only private members are analyzed: they cannot be referenced from outside the
-declaring library, which rules out the reflection and cross library false
-positives that make public members unreliable to report. Two limitations are
-worth knowing about:
+The CLI flag wins over the `analysis_options.yaml` value when both are set. Two
+limitations are worth knowing about:
 
 - A private field that is only ever assigned, never read, is reported as unused,
   the same way an unused top level variable is.
 - Usages that live only in files excluded from analysis (generated `part` files,
   for example) are invisible, so members used exclusively from there are
   reported.
+
+Public members are covered by a separate opt in, because they need more
+guesswork than private ones and are therefore less reliable:
+
+```sh
+$ dart run dart_code_linter:metrics check-unused-code lib --analyze-public-members
+```
+
+```yaml
+dart_code_linter:
+  unused-code:
+    analyze-public-members: true
+```
+
+The two options are independent, so a large project can keep the cheap private
+members check on while leaving this one off. Members that cannot be seen to be
+used through a reference are skipped rather than reported:
+
+- Members that override or implement an inherited member, since dispatch
+  resolves to the supertype's declaration. This covers `toString`, `hashCode`
+  and `noSuchMethod` on every class, and overrides that carry no `@override`
+  annotation.
+- Members annotated `@override`, `@mustBeOverridden`, `@visibleForOverriding`,
+  `@redeclare`, `@protected`, `@visibleForTesting`, `@JS`, or
+  `@pragma('vm:entry-point')`.
+- Members whose name is invoked or read somewhere on a target of an unknown
+  (`dynamic`) type.
+- `toJson`, which `json.encode` calls by convention rather than by reference.
+- Enum constants of an enum whose `values` is referenced anywhere, since
+  iteration, `byName` and name based deserialization reach the constants without
+  naming any of them.
+- Unnamed constructors, whose invocations carry no identifier to record. Named
+  constructors are analyzed.
+
+Even so, expect more false positives than from the private members check.
+Members reached only through code generation, reflection or a package that
+depends on yours cannot be seen at all. Note also that members used only by
+your tests are reported when the analysis covers `lib` alone; pass the test
+folder too (`check-unused-code lib test`) if you want those usages counted.
 
 
 

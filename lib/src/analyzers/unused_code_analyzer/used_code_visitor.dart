@@ -10,6 +10,8 @@ import 'models/file_elements_usage.dart';
 // Copied from https://github.com/dart-lang/sdk/blob/main/pkg/analyzer/lib/src/error/imports_verifier.dart#L15
 
 class UsedCodeVisitor extends RecursiveAstVisitor<void> {
+  static const _enumValuesName = 'values';
+
   final fileElementsUsage = FileElementsUsage();
 
   final bool _recordClassMembers;
@@ -83,23 +85,44 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitBinaryExpression(BinaryExpression node) {
-    _recordIfExtensionMember(node.element);
+    _recordMemberUsage(node.element);
 
     super.visitBinaryExpression(node);
   }
 
   @override
   void visitFunctionExpressionInvocation(FunctionExpressionInvocation node) {
-    _recordIfExtensionMember(node.element);
+    _recordMemberUsage(node.element);
 
     super.visitFunctionExpressionInvocation(node);
   }
 
   @override
   void visitIndexExpression(IndexExpression node) {
-    _recordIfExtensionMember(node.element);
+    _recordMemberUsage(node.element);
 
     super.visitIndexExpression(node);
+  }
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    _recordDynamicUsage(node.methodName);
+
+    super.visitMethodInvocation(node);
+  }
+
+  @override
+  void visitPropertyAccess(PropertyAccess node) {
+    _recordDynamicUsage(node.propertyName);
+
+    super.visitPropertyAccess(node);
+  }
+
+  @override
+  void visitPrefixedIdentifier(PrefixedIdentifier node) {
+    _recordDynamicUsage(node.identifier);
+
+    super.visitPrefixedIdentifier(node);
   }
 
   @override
@@ -137,6 +160,8 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitPostfixExpression(PostfixExpression node) {
     _recordAssignmentTarget(node, node.operand);
+    // `a++` reaches `operator +` without naming it.
+    _recordMemberUsage(node.element);
 
     super.visitPostfixExpression(node);
   }
@@ -144,7 +169,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitPrefixExpression(PrefixExpression node) {
     _recordAssignmentTarget(node, node.operand);
-    _recordIfExtensionMember(node.element);
+    _recordMemberUsage(node.element);
 
     super.visitPrefixExpression(node);
   }
@@ -220,6 +245,48 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     }
   }
 
+  /// Records usage of a member that is reached without an identifier naming it,
+  /// such as an operator (`a + b`, `a[b]`, `-a`) or a `call` invocation.
+  void _recordMemberUsage(Element? element) {
+    _recordIfExtensionMember(element);
+
+    if (!_recordClassMembers || element == null) {
+      return;
+    }
+
+    // `baseElement` unwraps the member produced by a generic instantiation, so
+    // the recorded element is the declaration itself.
+    final baseElement = element.baseElement;
+    final enclosingElement = baseElement.enclosingElement;
+    if (enclosingElement is InterfaceElement ||
+        enclosingElement is ExtensionElement) {
+      _recordUsedElement(baseElement);
+    }
+  }
+
+  /// Records a member reference on a target of an unknown type by name.
+  ///
+  /// Such a reference resolves to no element, so there is nothing to record in
+  /// [FileElementsUsage.elements], but it can reach any member of that name.
+  void _recordDynamicUsage(SimpleIdentifier identifier) {
+    if (_recordClassMembers && identifier.element == null) {
+      fileElementsUsage.dynamicallyUsedNames.add(identifier.name);
+    }
+  }
+
+  /// Records every constant of [element] as used.
+  ///
+  /// Called when the enum's `values` is referenced: iteration, `byName` and
+  /// name based deserialization all reach the constants without naming any of
+  /// them.
+  void _recordEnumConstants(EnumElement element) {
+    for (final field in element.fields) {
+      if (field.isEnumConstant) {
+        _recordUsedElement(field);
+      }
+    }
+  }
+
   void _recordConditionalElement(Element element) {
     final elementPath = element
         .enclosingElement?.firstFragment.libraryFragment?.source.fullName;
@@ -275,9 +342,12 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     if (enclosingElement is LibraryElement ||
         enclosingElement is LibraryFragment) {
       _recordUsedElement(element);
-    } else if (_recordClassMembers &&
-        enclosingElement is InterfaceElement) {
+    } else if (_recordClassMembers && enclosingElement is InterfaceElement) {
       _recordUsedElement(element);
+
+      if (element.name == _enumValuesName && enclosingElement is EnumElement) {
+        _recordEnumConstants(enclosingElement);
+      }
     } else if (enclosingElement is ExtensionElement) {
       _recordUsedExtension(enclosingElement);
 

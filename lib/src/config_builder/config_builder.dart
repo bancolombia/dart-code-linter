@@ -105,12 +105,14 @@ class ConfigBuilder {
     required bool? isMonorepo,
     required bool? shouldPrintConfig,
     required bool? analyzePrivateMembers,
+    required bool? analyzePublicMembers,
   }) =>
       UnusedCodeConfig.fromArgs(
         excludePatterns,
         isMonorepo: isMonorepo,
         shouldPrintConfig: shouldPrintConfig,
         analyzePrivateMembers: analyzePrivateMembers,
+        analyzePublicMembers: analyzePublicMembers,
       );
 
   /// Creates a raw unused code config from given [options].
@@ -129,6 +131,7 @@ class ConfigBuilder {
         createAbsolutePatterns(config.analyzerExcludePatterns, rootPath),
         isMonorepo: config.isMonorepo ?? false,
         analyzePrivateMembers: config.analyzePrivateMembers ?? false,
+        analyzePublicMembers: config.analyzePublicMembers ?? false,
       );
 
   /// Creates a raw unused localization config from given [excludePatterns] and [classPattern].

@@ -48,13 +48,13 @@ bool haveSameParameterType(Expression left, Expression right) =>
 
 bool isEntrypoint(String name, NodeList<Annotation> metadata) =>
     name == 'main' ||
-    _hasPragmaAnnotation(metadata) ||
+    hasEntryPointPragma(metadata) ||
     _flutterInternalEntryFunctions.contains(name);
 
 const _flutterInternalEntryFunctions = {'registerPlugins', 'testExecutable'};
 
 /// See https://github.com/dart-lang/sdk/blob/master/runtime/docs/compiler/aot/entry_point_pragma.md
-bool _hasPragmaAnnotation(Iterable<Annotation> metadata) =>
+bool hasEntryPointPragma(Iterable<Annotation> metadata) =>
     metadata.where((annotation) {
       final arguments = annotation.arguments;
 
