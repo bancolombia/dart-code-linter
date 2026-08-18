@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.1](https://github.com/bancolombia/dart-code-linter/compare/v4.2.0...v4.2.1) (2026-08-18)
+
+
+### Bug Fixes
+
+* **prefer-dot-shorthands:** add support for unnamed constructors ([#266](https://github.com/bancolombia/dart-code-linter/issues/266)) ([f684aec](https://github.com/bancolombia/dart-code-linter/commit/f684aec04a2312f5776927ecda6731a41ab613b5))
+
 ## 4.2.1
 - Fix `prefer-dot-shorthands` to also flag unnamed constructor calls (suggesting `.new(...)`) and enum/static member access used as a `switch` statement/expression case pattern matched against the switch's scrutinee type — both were previously left unflagged.
 
@@ -144,5 +151,3 @@
 
 ## 1.0.0
 - Fork: [Dart code metrics 5.7.3](https://github.com/dart-code-checker/dart-code-metrics)
-
-
