@@ -52,9 +52,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
     final constructorName = node.constructorName;
     final name = constructorName.name;
-    if (node.keyword != null ||
-        name == null ||
-        constructorName.type.typeArguments != null) {
+    if (node.keyword != null || constructorName.type.typeArguments != null) {
       return;
     }
 
@@ -66,7 +64,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
     if (_matchesContextType(node, typeElement)) {
       _candidates.add((
         node: node,
-        replacement: '.${name.name}${node.argumentList.toSource()}',
+        replacement:
+            '.${name?.name ?? 'new'}${node.argumentList.toSource()}',
       ));
     }
   }
@@ -99,6 +98,36 @@ class _Visitor extends RecursiveAstVisitor<void> {
           return _classElement(typeAnnotation.type);
         }
       }
+    }
+
+    if (parent is ConstantPattern && parent.expression == node) {
+      return _classElement(_switchScrutineeOf(parent)?.staticType);
+    }
+
+    return null;
+  }
+
+  Expression? _switchScrutineeOf(ConstantPattern pattern) {
+    final guardedPattern = pattern.parent;
+    if (guardedPattern is! GuardedPattern) {
+      return null;
+    }
+
+    final caseNode = guardedPattern.parent;
+    if (caseNode is SwitchExpressionCase) {
+      final switchExpression = caseNode.parent;
+
+      return switchExpression is SwitchExpression
+          ? switchExpression.expression
+          : null;
+    }
+
+    if (caseNode is SwitchPatternCase) {
+      final switchStatement = caseNode.parent;
+
+      return switchStatement is SwitchStatement
+          ? switchStatement.expression
+          : null;
     }
 
     return null;
