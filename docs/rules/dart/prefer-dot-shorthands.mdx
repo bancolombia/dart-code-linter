@@ -1,0 +1,57 @@
+# prefer-dot-shorthands
+
+added in: 4.2.0 <span style={{color: 'green'}}>style</span>
+
+Recommends using Dart's dot shorthand syntax when an explicit context type makes the type name redundant.
+
+The rule checks enum values, static fields and getters, static methods, and named constructors in arguments and typed variable initializers. It also supports constant contexts and provides a quick fix.
+
+:::note
+Dot shorthands require a Dart language version of 3.10 or later. The rule is silent for files with an earlier language version.
+:::
+
+## Examples
+
+### Bad:
+
+```dart
+enum LogLevel { info }
+
+class Point {
+  const Point(this.x);
+  const Point.origin() : x = 0;
+
+  final int x;
+
+  static const zero = Point.origin();
+  static Point from(int x) => Point(x);
+}
+
+void acceptPoint(Point point) {}
+
+void main() {
+  LogLevel level = LogLevel.info; // LINT: enum value
+  Point origin = Point.origin(); // LINT: named constructor
+  acceptPoint(Point.zero); // LINT: static field
+  acceptPoint(Point.from(1)); // LINT: static method
+  const Point constant = Point.origin(); // LINT: constant context
+}
+```
+
+### Good:
+
+```dart
+void main() {
+  LogLevel level = .info;
+  Point origin = .origin();
+  acceptPoint(.zero);
+  acceptPoint(.from(1));
+  const Point constant = .origin();
+}
+```
+
+The rule reports only cases with an explicit context type, such as a typed variable initializer or a matching parameter type. It skips inferred variables, explicit `const` constructor calls, and calls with explicit type arguments.
+
+Additional resources:
+
+- [Dot shorthands](https://dart.dev/language/dot-shorthands)
