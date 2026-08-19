@@ -1,0 +1,39 @@
+# avoid-non-exhaustive-switch-on-sealed-classes
+
+added in: 4.2.0 <span style={{color: 'green'}}>style</span>
+
+Warns when a switch over a sealed type uses a `default` case or an unguarded wildcard (`_`) case.
+
+A fallback case handles every otherwise-unmatched value, so the compiler cannot identify newly added subtypes that are not handled explicitly. Listing every subtype preserves exhaustiveness checking and makes each decision visible.
+
+## Example
+
+### Bad:
+
+```dart
+sealed class Shape {}
+
+final class Circle extends Shape {}
+final class Square extends Shape {}
+
+String describe(Shape shape) => switch (shape) {
+  Circle() => 'circle',
+  _ => 'unknown', // LINT
+};
+```
+
+### Good:
+
+```dart
+String describe(Shape shape) => switch (shape) {
+  Circle() => 'circle',
+  Square() => 'square',
+};
+```
+
+The rule applies to switch statements and switch expressions. Guarded wildcards such as `case _ when condition` are allowed because they do not satisfy exhaustiveness by themselves, so the compiler still requires the remaining subtypes to be handled.
+
+Additional resources:
+
+- [Dart exhaustiveness checking](https://dart.dev/language/branches#exhaustiveness-checking)
+- [Dart sealed types](https://dart.dev/language/class-modifiers#sealed)
