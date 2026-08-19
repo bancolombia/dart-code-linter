@@ -571,6 +571,14 @@ warning
 🛠
   </p>
 </Admonition>
+<Admonition type="info" icon="-" title="avoid-non-configurable-callbacks-in-init-state
+">
+  <p>
+
+Warns when State.initState configures a widget-supplied object with a callback object whose named callback parameters do not reference the widget's own fields, leaving callers no way to customize the behavior.
+warning
+  </p>
+</Admonition>
 <Admonition type="info" icon="-" title="avoid-wrapping-in-padding
 ">
   <p>

@@ -1,0 +1,67 @@
+# avoid-non-configurable-callbacks-in-init-state
+
+added in: 4.2.0 <span style={{color: 'orange'}}>warning</span>
+
+Warns when `initState` configures a widget-supplied object with callbacks that never use the widget's fields.
+
+This makes the behavior hardcoded, so callers cannot customize it. Expose the callbacks as widget parameters when callers need to change the behavior.
+
+## Example
+
+### Bad:
+
+```dart
+class BrowserView extends StatefulWidget {
+  const BrowserView({required this.controller});
+
+  final WebViewController controller;
+
+  @override
+  State<BrowserView> createState() => _BrowserViewState();
+}
+
+class _BrowserViewState extends State<BrowserView> {
+  @override
+  void initState() {
+    super.initState();
+
+    widget.controller.setNavigationDelegate(
+      NavigationDelegate(
+        onNavigationRequest: (_) => NavigationDecision.navigate, // LINT
+      ),
+    );
+  }
+}
+```
+
+### Good:
+
+```dart
+class BrowserView extends StatefulWidget {
+  const BrowserView({
+    required this.controller,
+    required this.onNavigationRequest,
+  });
+
+  final WebViewController controller;
+  final NavigationRequestCallback onNavigationRequest;
+
+  @override
+  State<BrowserView> createState() => _BrowserViewState();
+}
+
+class _BrowserViewState extends State<BrowserView> {
+  @override
+  void initState() {
+    super.initState();
+
+    widget.controller.setNavigationDelegate(
+      NavigationDelegate(
+        onNavigationRequest: widget.onNavigationRequest,
+      ),
+    );
+  }
+}
+```
+
+The rule checks callback objects passed to calls on `widget` fields from `initState`. It ignores local objects, configuration outside `initState`, and callbacks it cannot inspect.
