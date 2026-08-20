@@ -4,6 +4,7 @@ import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
+import 'package:glob/glob.dart';
 
 import '../analyzers/lint_analyzer/models/internal_resolved_unit_result.dart';
 import '../analyzers/lint_analyzer/rules/models/rule.dart';
@@ -50,7 +51,9 @@ final class DclAnalysisRule extends AnalysisRule {
       try {
         final loaded = loadAnalysisServerRule(packageRoot, _dclRule.id);
         rulesExcludes = loaded.rulesExcludes;
-        if (loaded.rule != null) {
+        if (loaded.error != null) {
+          configError = loaded.error!.message;
+        } else if (loaded.rule != null) {
           configuredRule = loaded.rule!;
         } else if (_dclRule.requiresConfig) {
           configError = "'${_dclRule.id}' requires configuration under "
@@ -60,6 +63,17 @@ final class DclAnalysisRule extends AnalysisRule {
         configError = error.message;
       }
     }
+
+    final includes = packageRoot == null
+        ? const <Glob>[]
+        : createAbsolutePatterns(configuredRule.includes, packageRoot);
+    final excludes = packageRoot == null
+        ? const <Glob>[]
+        : createAbsolutePatterns(configuredRule.excludes, packageRoot);
+    final globalExcludes = packageRoot == null
+        ? const <Glob>[]
+        : createAbsolutePatterns(rulesExcludes, packageRoot);
+
     registry.addCompilationUnit(
       this,
       _DclVisitor(
@@ -67,8 +81,9 @@ final class DclAnalysisRule extends AnalysisRule {
         context,
         configuredRule,
         configError,
-        packageRoot,
-        rulesExcludes,
+        includes,
+        excludes,
+        globalExcludes,
       ),
     );
   }
@@ -79,15 +94,17 @@ class _DclVisitor extends SimpleAstVisitor<void> {
   final RuleContext _context;
   final Rule _dclRule;
   final String? _configError;
-  final String? _packageRoot;
-  final Iterable<String> _rulesExcludes;
+  final Iterable<Glob> _includes;
+  final Iterable<Glob> _excludes;
+  final Iterable<Glob> _rulesExcludes;
 
   _DclVisitor(
     this._rule,
     this._context,
     this._dclRule,
     this._configError,
-    this._packageRoot,
+    this._includes,
+    this._excludes,
     this._rulesExcludes,
   );
 
@@ -98,20 +115,9 @@ class _DclVisitor extends SimpleAstVisitor<void> {
       return;
     }
 
-    final packageRoot = _packageRoot;
-    if (packageRoot != null &&
-        (!isIncluded(
-              contextUnit.file.path,
-              createAbsolutePatterns(_dclRule.includes, packageRoot),
-            ) ||
-            isExcluded(
-              contextUnit.file.path,
-              createAbsolutePatterns(_dclRule.excludes, packageRoot),
-            ) ||
-            isExcluded(
-              contextUnit.file.path,
-              createAbsolutePatterns(_rulesExcludes, packageRoot),
-            ))) {
+    if (!isIncluded(contextUnit.file.path, _includes) ||
+        isExcluded(contextUnit.file.path, _excludes) ||
+        isExcluded(contextUnit.file.path, _rulesExcludes)) {
       return;
     }
 

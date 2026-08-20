@@ -156,6 +156,23 @@ dart_code_linter:
       isNot(contains('ban-name')),
     );
 
+    final invalidConfigExcluded = await _analyze(dart, project, '''
+plugins:
+  dart_code_linter:
+    path: ${_yamlString(packageRoot)}
+    diagnostics:
+      avoid-dynamic: warning
+
+dart_code_linter:
+  rules-exclude:
+    - lib/**
+  rules: no-magic-number
+''');
+    expect(
+      invalidConfigExcluded.output,
+      isNot(contains("Expected 'dart_code_linter.rules'")),
+    );
+
     final invalid = await _analyze(dart, project, '''
 plugins:
   dart_code_linter:

@@ -55,13 +55,12 @@ dart_code_linter:
   rules: no-magic-number
 ''');
 
+    final result = loadAnalysisServerRule(project.path, 'no-magic-number');
     expect(
-      () => loadAnalysisServerRule(project.path, 'no-magic-number').rule,
-      throwsA(
-        isA<FormatException>()
-            .having((error) => error.message, 'message', contains('rules'))
-            .having((error) => error.source, 'source', file.path),
-      ),
+      result.error,
+      isA<FormatException>()
+          .having((error) => error.message, 'message', contains('rules'))
+          .having((error) => error.source, 'source', file.path),
     );
   });
 
@@ -75,8 +74,8 @@ dart_code_linter:
 ''');
 
     expect(
-      () => loadAnalysisServerRule(project.path, 'avoid-dynamic').rule,
-      throwsA(isA<FormatException>()),
+      loadAnalysisServerRule(project.path, 'avoid-dynamic').error,
+      isA<FormatException>(),
     );
   });
 
@@ -130,17 +129,16 @@ dart_code_linter:
         severity: fatal
 ''');
 
+    final result = loadAnalysisServerRule(package.path, 'no-magic-number');
     expect(
-      () => loadAnalysisServerRule(package.path, 'no-magic-number').rule,
-      throwsA(
-        isA<FormatException>()
-            .having((error) => error.source, 'source', optionsFile.path)
-            .having(
-              (error) => error.message,
-              'message',
-              contains("Invalid severity 'fatal' for 'no-magic-number'"),
-            ),
-      ),
+      result.error,
+      isA<FormatException>()
+          .having((error) => error.source, 'source', optionsFile.path)
+          .having(
+            (error) => error.message,
+            'message',
+            contains("Invalid severity 'fatal' for 'no-magic-number'"),
+          ),
     );
   });
 
@@ -172,8 +170,8 @@ dart_code_linter:
     _writeOptions(project, 'include: base.yaml\n');
 
     expect(
-      () => loadAnalysisServerRule(project.path, 'no-magic-number'),
-      throwsA(isA<FormatException>()),
+      loadAnalysisServerRule(project.path, 'no-magic-number').error,
+      isA<FormatException>(),
     );
   });
 
@@ -214,6 +212,19 @@ dart_code_linter:
     );
   });
 
+  test('keeps rules-exclude patterns when rules config is invalid', () {
+    _writeOptions(project, '''
+dart_code_linter:
+  rules-exclude:
+    - generated/**
+  rules: no-magic-number
+''');
+
+    final result = loadAnalysisServerRule(project.path, 'no-magic-number');
+    expect(result.error, isA<FormatException>());
+    expect(result.rulesExcludes, ['generated/**']);
+  });
+
   test('rejects invalid severity instead of silently using none', () {
     _writeOptions(project, '''
 dart_code_linter:
@@ -223,13 +234,11 @@ dart_code_linter:
 ''');
 
     expect(
-      () => loadAnalysisServerRule(project.path, 'no-magic-number').rule,
-      throwsA(
-        isA<FormatException>().having(
-          (error) => error.message,
-          'message',
-          contains("Invalid severity 'fatal' for 'no-magic-number'"),
-        ),
+      loadAnalysisServerRule(project.path, 'no-magic-number').error,
+      isA<FormatException>().having(
+        (error) => error.message,
+        'message',
+        contains("Invalid severity 'fatal' for 'no-magic-number'"),
       ),
     );
   });

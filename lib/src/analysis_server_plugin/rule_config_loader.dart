@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 
 import '../analyzers/lint_analyzer/lint_config.dart';
 import '../analyzers/lint_analyzer/models/severity.dart';
@@ -8,44 +8,75 @@ import '../config_builder/config_builder.dart';
 import '../config_builder/models/analysis_options.dart';
 import '../utils/analyzer_utils.dart';
 
-/// Loads [ruleId]'s full DCL configuration for Analysis Server integration.
-({Rule? rule, Iterable<String> rulesExcludes}) loadAnalysisServerRule(
-  String packageRoot,
-  String ruleId,
-) {
-  // ponytail: reload on registration; correctness beats dependency-cache
-  // invalidation until profiling proves config loading is hot.
-  final config = _loadConfig(packageRoot);
-  final ruleConfig = config.rules[ruleId];
-  if (ruleConfig == null) {
-    return (rule: null, rulesExcludes: config.excludeForRulesPatterns);
-  }
+// ponytail: retain one collection per package root for plugin lifetime; evict
+// only if multi-workspace analysis shows measurable memory pressure.
+final _analysisContextCollections = <String, AnalysisContextCollection>{};
 
-  _validateSeverity(ruleId, ruleConfig, config.analysisOptionsPath);
+/// Loads [ruleId]'s full DCL configuration for Analysis Server integration.
+({Rule? rule, Iterable<String> rulesExcludes, FormatException? error})
+    loadAnalysisServerRule(String packageRoot, String ruleId) {
+  final loaded = _loadConfig(packageRoot);
+  final config = loaded.config;
   try {
+    if (loaded.source case final source?) {
+      _validateResolvedRules(loaded.options, source);
+    }
+
+    final ruleConfig = config.rules[ruleId];
+    if (ruleConfig == null) {
+      return (
+        rule: null,
+        rulesExcludes: config.excludeForRulesPatterns,
+        error: null,
+      );
+    }
+
+    _validateSeverity(ruleId, ruleConfig, config.analysisOptionsPath);
     return (
       rule: getRulesById({ruleId: ruleConfig}).firstOrNull,
       rulesExcludes: config.excludeForRulesPatterns,
+      error: null,
+    );
+  } on FormatException catch (error) {
+    return (
+      rule: null,
+      rulesExcludes: config.excludeForRulesPatterns,
+      error: error,
     );
   } on Object catch (error) {
-    throw FormatException(
-      "Invalid configuration for '$ruleId': $error",
-      config.analysisOptionsPath,
+    return (
+      rule: null,
+      rulesExcludes: config.excludeForRulesPatterns,
+      error: FormatException(
+        "Invalid configuration for '$ruleId': $error",
+        config.analysisOptionsPath,
+      ),
     );
   }
 }
 
-LintConfig _loadConfig(String packageRoot) {
-  final collection = createAnalysisContextCollection(
-    [packageRoot],
+({LintConfig config, Map<String, Object> options, String? source}) _loadConfig(
+    String packageRoot) {
+  final collection = _analysisContextCollections.putIfAbsent(
     packageRoot,
-    null,
+    () => createAnalysisContextCollection(
+      [packageRoot],
+      packageRoot,
+      null,
+    ),
   );
-  try {
-    final context = collection.contexts.first;
-    final options = analysisOptionsFromContext(context);
-    if (options == null) {
-      return const LintConfig(
+  if (collection.contexts.isEmpty) {
+    throw FormatException(
+      "No analysis context found for '$packageRoot'.",
+      packageRoot,
+    );
+  }
+
+  final context = collection.contexts.first;
+  final analysisOptions = analysisOptionsFromContext(context);
+  if (analysisOptions == null) {
+    return (
+      config: const LintConfig(
         excludePatterns: [],
         excludeForMetricsPatterns: [],
         metrics: {},
@@ -54,14 +85,17 @@ LintConfig _loadConfig(String packageRoot) {
         antiPatterns: {},
         shouldPrintConfig: false,
         analysisOptionsPath: null,
-      );
-    }
-
-    _validateResolvedRules(options.options, options.fullPath!);
-    return ConfigBuilder.getLintConfigFromOptions(options);
-  } finally {
-    unawaited(collection.dispose());
+      ),
+      options: <String, Object>{},
+      source: null,
+    );
   }
+
+  return (
+    config: ConfigBuilder.getLintConfigFromOptions(analysisOptions),
+    options: analysisOptions.options,
+    source: analysisOptions.fullPath,
+  );
 }
 
 void _validateResolvedRules(Map<String, Object> options, String source) {
