@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 
 import '../analyzers/lint_analyzer/lint_config.dart';
@@ -8,9 +10,32 @@ import '../config_builder/config_builder.dart';
 import '../config_builder/models/analysis_options.dart';
 import '../utils/analyzer_utils.dart';
 
-// ponytail: retain one collection per package root for plugin lifetime; evict
-// only if multi-workspace analysis shows measurable memory pressure.
+const _maxCachedAnalysisContextCollections = 8;
 final _analysisContextCollections = <String, AnalysisContextCollection>{};
+
+AnalysisContextCollection _analysisContextCollectionFor(String packageRoot) {
+  final cached = _analysisContextCollections.remove(packageRoot);
+  if (cached != null) {
+    _analysisContextCollections[packageRoot] = cached;
+    return cached;
+  }
+
+  final collection = createAnalysisContextCollection(
+    [packageRoot],
+    packageRoot,
+    null,
+  );
+  _analysisContextCollections[packageRoot] = collection;
+
+  if (_analysisContextCollections.length >
+      _maxCachedAnalysisContextCollections) {
+    final oldestPackageRoot = _analysisContextCollections.keys.first;
+    final evicted = _analysisContextCollections.remove(oldestPackageRoot)!;
+    unawaited(evicted.dispose());
+  }
+
+  return collection;
+}
 
 /// Loads [ruleId]'s full DCL configuration for Analysis Server integration.
 ({Rule? rule, Iterable<String> rulesExcludes, FormatException? error})
@@ -57,14 +82,7 @@ final _analysisContextCollections = <String, AnalysisContextCollection>{};
 
 ({LintConfig config, Map<String, Object> options, String? source}) _loadConfig(
     String packageRoot) {
-  final collection = _analysisContextCollections.putIfAbsent(
-    packageRoot,
-    () => createAnalysisContextCollection(
-      [packageRoot],
-      packageRoot,
-      null,
-    ),
-  );
+  final collection = _analysisContextCollectionFor(packageRoot);
   if (collection.contexts.isEmpty) {
     throw FormatException(
       "No analysis context found for '$packageRoot'.",
