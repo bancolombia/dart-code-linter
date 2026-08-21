@@ -38,9 +38,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runtime: Dart 3.9 / Flutter 3.35
-            flutter_version: '3.35.0'
-            scalar_diagnostics: 'false'
           - runtime: Dart 3.10 / Flutter 3.38
             flutter_version: '3.38.0'
             scalar_diagnostics: 'false'
