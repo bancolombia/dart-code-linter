@@ -52,6 +52,8 @@ jobs:
         with:
           channel: 'stable'
           flutter-version: ${{ matrix.flutter_version }}
+      - name: Show resolved Dart version
+        run: dart --version
       - name: Install dependencies
         run: dart pub get
       - name: Test plugin configuration compatibility
