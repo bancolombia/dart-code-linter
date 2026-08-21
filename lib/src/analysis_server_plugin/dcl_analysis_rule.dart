@@ -46,11 +46,13 @@ final class DclAnalysisRule extends AnalysisRule {
     final packageRoot = context.package?.root.path;
     var configuredRule = _dclRule;
     Iterable<String> rulesExcludes = const [];
+    String? optionsFolderPath;
     String? configError;
     if (packageRoot != null) {
       try {
         final loaded = loadAnalysisServerRule(packageRoot, _dclRule.id);
         rulesExcludes = loaded.rulesExcludes;
+        optionsFolderPath = loaded.optionsFolderPath;
         if (loaded.error != null) {
           configError = loaded.error!.message;
         } else if (loaded.rule != null) {
@@ -64,15 +66,16 @@ final class DclAnalysisRule extends AnalysisRule {
       }
     }
 
-    final includes = packageRoot == null
+    final patternRoot = optionsFolderPath ?? packageRoot;
+    final includes = patternRoot == null
         ? const <Glob>[]
-        : createAbsolutePatterns(configuredRule.includes, packageRoot);
-    final excludes = packageRoot == null
+        : createAbsolutePatterns(configuredRule.includes, patternRoot);
+    final excludes = patternRoot == null
         ? const <Glob>[]
-        : createAbsolutePatterns(configuredRule.excludes, packageRoot);
-    final globalExcludes = packageRoot == null
+        : createAbsolutePatterns(configuredRule.excludes, patternRoot);
+    final globalExcludes = patternRoot == null
         ? const <Glob>[]
-        : createAbsolutePatterns(rulesExcludes, packageRoot);
+        : createAbsolutePatterns(rulesExcludes, patternRoot);
 
     registry.addCompilationUnit(
       this,

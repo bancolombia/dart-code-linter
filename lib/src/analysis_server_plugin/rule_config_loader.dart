@@ -38,20 +38,30 @@ AnalysisContextCollection _analysisContextCollectionFor(String packageRoot) {
 }
 
 /// Loads [ruleId]'s full DCL configuration for Analysis Server integration.
-({Rule? rule, Iterable<String> rulesExcludes, FormatException? error})
-    loadAnalysisServerRule(String packageRoot, String ruleId) {
-  final loaded = _loadConfig(packageRoot);
-  final config = loaded.config;
+({
+  Rule? rule,
+  Iterable<String> rulesExcludes,
+  String? optionsFolderPath,
+  FormatException? error,
+}) loadAnalysisServerRule(String packageRoot, String ruleId) {
+  LintConfig? loadedConfig;
+  String? optionsFolderPath;
   try {
+    final loaded = _loadConfig(packageRoot);
+    loadedConfig = loaded.config;
+    optionsFolderPath = loaded.optionsFolderPath;
+
     if (loaded.source case final source?) {
       _validateResolvedRules(loaded.options, source);
     }
 
+    final config = loaded.config;
     final ruleConfig = config.rules[ruleId];
     if (ruleConfig == null) {
       return (
         rule: null,
         rulesExcludes: config.excludeForRulesPatterns,
+        optionsFolderPath: optionsFolderPath,
         error: null,
       );
     }
@@ -60,28 +70,35 @@ AnalysisContextCollection _analysisContextCollectionFor(String packageRoot) {
     return (
       rule: getRulesById({ruleId: ruleConfig}).firstOrNull,
       rulesExcludes: config.excludeForRulesPatterns,
+      optionsFolderPath: optionsFolderPath,
       error: null,
     );
   } on FormatException catch (error) {
     return (
       rule: null,
-      rulesExcludes: config.excludeForRulesPatterns,
+      rulesExcludes: loadedConfig?.excludeForRulesPatterns ?? const [],
+      optionsFolderPath: optionsFolderPath,
       error: error,
     );
   } on Object catch (error) {
     return (
       rule: null,
-      rulesExcludes: config.excludeForRulesPatterns,
+      rulesExcludes: loadedConfig?.excludeForRulesPatterns ?? const [],
+      optionsFolderPath: optionsFolderPath,
       error: FormatException(
         "Invalid configuration for '$ruleId': $error",
-        config.analysisOptionsPath,
+        loadedConfig?.analysisOptionsPath ?? optionsFolderPath ?? packageRoot,
       ),
     );
   }
 }
 
-({LintConfig config, Map<String, Object> options, String? source}) _loadConfig(
-    String packageRoot) {
+({
+  LintConfig config,
+  Map<String, Object> options,
+  String? source,
+  String? optionsFolderPath,
+}) _loadConfig(String packageRoot) {
   final collection = _analysisContextCollectionFor(packageRoot);
   if (collection.contexts.isEmpty) {
     throw FormatException(
@@ -106,6 +123,7 @@ AnalysisContextCollection _analysisContextCollectionFor(String packageRoot) {
       ),
       options: <String, Object>{},
       source: null,
+      optionsFolderPath: null,
     );
   }
 
@@ -113,6 +131,7 @@ AnalysisContextCollection _analysisContextCollectionFor(String packageRoot) {
     config: ConfigBuilder.getLintConfigFromOptions(analysisOptions),
     options: analysisOptions.options,
     source: analysisOptions.fullPath,
+    optionsFolderPath: analysisOptions.folderPath,
   );
 }
 

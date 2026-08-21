@@ -109,10 +109,11 @@ dart_code_linter:
         allowed: [42]
 ''');
 
-    final rule = loadAnalysisServerRule(package.path, 'no-magic-number').rule;
+    final result = loadAnalysisServerRule(package.path, 'no-magic-number');
 
-    expect(rule?.severity, Severity.error);
-    expect(rule?.toJson()['allowed'], [42]);
+    expect(result.rule?.severity, Severity.error);
+    expect(result.rule?.toJson()['allowed'], [42]);
+    expect(result.optionsFolderPath, workspace.path);
   });
 
   test('reports ancestor analysis options as invalid severity source', () {
@@ -172,6 +173,25 @@ dart_code_linter:
     expect(
       loadAnalysisServerRule(project.path, 'no-magic-number').error,
       isA<FormatException>(),
+    );
+  });
+
+  test('converts malformed DCL extends into a configuration error', () {
+    _writeOptions(project, '''
+dart_code_linter:
+  extends:
+    - 42
+''');
+
+    final result = loadAnalysisServerRule(project.path, 'no-magic-number');
+
+    expect(
+      result.error,
+      isA<FormatException>().having(
+        (error) => error.message,
+        'message',
+        contains("Invalid configuration for 'no-magic-number'"),
+      ),
     );
   });
 
