@@ -128,8 +128,11 @@ Rules that are marked with 🛠 have auto-fixes available through the IDE contex
 
 As DCL depends on the Dart `analyzer` package. The following table shows the compatible versions:
 
+The Dart SDK column is the range DCL itself declares. The effective floor is higher: every `analyzer` release DCL supports requires Dart `^3.9.0`, so Dart 3.9 is the real minimum regardless of the declared range.
+
 | DCL Version       | Analyzer Version   | Dart SDK          |
 |-------------------|--------------------|-------------------|
+| 4.3.0             | >=8.2.0 <15.0.0    | >=3.5.0 <4.0.0   |
 | 4.2.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.1.9             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |

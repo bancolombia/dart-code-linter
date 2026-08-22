@@ -183,12 +183,41 @@ bool isAbstractMethod(MethodDeclaration node) {
 /// identifier and is not anchored on), and its first identifier token is the
 /// type name (any leading `const` is a keyword token, so it is skipped).
 String? extensionTypeName(ExtensionTypeDeclaration node) {
+  final flat = _extensionTypeNameFromTokens(node);
+  if (flat != null) {
+    return flat;
+  }
+
   final namePart = _firstChildNode(node);
   if (namePart == null) {
     return null;
   }
 
   return _firstIdentifierLexeme(namePart);
+}
+
+/// Reads the name from the flat child shape used by analyzer 8.2–9.0, where the
+/// declaration's own tokens are `extension type <name> …` and the first child
+/// node is the representation (`(int value)`), not the name part. Anchoring on
+/// the contextual `type` identifier is safe here because the name is the next
+/// identifier token after it; a leading `const` is a keyword token and is
+/// skipped. Returns `null` on the nested rows (10.0+), where the name lives in
+/// a child node and there is no second identifier token to find.
+String? _extensionTypeNameFromTokens(ExtensionTypeDeclaration node) {
+  var seenTypeToken = false;
+  for (final entity in node.childEntities) {
+    if (entity is! Token) {
+      continue;
+    }
+    if (seenTypeToken && entity.type == TokenType.IDENTIFIER) {
+      return entity.lexeme;
+    }
+    if (entity.lexeme == 'type') {
+      seenTypeToken = true;
+    }
+  }
+
+  return null;
 }
 
 /// Exposes the structurally-resolved name-part node of an
@@ -207,10 +236,13 @@ AstNode? _firstChildNode(AstNode node) {
   return null;
 }
 
-String? _firstIdentifierLexeme(AstNode node) {
+String? _firstIdentifierLexeme(AstNode node) =>
+    _firstIdentifierToken(node)?.lexeme;
+
+Token? _firstIdentifierToken(AstNode node) {
   for (final entity in node.childEntities) {
     if (entity is Token && entity.type == TokenType.IDENTIFIER) {
-      return entity.lexeme;
+      return entity;
     }
   }
   return null;
@@ -263,4 +295,119 @@ List<FormalParameterElement> _invocationParameters(AstNode? invocation) {
   };
 
   return element?.formalParameters ?? const [];
+}
+
+const _typeDeclarationKeywords = {'class', 'enum'};
+
+/// Returns the declared name token of a class or enum declaration across
+/// analyzer versions, or `null` if it can't be located.
+///
+/// analyzer 8.2–8.3 expose the name directly, because `ClassDeclaration` and
+/// `EnumDeclaration` implement `NamedCompilationUnitMember` there. analyzer
+/// 8.4+ moved it behind `namePart.typeName` (nullable on 8.4, non-nullable
+/// from 9.0) and dropped `NamedCompilationUnitMember` from both interfaces, so
+/// neither `name` nor `namePart` is callable on every supported row. The token
+/// is read structurally instead: on the older rows the name is the first
+/// identifier token following the `class`/`enum` keyword (anchoring after the
+/// keyword skips leading contextual identifiers such as `augment`), and on the
+/// newer rows it is the first identifier token of the name-part child node.
+Token? typeDeclarationNameToken(AstNode node) {
+  final direct = _identifierAfterDeclarationKeyword(node);
+  if (direct != null) {
+    return direct;
+  }
+
+  final namePart = _firstChildNode(node);
+
+  return namePart == null ? null : _firstIdentifierToken(namePart);
+}
+
+/// Returns the declared name of a class or enum declaration across analyzer
+/// versions, or `null` if it can't be located. See [typeDeclarationNameToken].
+String? typeDeclarationName(AstNode node) =>
+    typeDeclarationNameToken(node)?.lexeme;
+
+/// Returns the members declared in the block body of a class-like declaration,
+/// or `null` when the declaration has no block body.
+///
+/// analyzer 8.2–8.3 hang members directly off the declaration
+/// (`ClassDeclaration.members`); analyzer 8.4+ introduced a `ClassBody` child
+/// (`BlockClassBody` for the `{ ... }` form, a type that doesn't exist on the
+/// earlier rows) and dropped the direct `members` getter, so neither shape is
+/// callable everywhere. The block body is recognised structurally by its `{`
+/// token: on the older rows that token is a direct child of the declaration,
+/// on the newer rows it belongs to the body node. Returning `null` mirrors the
+/// `body is! BlockClassBody` guard callers used against the newer API.
+List<ClassMember>? classBodyMembers(AstNode node) =>
+    _blockBodyChildren<ClassMember>(node);
+
+/// Returns the constants declared in an enum's block body across analyzer
+/// versions, or an empty list when they can't be located.
+///
+/// Mirrors [classBodyMembers]: analyzer 8.2–8.3 hang the constants directly off
+/// the declaration, analyzer 8.4+ moved them into an `EnumBody` child.
+List<EnumConstantDeclaration> enumConstants(EnumDeclaration node) =>
+    _blockBodyChildren<EnumConstantDeclaration>(node) ?? const [];
+
+/// Collects the [T] children of [node]'s block body, looking first at [node]
+/// itself (older rows, where the braces belong to the declaration) and then at
+/// the child node owning the braces (newer rows). Returns `null` when no block
+/// body is present.
+List<T>? _blockBodyChildren<T extends AstNode>(AstNode node) {
+  if (_hasBlockToken(node)) {
+    return node.childEntities.whereType<T>().toList();
+  }
+
+  for (final entity in node.childEntities) {
+    if (entity is AstNode && _hasBlockToken(entity)) {
+      return entity.childEntities.whereType<T>().toList();
+    }
+  }
+
+  return null;
+}
+
+bool _hasBlockToken(AstNode node) => node.childEntities.any(
+      (entity) =>
+          entity is Token && entity.type == TokenType.OPEN_CURLY_BRACKET,
+    );
+
+Token? _identifierAfterDeclarationKeyword(AstNode node) {
+  var seenKeyword = false;
+  for (final entity in node.childEntities) {
+    if (entity is! Token) {
+      continue;
+    }
+    if (seenKeyword && entity.type == TokenType.IDENTIFIER) {
+      return entity;
+    }
+    if (_typeDeclarationKeywords.contains(entity.lexeme)) {
+      seenKeyword = true;
+    }
+  }
+
+  return null;
+}
+
+/// Returns the class-like declaration that [node] is declared in, across
+/// analyzer versions, or `null` when there is none.
+///
+/// Members hang directly off the declaration on analyzer 8.2–9.0 and off an
+/// intervening body node (`BlockClassBody`) from 10.0 onwards, so the fixed
+/// `parent.parent` hop that is correct on the newer rows overshoots to the
+/// compilation unit on the older ones. Walking ancestors is correct on both:
+/// Dart has no nested class-like declarations, so the nearest enclosing one is
+/// always the intended target.
+AstNode? enclosingTypeDeclaration(AstNode node) {
+  for (var current = node.parent; current != null; current = current.parent) {
+    if (current is ClassDeclaration ||
+        current is EnumDeclaration ||
+        current is MixinDeclaration ||
+        current is ExtensionDeclaration ||
+        current is ExtensionTypeDeclaration) {
+      return current;
+    }
+  }
+
+  return null;
 }

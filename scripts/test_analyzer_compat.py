@@ -1,5 +1,5 @@
 """Tests dart_code_linter against multiple analyzer versions to verify
-cross-version compatibility (analyzer 10.x, 11.x, 12.x, 13.x, 14.x).
+cross-version compatibility (analyzer 8.x, 9.x, 10.x, 11.x, 12.x, 13.x, 14.x).
 
 Usage:
     python scripts/test_analyzer_compat.py [--analyze-only]
@@ -17,25 +17,55 @@ import sys
 from pathlib import Path
 
 # Analyzer + analyzer_plugin version pairs to test. One representative per
-# analyzer major spanned by the pubspec range (>=10.0.0 <15.0.0), plus a second
-# 13.x row to straddle the namePart reshape (see the 13.3.0 entry).
+# analyzer major spanned by the pubspec range (>=8.2.0 <15.0.0), plus extra rows
+# straddling API reshapes (see the 8.4.0 and 13.3.0 entries).
 # Each entry: (analyzer_version, analyzer_plugin_version, extra_overrides).
 # `extra_overrides` lets us pin test/test_core/test_api when a given analyzer
 # version requires a newer test stack than the lowest-allowed by pubspec.
+# test_core 0.6.19+ uses the `NamedArgument` type, which only exists from
+# analyzer 13, but declares a loose `analyzer: >=13.0.0 <15.0.0`; test_core
+# 0.6.18 declares `>=8.0.0 <14.0.0` and never names that type. So every row
+# below analyzer 14 has to pin the older test stack explicitly, otherwise the
+# row silently inherits whatever the developer's lockfile happens to hold and
+# fails to compile the test runner. The analyzer 14 rows must NOT pin it, since
+# 0.6.18 excludes analyzer 14.
+_PRE_14_TEST_STACK = {
+    "test": "1.31.1",
+    "test_core": "0.6.18",
+    "test_api": "0.7.12",
+}
+
 VERSION_PAIRS = [
-    # 10.x: the pubspec floor. .0.1 patch is the lowest that resolves with meta 1.17.0.
-    ("10.0.1", "0.14.1", {"analysis_server_plugin": "0.3.7"}),
-    ("11.0.0", "0.14.5", {"analysis_server_plugin": "0.3.11"}),  # 11.x
-    ("12.1.0", "0.14.8", {"analysis_server_plugin": "0.3.14"}),  # 12.x
+    # 8.2.0: the pubspec floor. analysis_server_plugin 0.3.0 is the oldest
+    # release in the `^0.3.0` range and exact-pins analyzer 8.2.0, so this is
+    # the lowest analyzer reachable without widening the plugin constraint.
+    # Pre-reshape row: no `ClassDeclaration.namePart`/`body`, so it exercises
+    # the structural fallbacks in ast_compat (name read after the `class`/`enum`
+    # keyword, members read off the declaration's own braces).
+    ("8.2.0", "0.13.8", {"analysis_server_plugin": "0.3.0", **_PRE_14_TEST_STACK}),
+    (
+        # 8.4.0 introduced `namePart`/`body` (with `namePart` still nullable
+        # here, non-nullable from 9.0), so this straddles the reshape: the same
+        # call sites must resolve through the new nodes on this row and through
+        # the old direct getters on 8.2.0.
+        "8.4.0",
+        "0.13.10",
+        {"analysis_server_plugin": "0.3.3", **_PRE_14_TEST_STACK},
+    ),
+    # 9.x: post-reshape, but before `isOriginDeclaration` existed on
+    # Field/MethodElement, which is why the l10n analyzer uses `nonSynthetic`
+    # unconditionally instead.
+    ("9.0.0", "0.13.11", {"analysis_server_plugin": "0.3.4", **_PRE_14_TEST_STACK}),
+    # 10.x: .0.1 patch is the lowest that resolves with meta 1.17.0.
+    ("10.0.1", "0.14.1", {"analysis_server_plugin": "0.3.7", **_PRE_14_TEST_STACK}),
+    ("11.0.0", "0.14.5", {"analysis_server_plugin": "0.3.11", **_PRE_14_TEST_STACK}),  # 11.x
+    ("12.1.0", "0.14.8", {"analysis_server_plugin": "0.3.14", **_PRE_14_TEST_STACK}),  # 12.x
     (
         "13.0.0",
         "0.14.9",
         {
             "analysis_server_plugin": "0.3.15",
-            # analyzer 13 needs the bumped test stack (NodeList<Argument>).
-            "test": "1.31.1",
-            "test_core": "0.6.18",
-            "test_api": "0.7.12",
+            **_PRE_14_TEST_STACK,
         },
     ),
     (
@@ -48,9 +78,7 @@ VERSION_PAIRS = [
         "0.14.12",
         {
             "analysis_server_plugin": "0.3.18",
-            "test": "1.31.1",
-            "test_core": "0.6.18",
-            "test_api": "0.7.12",
+            **_PRE_14_TEST_STACK,
         },
     ),
     (

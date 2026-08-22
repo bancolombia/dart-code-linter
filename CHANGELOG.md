@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.3.0
+- Lower the supported `analyzer` floor from 10.0.0 to 8.2.0, so DCL can be added to projects that pin an older analyzer. 8.2.0 is the lowest reachable version without widening the `analysis_server_plugin: ^0.3.0` constraint, because plugin 0.3.0 exact-pins analyzer 8.2.0. The modern Analysis Server plugin keeps working across the whole range. Note that every analyzer 8.2.0+ requires Dart SDK `^3.9.0`, so this widens analyzer compatibility without lowering the effective SDK floor.
+- Fix `extension-type` name resolution on analyzer 8.2.0-9.0.0, where the declaration's first child node is the representation rather than the name part, so the name resolved to the representation field (e.g. `value` instead of `Meters`).
+- Fix the enclosing-type lookup used by `member-ordering`, `prefer-intl-name`, `provide-correct-intl-args` and scope collection. It hopped a fixed two levels to reach the declaring class, which is correct only when an intervening class-body node exists (analyzer 10.0+) and overshot to the compilation unit on analyzer 8.2.0-9.0.0.
+
 ## 4.2.1
 - Fix `prefer-dot-shorthands` to also flag unnamed constructor calls (suggesting `.new(...)`) and enum/static member access used as a `switch` statement/expression case pattern matched against the switch's scrutinee type — both were previously left unflagged.
 
