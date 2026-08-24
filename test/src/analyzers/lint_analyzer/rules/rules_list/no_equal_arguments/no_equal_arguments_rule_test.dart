@@ -11,6 +11,8 @@ const _namedParametersExamplePath =
     'no_equal_arguments/examples/named_parameters_example.dart';
 const _providerExamplePath =
     'no_equal_arguments/examples/provider_example.dart';
+const _noMatchingArgumentsExamplePath =
+    'no_equal_arguments/examples/no_matching_arguments_example.dart';
 
 void main() {
   group('NoEqualArgumentsRule', () {
@@ -77,6 +79,14 @@ void main() {
 
     test('reports no issues for provider read', () async {
       final unit = await RuleTestHelper.resolveFromFile(_providerExamplePath);
+      final issues = NoEqualArgumentsRule().check(unit);
+
+      RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    test('reports no issues for argument without a match', () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_noMatchingArgumentsExamplePath);
       final issues = NoEqualArgumentsRule().check(unit);
 
       RuleTestHelper.verifyNoIssues(issues);
