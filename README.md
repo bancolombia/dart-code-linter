@@ -105,6 +105,16 @@ plugins:
 > [!NOTE]
 > Rules that require mandatory user-supplied configuration (such as `avoid-banned-imports` or `ban-name`) are not currently supported via the `analysis_server_plugin` protocol and should be configured using the legacy mechanism instead.
 
+> [!NOTE]
+> The `plugins` loader resolves `dart_code_linter` on its own, independently of your project's normal dependency resolution. A `dependency_overrides` entry pointing `dart_code_linter` at a local path or a fork is **not** picked up by it, so pinning to an unpublished version this way loads no diagnostics at all, with no error. To point the plugin itself at a local checkout (for example, when testing an unreleased branch or fork), add a `path` key under its own configuration block instead:
+> ```yaml title="analysis_options.yaml"
+> plugins:
+>   dart_code_linter:
+>     path: ../path/to/dart-code-linter
+>     diagnostics:
+>       avoid-dynamic: true
+> ```
+
 #### 2. Legacy Analyzer Plugin (Dart < 3.9)
 
 Configure the plugin under `analyzer` in your `analysis_options.yaml`:
