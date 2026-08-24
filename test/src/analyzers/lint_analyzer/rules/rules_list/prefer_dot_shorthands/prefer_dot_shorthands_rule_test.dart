@@ -23,20 +23,27 @@ void main() {
     });
 
     test(
-        'reports enum/static member access, static method calls and named constructor calls whose type is inferable from context, and nothing else',
-        () async {
+        'reports enum/static member access, static method calls, named and '
+        'unnamed constructor calls, and switch-case patterns whose type is '
+        'inferable from context, and nothing else', () async {
       final unit = await RuleTestHelper.resolveFromFile(_examplePath);
       final issues = PreferDotShorthandsRule().check(unit);
 
       RuleTestHelper.verifyIssues(
         issues: issues,
-        startLines: [21, 26, 31, 37, 42],
+        startLines: [21, 26, 31, 37, 42, 60, 66, 67, 68, 75, 77],
         replacements: [
           '.error',
           '.warning',
           '.info',
           '.origin()',
           '.zero()',
+          '.new(1, 2)',
+          '.error',
+          '.warning',
+          '.info',
+          '.error',
+          '.warning',
         ],
       );
     });

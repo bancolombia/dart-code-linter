@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.2.1
+- Fix `prefer-dot-shorthands` to also flag unnamed constructor calls (suggesting `.new(...)`) and enum/static member access used as a `switch` statement/expression case pattern matched against the switch's scrutinee type — both were previously left unflagged.
+
 ## 4.2.0
 - Fix Analysis Server plugin rule configuration on Dart 3.13 by keeping plugin diagnostics scalar and loading full options from `dart_code_linter.rules`.
 - Add the `avoid-non-configurable-callbacks-in-init-state` rule, which flags a `State.initState` that configures a widget-supplied object (e.g. `widget.controller.setNavigationDelegate(...)`) with a callback object whose named callbacks never reference the widget's own fields — a sign the behavior is fully hardcoded with no way for callers of the widget to customize it.
