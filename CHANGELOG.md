@@ -1,5 +1,7 @@
 # Changelog
 
+## 4.2.2
+- Fix Analysis Server plugin configuration loading across supported Dart runtimes.
 ## 4.2.1
 - Fix `prefer-dot-shorthands` to also flag unnamed constructor calls (suggesting `.new(...)`) and enum/static member access used as a `switch` statement/expression case pattern matched against the switch's scrutinee type — both were previously left unflagged.
 
