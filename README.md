@@ -89,21 +89,37 @@ DCL can be used as a plugin for the Dart `analyzer` [package](https://pub.dev/pa
 
 Depending on your Dart SDK version, you can configure the plugin in two ways:
 
-#### 1. Analysis Server Plugin (Recommended for Dart >= 3.9)
+#### 1. Analysis Server Plugin (Recommended for Dart >= 3.10)
 
-DCL supports the new Dart Analysis Server plugin protocol (`analysis_server_plugin`). To use it, add the plugin configuration under the top-level `plugins` key in your `analysis_options.yaml`:
+Dart 3.9 is not supported by this release's plugin integrations. Use Dart >= 3.10 for the Analysis Server Plugin and Dart < 3.9 for the Legacy Analyzer Plugin.
+DCL supports the new Dart Analysis Server plugin protocol (`analysis_server_plugin`). To use it, add plugin configuration under the top-level `plugins` key in `analysis_options.yaml`:
 
 ```yaml title="analysis_options.yaml"
 plugins:
   dart_code_linter:
     diagnostics:
       avoid-dynamic: true
-      prefer-trailing-comma: true
-      # ... add other rule IDs to enable them
+      no-magic-number: warning
+
+dart_code_linter:
+  rules:
+    - avoid-dynamic
+    - no-magic-number:
+        severity: warning
+        allowed: [42]
 ```
 
-> [!NOTE]
-> Rules that require mandatory user-supplied configuration (such as `avoid-banned-imports` or `ban-name`) are not currently supported via the `analysis_server_plugin` protocol and should be configured using the legacy mechanism instead.
+Top-level `plugins.dart_code_linter.diagnostics` controls IDE enablement and severity. The top-level `dart_code_linter.rules` section supplies full DCL rule configuration, including arbitrary parameters used by both IDE integration and CLI.
+
+Dart 3.13 accepts only scalar diagnostic values in `plugins.dart_code_linter.diagnostics`:
+
+- `true`: enable the rule with its analyzer default severity.
+- `false`: disable the rule in the IDE.
+- `info`, `warning`, or `error`: enable the rule with that IDE severity.
+
+Do not put a map below `plugins.dart_code_linter.diagnostics.<rule>` on Flutter 3.47 / Dart 3.13. The analyzer rejects that shape with `invalid_section_format` before the plugin runs. Put rule maps under `dart_code_linter.rules` instead.
+
+Rules with mandatory configuration, such as `avoid-banned-imports` and `ban-name`, work with the modern plugin when their configuration lives under `dart_code_linter.rules`.
 
 #### 2. Legacy Analyzer Plugin (Dart < 3.9)
 
@@ -130,6 +146,7 @@ As DCL depends on the Dart `analyzer` package. The following table shows the com
 
 | DCL Version       | Analyzer Version   | Dart SDK          |
 |-------------------|--------------------|-------------------|
+| 4.3.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.2             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
