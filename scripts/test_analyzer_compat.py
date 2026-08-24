@@ -35,6 +35,31 @@ _PRE_14_TEST_STACK = {
     "test_api": "0.7.12",
 }
 
+# dart_style is a transitive dependency of analyzer_plugin
+# (`change_builder_dart.dart`, used by fix-producing rules), and each
+# dart_style release exact-brackets the analyzer AST shape it compiles
+# against (e.g. 3.1.7 declares `analyzer: '>=10.0.0 <12.0.0'`). Overriding
+# `analyzer` via dependency_overrides does not make pub re-check dart_style's
+# own constraint against it, so an unpinned dart_style silently keeps
+# whatever version the ambient lockfile already holds even when it no longer
+# supports the row's analyzer. That mismatch only breaks the build once
+# something actually compiles dart_style's visitor code (the modern
+# analysis_server_plugin bridge in dcl_analysis_rule.dart reaches every
+# rule's fix-building code, which reaches change_builder_dart.dart), so every
+# row must pin a dart_style compatible with its own analyzer version.
+_DART_STYLE_BY_ANALYZER = {
+    "8.2.0": "3.1.3",  # >=8.2.0 <10.0.0
+    "8.4.0": "3.1.3",
+    "9.0.0": "3.1.3",
+    "10.0.1": "3.1.6",  # ^10.0.0
+    "11.0.0": "3.1.7",  # >=10.0.0 <12.0.0
+    "12.1.0": "3.1.8",  # ^12.0.0
+    "13.0.0": "3.1.9",  # ^13.0.0
+    "13.3.0": "3.1.9",
+    "14.0.0": "3.1.11",  # >=13.1.0 <15.0.0
+    "14.1.0": "3.1.12",
+}
+
 VERSION_PAIRS = [
     # 8.2.0: the pubspec floor. analysis_server_plugin 0.3.0 is the oldest
     # release in the `^0.3.0` range and exact-pins analyzer 8.2.0, so this is
@@ -42,7 +67,15 @@ VERSION_PAIRS = [
     # Pre-reshape row: no `ClassDeclaration.namePart`/`body`, so it exercises
     # the structural fallbacks in ast_compat (name read after the `class`/`enum`
     # keyword, members read off the declaration's own braces).
-    ("8.2.0", "0.13.8", {"analysis_server_plugin": "0.3.0", **_PRE_14_TEST_STACK}),
+    (
+        "8.2.0",
+        "0.13.8",
+        {
+            "analysis_server_plugin": "0.3.0",
+            "dart_style": _DART_STYLE_BY_ANALYZER["8.2.0"],
+            **_PRE_14_TEST_STACK,
+        },
+    ),
     (
         # 8.4.0 introduced `namePart`/`body` (with `namePart` still nullable
         # here, non-nullable from 9.0), so this straddles the reshape: the same
@@ -50,21 +83,58 @@ VERSION_PAIRS = [
         # the old direct getters on 8.2.0.
         "8.4.0",
         "0.13.10",
-        {"analysis_server_plugin": "0.3.3", **_PRE_14_TEST_STACK},
+        {
+            "analysis_server_plugin": "0.3.3",
+            "dart_style": _DART_STYLE_BY_ANALYZER["8.4.0"],
+            **_PRE_14_TEST_STACK,
+        },
     ),
-    # 9.x: post-reshape, but before `isOriginDeclaration` existed on
-    # Field/MethodElement, which is why the l10n analyzer uses `nonSynthetic`
-    # unconditionally instead.
-    ("9.0.0", "0.13.11", {"analysis_server_plugin": "0.3.4", **_PRE_14_TEST_STACK}),
-    # 10.x: .0.1 patch is the lowest that resolves with meta 1.17.0.
-    ("10.0.1", "0.14.1", {"analysis_server_plugin": "0.3.7", **_PRE_14_TEST_STACK}),
-    ("11.0.0", "0.14.5", {"analysis_server_plugin": "0.3.11", **_PRE_14_TEST_STACK}),  # 11.x
-    ("12.1.0", "0.14.8", {"analysis_server_plugin": "0.3.14", **_PRE_14_TEST_STACK}),  # 12.x
+    (
+        # 9.x: post-reshape, but before `isOriginDeclaration` existed on
+        # Field/MethodElement, which is why the l10n analyzer uses
+        # `nonSynthetic` unconditionally instead.
+        "9.0.0",
+        "0.13.11",
+        {
+            "analysis_server_plugin": "0.3.4",
+            "dart_style": _DART_STYLE_BY_ANALYZER["9.0.0"],
+            **_PRE_14_TEST_STACK,
+        },
+    ),
+    (
+        # 10.x: .0.1 patch is the lowest that resolves with meta 1.17.0.
+        "10.0.1",
+        "0.14.1",
+        {
+            "analysis_server_plugin": "0.3.7",
+            "dart_style": _DART_STYLE_BY_ANALYZER["10.0.1"],
+            **_PRE_14_TEST_STACK,
+        },
+    ),
+    (
+        "11.0.0",
+        "0.14.5",
+        {
+            "analysis_server_plugin": "0.3.11",
+            "dart_style": _DART_STYLE_BY_ANALYZER["11.0.0"],
+            **_PRE_14_TEST_STACK,
+        },
+    ),
+    (
+        "12.1.0",
+        "0.14.8",
+        {
+            "analysis_server_plugin": "0.3.14",
+            "dart_style": _DART_STYLE_BY_ANALYZER["12.1.0"],
+            **_PRE_14_TEST_STACK,
+        },
+    ),
     (
         "13.0.0",
         "0.14.9",
         {
             "analysis_server_plugin": "0.3.15",
+            "dart_style": _DART_STYLE_BY_ANALYZER["13.0.0"],
             **_PRE_14_TEST_STACK,
         },
     ),
@@ -78,23 +148,29 @@ VERSION_PAIRS = [
         "0.14.12",
         {
             "analysis_server_plugin": "0.3.18",
+            "dart_style": _DART_STYLE_BY_ANALYZER["13.3.0"],
             **_PRE_14_TEST_STACK,
         },
     ),
     (
         # 14.x requires dart_style 3.1.11+ (transitive via analyzer_plugin),
-        # which only just added analyzer-14 support. dart_style itself isn't
-        # pinned here; pub resolves it automatically off analyzer_plugin.
+        # which only just added analyzer-14 support.
         "14.0.0",
         "0.14.13",
-        {"analysis_server_plugin": "0.3.19"},
+        {
+            "analysis_server_plugin": "0.3.19",
+            "dart_style": _DART_STYLE_BY_ANALYZER["14.0.0"],
+        },
     ),
     (
         # Upper boundary of the current <15.0.0 ceiling: latest 14.x patch,
         # which is what `dart pub upgrade` actually resolves to today.
         "14.1.0",
         "0.14.14",
-        {"analysis_server_plugin": "0.3.20"},
+        {
+            "analysis_server_plugin": "0.3.20",
+            "dart_style": _DART_STYLE_BY_ANALYZER["14.1.0"],
+        },
     ),
 ]
 
