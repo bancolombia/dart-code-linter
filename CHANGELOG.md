@@ -6,10 +6,14 @@
 - Fix the enclosing-type lookup used by `member-ordering`, `prefer-intl-name`, `provide-correct-intl-args` and scope collection. It hopped a fixed two levels to reach the declaring class, which is correct only when an intervening class-body node exists (analyzer 10.0+) and overshot to the compilation unit on analyzer 8.2.0-9.0.0.
 - Fix the legacy analyzer plugin loader silently loading the wrong DCL version. The analysis server copies `tools/analyzer_plugin/pubspec.yaml` verbatim and resolves it against pub.dev, so its `dart_code_linter` range (frozen at `<4.2.0` since 4.1.7) resolved to 4.1.9 for anyone on 4.2.0 or 4.2.1: the IDE ran 4.1.9's rules while the CLI ran the installed version, with no error, because a satisfying version always exists. Restored the exact version pin used up to 4.0.1, so each release's loader loads exactly that release, and added a test that fails if the pin or the loader version drifts.
 
+## 4.2.2
+- Fix Analysis Server plugin configuration loading across supported Dart runtimes.
+
 ## 4.2.1
 - Fix `prefer-dot-shorthands` to also flag unnamed constructor calls (suggesting `.new(...)`) and enum/static member access used as a `switch` statement/expression case pattern matched against the switch's scrutinee type — both were previously left unflagged.
 
 ## 4.2.0
+- Fix Analysis Server plugin rule configuration on Dart 3.13 by keeping plugin diagnostics scalar and loading full options from `dart_code_linter.rules`.
 - Add the `avoid-non-configurable-callbacks-in-init-state` rule, which flags a `State.initState` that configures a widget-supplied object (e.g. `widget.controller.setNavigationDelegate(...)`) with a callback object whose named callbacks never reference the widget's own fields — a sign the behavior is fully hardcoded with no way for callers of the widget to customize it.
 - Add the `avoid-non-exhaustive-switch-on-sealed-classes` rule, which flags a `default`/wildcard (`_`) case in a `switch` statement or expression over a sealed type. Relying on a fallback case defeats the compiler's exhaustiveness checking for sealed hierarchies, so newly added subtypes can silently fall through instead of forcing an explicit decision at each call site.
 - Add the `prefer-dot-shorthands` rule (with auto-fix), which flags enum/static member access, static method calls, and named constructor calls that repeat a type name already inferable from context (a call argument's declared parameter type, or an explicitly typed variable's initializer) — Dart 3.10's dot-shorthand syntax lets these collapse to `.value` instead of `Type.value`. The rule only fires on files whose language version is 3.10 or later, since the shorthand syntax does not compile below that.
