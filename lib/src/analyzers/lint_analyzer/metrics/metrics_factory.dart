@@ -1,4 +1,5 @@
 import '../models/entity_type.dart';
+import 'metrics_list/cognitive_complexity/cognitive_complexity_metric.dart';
 import 'metrics_list/cyclomatic_complexity/cyclomatic_complexity_metric.dart';
 import 'metrics_list/halstead_volume/halstead_volume_metric.dart';
 import 'metrics_list/lines_of_code/lines_of_code_metric.dart';
@@ -12,6 +13,8 @@ import 'metrics_list/weight_of_class/weight_of_class_metric.dart';
 import 'models/metric.dart';
 
 final _implementedMetrics = <String, Metric Function(Map<String, Object>)>{
+  CognitiveComplexityMetric.metricId: (config) =>
+      CognitiveComplexityMetric(config: config),
   CyclomaticComplexityMetric.metricId: (config) =>
       CyclomaticComplexityMetric(config: config),
   HalsteadVolumeMetric.metricId: (config) =>

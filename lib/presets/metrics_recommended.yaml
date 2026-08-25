@@ -1,5 +1,6 @@
 dart_code_linter:
   metrics:
+    cognitive-complexity: 20
     cyclomatic-complexity: 20
     halstead-volume: 150
     maintainability-index: 50

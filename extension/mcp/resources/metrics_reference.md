@@ -1,6 +1,6 @@
 # Code Metrics Reference
 
-Dart Code Linter provides 10 code metrics to measure code complexity, maintainability, and technical debt. Metrics are configured in `analysis_options.yaml` under `dart_code_linter > metrics`.
+Dart Code Linter provides 11 code metrics to measure code complexity, maintainability, and technical debt. Metrics are configured in `analysis_options.yaml` under `dart_code_linter > metrics`.
 
 ## Function-Level Metrics
 
@@ -11,6 +11,14 @@ These metrics are computed per function or method.
 Measures the number of linearly independent paths through a function's source code. Higher values indicate more complex, harder-to-test code.
 
 - **Config key:** `cyclomatic-complexity`
+- **Default threshold:** 20
+- **Measured on:** Functions and methods
+
+### Cognitive Complexity (COGNITIVE)
+
+Measures how difficult a function is for a human to read and understand, based on SonarSource's Cognitive Complexity algorithm. Unlike cyclomatic complexity, control flow nested inside other control flow is penalized more heavily than the same control flow written flat.
+
+- **Config key:** `cognitive-complexity`
 - **Default threshold:** 20
 - **Measured on:** Functions and methods
 
@@ -126,6 +134,7 @@ Flags methods that exceed the configured number of parameters threshold.
 dart_code_linter:
   metrics:
     cyclomatic-complexity: 20
+    cognitive-complexity: 20
     number-of-parameters: 4
     maximum-nesting-level: 5
     source-lines-of-code: 50
