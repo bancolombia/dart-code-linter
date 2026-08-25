@@ -35,10 +35,14 @@ bool _matchesNamedArgumentShape(List<SyntacticEntity> children) {
     return false;
   }
 
-  // analyzer 13: identifier token + colon token + expression.
+  // analyzer 13: identifier-like token + colon token + expression. The label
+  // token can be a built-in-identifier keyword (e.g. `on`, `show`, `get`),
+  // which the lexer tags with a keyword TokenType even though the parser
+  // accepts it as an identifier here; the caller's runtime-type check is what
+  // already establishes this is a named argument, so no further restriction
+  // on the label token's type is needed (or correct: it excludes keywords).
   if (children.length >= 3 &&
       children[0] is Token &&
-      (children[0] as Token).type == TokenType.IDENTIFIER &&
       children[1] is Token &&
       (children[1] as Token).type == TokenType.COLON &&
       children.last is Expression) {
