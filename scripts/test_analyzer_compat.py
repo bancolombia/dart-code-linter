@@ -20,22 +20,80 @@ from pathlib import Path
 # analyzer major spanned by the pubspec range (>=10.0.0 <15.0.0), plus a second
 # 13.x row to straddle the namePart reshape (see the 13.3.0 entry).
 # Each entry: (analyzer_version, analyzer_plugin_version, extra_overrides).
-# `extra_overrides` lets us pin test/test_core/test_api when a given analyzer
-# version requires a newer test stack than the lowest-allowed by pubspec.
+# `extra_overrides` pins whatever else a row needs on top of the analyzer pair.
+
+# The test runner stack, pinned on every row rather than left to resolution:
+# pubspec.lock is gitignored, so an unpinned row inherits whatever lock happens
+# to be lying around, and a clean checkout fails inside test_core itself, which
+# looks nothing like a code regression.
+#
+# There is no slack in the value. test_core 0.6.18 is both the floor (analyzer
+# 13+ fails on NodeList<Argument> below it) and the ceiling (0.6.19 fails against
+# analyzer 10 with "'NamedArgument' isn't a type"), so a bump breaks one end.
+_PRE_14_TEST_STACK = {
+    "test": "1.31.1",
+    "test_core": "0.6.18",
+    "test_api": "0.7.12",
+}
+
+# dart_style is a transitive dependency of analyzer_plugin
+# (`change_builder_dart.dart`, used by fix-producing rules), and each
+# dart_style release exact-brackets the analyzer AST shape it compiles
+# against (e.g. 3.1.7 declares `analyzer: '>=10.0.0 <12.0.0'`). Overriding
+# `analyzer` via dependency_overrides does not make pub re-check dart_style's
+# own constraint against it, so an unpinned dart_style silently keeps
+# whatever version the ambient lockfile already holds even when it no longer
+# supports the row's analyzer. That mismatch only breaks the build once
+# something actually compiles dart_style's visitor code (the modern
+# analysis_server_plugin bridge in dcl_analysis_rule.dart reaches every
+# rule's fix-building code, which reaches change_builder_dart.dart), so every
+# row must pin a dart_style compatible with its own analyzer version.
+_DART_STYLE_BY_ANALYZER = {
+    "10.0.1": "3.1.6",  # ^10.0.0
+    "11.0.0": "3.1.7",  # >=10.0.0 <12.0.0
+    "12.1.0": "3.1.8",  # ^12.0.0
+    "13.0.0": "3.1.9",  # ^13.0.0
+    "13.3.0": "3.1.9",
+    "14.0.0": "3.1.11",  # >=13.1.0 <15.0.0
+    "14.1.0": "3.1.12",
+}
+
 VERSION_PAIRS = [
     # 10.x: the pubspec floor. .0.1 patch is the lowest that resolves with meta 1.17.0.
-    ("10.0.1", "0.14.1", {"analysis_server_plugin": "0.3.7"}),
-    ("11.0.0", "0.14.5", {"analysis_server_plugin": "0.3.11"}),  # 11.x
-    ("12.1.0", "0.14.8", {"analysis_server_plugin": "0.3.14"}),  # 12.x
+    (
+        "10.0.1",
+        "0.14.1",
+        {
+            "analysis_server_plugin": "0.3.7",
+            "dart_style": _DART_STYLE_BY_ANALYZER["10.0.1"],
+            **_PRE_14_TEST_STACK,
+        },
+    ),
+    (
+        "11.0.0",  # 11.x
+        "0.14.5",
+        {
+            "analysis_server_plugin": "0.3.11",
+            "dart_style": _DART_STYLE_BY_ANALYZER["11.0.0"],
+            **_PRE_14_TEST_STACK,
+        },
+    ),
+    (
+        "12.1.0",  # 12.x
+        "0.14.8",
+        {
+            "analysis_server_plugin": "0.3.14",
+            "dart_style": _DART_STYLE_BY_ANALYZER["12.1.0"],
+            **_PRE_14_TEST_STACK,
+        },
+    ),
     (
         "13.0.0",
         "0.14.9",
         {
             "analysis_server_plugin": "0.3.15",
-            # analyzer 13 needs the bumped test stack (NodeList<Argument>).
-            "test": "1.31.1",
-            "test_core": "0.6.18",
-            "test_api": "0.7.12",
+            "dart_style": _DART_STYLE_BY_ANALYZER["13.0.0"],
+            **_PRE_14_TEST_STACK,
         },
     ),
     (
@@ -48,25 +106,29 @@ VERSION_PAIRS = [
         "0.14.12",
         {
             "analysis_server_plugin": "0.3.18",
-            "test": "1.31.1",
-            "test_core": "0.6.18",
-            "test_api": "0.7.12",
+            "dart_style": _DART_STYLE_BY_ANALYZER["13.3.0"],
+            **_PRE_14_TEST_STACK,
         },
     ),
     (
         # 14.x requires dart_style 3.1.11+ (transitive via analyzer_plugin),
-        # which only just added analyzer-14 support. dart_style itself isn't
-        # pinned here; pub resolves it automatically off analyzer_plugin.
+        # which only just added analyzer-14 support.
         "14.0.0",
         "0.14.13",
-        {"analysis_server_plugin": "0.3.19"},
+        {
+            "analysis_server_plugin": "0.3.19",
+            "dart_style": _DART_STYLE_BY_ANALYZER["14.0.0"],
+        },
     ),
     (
         # Upper boundary of the current <15.0.0 ceiling: latest 14.x patch,
         # which is what `dart pub upgrade` actually resolves to today.
         "14.1.0",
         "0.14.14",
-        {"analysis_server_plugin": "0.3.20"},
+        {
+            "analysis_server_plugin": "0.3.20",
+            "dart_style": _DART_STYLE_BY_ANALYZER["14.1.0"],
+        },
     ),
 ]
 
