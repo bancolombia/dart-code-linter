@@ -30,7 +30,7 @@ from pathlib import Path
 # There is no slack in the value. test_core 0.6.18 is both the floor (analyzer
 # 13+ fails on NodeList<Argument> below it) and the ceiling (0.6.19 fails against
 # analyzer 10 with "'NamedArgument' isn't a type"), so a bump breaks one end.
-_PRE_14_TEST_STACK = {
+TEST_STACK = {
     "test": "1.31.1",
     "test_core": "0.6.18",
     "test_api": "0.7.12",
@@ -64,36 +64,36 @@ VERSION_PAIRS = [
         "10.0.1",
         "0.14.1",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.7",
             "dart_style": _DART_STYLE_BY_ANALYZER["10.0.1"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
         "11.0.0",  # 11.x
         "0.14.5",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.11",
             "dart_style": _DART_STYLE_BY_ANALYZER["11.0.0"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
         "12.1.0",  # 12.x
         "0.14.8",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.14",
             "dart_style": _DART_STYLE_BY_ANALYZER["12.1.0"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
         "13.0.0",
         "0.14.9",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.15",
             "dart_style": _DART_STYLE_BY_ANALYZER["13.0.0"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
@@ -105,9 +105,9 @@ VERSION_PAIRS = [
         "13.3.0",
         "0.14.12",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.18",
             "dart_style": _DART_STYLE_BY_ANALYZER["13.3.0"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
@@ -116,6 +116,7 @@ VERSION_PAIRS = [
         "14.0.0",
         "0.14.13",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.19",
             "dart_style": _DART_STYLE_BY_ANALYZER["14.0.0"],
         },
@@ -126,6 +127,7 @@ VERSION_PAIRS = [
         "14.1.0",
         "0.14.14",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.20",
             "dart_style": _DART_STYLE_BY_ANALYZER["14.1.0"],
         },

@@ -40,10 +40,20 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   // A guarded wildcard (`_ when ...`) doesn't satisfy exhaustiveness, so the
   // compiler still enforces the remaining subtypes and there is no fallback
-  // to report.
+  // to report. A parenthesized wildcard (`(_)`) defeats exhaustiveness the
+  // same way a bare `_` does, so it is unwrapped before the check.
   bool _isUnguardedWildcard(GuardedPattern guardedPattern) =>
-      guardedPattern.pattern is WildcardPattern &&
+      _unwrapParentheses(guardedPattern.pattern) is WildcardPattern &&
       guardedPattern.whenClause == null;
+
+  DartPattern _unwrapParentheses(DartPattern pattern) {
+    var current = pattern;
+    while (current is ParenthesizedPattern) {
+      current = current.pattern;
+    }
+
+    return current;
+  }
 
   bool _isSealedType(DartType? type) {
     final element = type is InterfaceType ? type.element : null;

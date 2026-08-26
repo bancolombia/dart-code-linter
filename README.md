@@ -146,6 +146,8 @@ As DCL depends on the Dart `analyzer` package. The following table shows the com
 
 | DCL Version       | Analyzer Version   | Dart SDK          |
 |-------------------|--------------------|-------------------|
+| 4.3.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
+| 4.2.2             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.1.9             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
@@ -193,7 +195,7 @@ You can define one analysis_options.yaml at the root file.
 Reports code metrics, rules and anti-patterns violations. To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics analyze lib
+dart run dart_code_linter:metrics analyze lib
 ```
 
 It will produce a result in one of the format:
@@ -211,7 +213,7 @@ It will produce a result in one of the format:
 Checks unnecessary nullable parameters in functions, methods, constructors. To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics check-unnecessary-nullable lib
+dart run dart_code_linter:metrics check-unnecessary-nullable lib
 ```
 
 It will produce a result in one of the format:
@@ -226,7 +228,7 @@ It will produce a result in one of the format:
 Checks unused `*.dart` files. To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics check-unused-files lib
+dart run dart_code_linter:metrics check-unused-files lib
 ```
 
 It will produce a result in one of the format:
@@ -257,7 +259,7 @@ class ClassWithLocalization {
 To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics check-unused-l10n lib
+dart run dart_code_linter:metrics check-unused-l10n lib
 ```
 
 It will produce a result in one of the format:
@@ -271,13 +273,88 @@ It will produce a result in one of the format:
 Checks unused code in `*.dart` files. To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics check-unused-code lib
+dart run dart_code_linter:metrics check-unused-code lib
 ```
 
 It will produce a result in one of the format:
 
 - Console
 - JSON
+
+By default only top level declarations (classes, functions, variables, and so
+on) are checked. Unused private members of type declarations (methods, fields,
+getters, setters and named constructors) are reported too when the check is
+opted in:
+
+```sh
+dart run dart_code_linter:metrics check-unused-code lib --analyze-private-members
+```
+
+The same can be enabled through `analysis_options.yaml`, so it applies to every
+run:
+
+```yaml
+dart_code_linter:
+  unused-code:
+    analyze-private-members: true
+```
+
+The CLI flag wins over the `analysis_options.yaml` value when both are set. Two
+limitations are worth knowing about:
+
+- A private field that is only ever assigned, never read, is reported as unused,
+  the same way an unused top level variable is.
+- Usages that live only in files excluded from analysis (generated `part` files,
+  for example) are invisible, so members used exclusively from there are
+  reported.
+
+Public members are covered by a separate opt in, because they need more
+guesswork than private ones and are therefore less reliable:
+
+```sh
+dart run dart_code_linter:metrics check-unused-code lib --analyze-public-members
+```
+
+```yaml
+dart_code_linter:
+  unused-code:
+    analyze-public-members: true
+```
+
+The two options are independent, so a large project can keep the cheap private
+members check on while leaving this one off. Members that cannot be seen to be
+used through a reference are skipped rather than reported:
+
+- Members that override or implement an inherited member, since dispatch
+  resolves to the supertype's declaration. This covers `toString`, `hashCode`
+  and `noSuchMethod` on every class, and overrides that carry no `@override`
+  annotation.
+- Members annotated `@override`, `@mustBeOverridden`, `@visibleForOverriding`,
+  `@redeclare`, `@protected`, `@visibleForTesting`, `@JS`, or
+  `@pragma('vm:entry-point')`.
+- Members exported to JavaScript with `@JSExport`, which JavaScript calls
+  through `createJSInteropWrapper`. This one also counts when the annotation
+  sits on the enclosing class, though only for that class's *instance* members,
+  since statics are never wrapped. Note that a `@pragma('vm:entry-point')` on
+  the enclosing class does *not* work the same way: it only permits allocation
+  from native code, so members still need their own pragma and are otherwise
+  reported.
+- Members whose name is invoked or read somewhere on a target of an unknown
+  (`dynamic`) type. Operators count too: a `host + 1`, `host[0] = 1` or
+  `host(1)` on a `dynamic` target keeps every `operator +`, `operator []=` and
+  `call` member, since any of them could be the one reached.
+- `toJson`, which `json.encode` calls by convention rather than by reference.
+- Enum constants of an enum whose `values` is referenced anywhere, since
+  iteration, `byName` and name based deserialization reach the constants without
+  naming any of them.
+- Unnamed constructors, whose invocations carry no identifier to record. Named
+  constructors are analyzed.
+
+Even so, expect more false positives than from the private members check.
+Members reached only through code generation, reflection or a package that
+depends on yours cannot be seen at all. Note also that members used only by
+your tests are reported when the analysis covers `lib` alone; pass the test
+folder too (`check-unused-code lib test`) if you want those usages counted.
 
 
 

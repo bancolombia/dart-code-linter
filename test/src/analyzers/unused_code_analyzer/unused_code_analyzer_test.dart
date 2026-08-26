@@ -283,6 +283,46 @@ void main() {
           );
         });
 
+        test('reports unused private members of every type kind', () async {
+          final result = await analyzer.runCliAnalysis(
+            privateMembersFolders,
+            rootDirectory,
+            _createConfig(analyzePrivateMembers: true),
+          );
+
+          final report = result.firstWhere(
+            (report) => report.path.endsWith('private_type_kinds.dart'),
+          );
+
+          final names = report.issues.map((issue) => issue.declarationName);
+
+          expect(
+            names,
+            unorderedEquals([
+              '_unusedInMixin',
+              '_unusedStaticInEnum',
+              '_unusedEnumGetter',
+              '_unusedEnumMethod',
+              '_unusedInExtensionType',
+              '_unusedStaticConst',
+              '_unusedStaticMethod',
+              '_unusedStaticGetter',
+              '_reportedUnusedMethod',
+            ]),
+          );
+
+          // Used from the mixing in class, from another member of the same
+          // enum, extension type or class, and suppressed with a member level
+          // ignore comment.
+          expect(names, isNot(contains('_usedInMixin')));
+          expect(names, isNot(contains('_usedStaticInEnum')));
+          expect(names, isNot(contains('_usedEnumGetter')));
+          expect(names, isNot(contains('_usedInExtensionType')));
+          expect(names, isNot(contains('_usedStaticConst')));
+          expect(names, isNot(contains('_usedStaticMethod')));
+          expect(names, isNot(contains('_suppressedUnusedMethod')));
+        });
+
         test(
           'known limitation: a dead private override sharing a name with a '
           'live ancestor member is not reported (see private_override.dart)',
@@ -307,6 +347,489 @@ void main() {
             expect(report, null);
           },
         );
+
+        test(
+          'reports a private-named enum constant, since privacy routes it '
+          'here rather than into analyzePublicMembers',
+          () async {
+            final result = await analyzer.runCliAnalysis(
+              privateMembersFolders,
+              rootDirectory,
+              _createConfig(analyzePrivateMembers: true),
+            );
+
+            final report = result.firstWhere(
+              (report) => report.path.endsWith('private_enum_constant.dart'),
+            );
+
+            final names = report.issues.map((issue) => issue.declarationName);
+
+            expect(names, ['_unusedConstant']);
+          },
+        );
+      });
+
+      group('analyze-public-members', () {
+        final publicMembersFolders = [
+          normalize(File('test/resources/unused_code_public_members_analyzer')
+              .absolute
+              .path),
+        ];
+
+        late Iterable<UnusedCodeFileReport> result;
+
+        setUpAll(() async {
+          result = await analyzer.runCliAnalysis(
+            publicMembersFolders,
+            rootDirectory,
+            _createConfig(analyzePublicMembers: true),
+          );
+        });
+
+        Iterable<String> namesFor(String fileName) => result
+            .firstWhere((report) => report.path.endsWith(fileName))
+            .issues
+            .map((issue) => issue.declarationName);
+
+        test('is disabled by default', () async {
+          final defaultResult = await analyzer.runCliAnalysis(
+            publicMembersFolders,
+            rootDirectory,
+            _createConfig(),
+          );
+
+          expect(defaultResult, isEmpty);
+        });
+
+        test('reports unused public members of a class', () {
+          final names = namesFor('public_members.dart');
+
+          expect(
+            names,
+            unorderedEquals([
+              'unusedField',
+              'unusedGetter',
+              'unusedSetter',
+              'unusedMethod',
+              'unusedStatic',
+              'Api.unusedNamed',
+            ]),
+          );
+
+          // Private members belong to the other flag.
+          expect(names, isNot(contains('_privateUnusedMethod')));
+          // The unnamed constructor is never a candidate.
+          expect(names, isNot(contains('Api')));
+        });
+
+        test('does not report members that override an inherited member', () {
+          final names = namesFor('overrides.dart');
+
+          expect(names, unorderedEquals(['unusedInBase', 'derivedUnused']));
+
+          // Annotated override, and an override without the annotation: both
+          // are reached by dispatch on `Base`.
+          expect(names, isNot(contains('template')));
+          expect(names, isNot(contains('hook')));
+        });
+
+        test(
+          'does not report an override whose supertype is in another library',
+          () {
+            expect(
+              namesFor('cross_library_override.dart'),
+              ['unusedInSubclass'],
+            );
+            expect(namesFor('cross_library_base.dart'), ['unusedInBase']);
+          },
+        );
+
+        test('does not report members reached without a reference', () {
+          final names = namesFor('enums_and_dynamic.dart');
+
+          expect(names, unorderedEquals(['unused', 'notInvoked']));
+
+          // Reached through `IteratedStatus.values`.
+          expect(names, isNot(contains('first')));
+          expect(names, isNot(contains('second')));
+          // Reached through a call on a `dynamic` target, and through reads on
+          // a `dynamic` target as a prefixed identifier and property access.
+          expect(names, isNot(contains('dynamicallyInvoked')));
+          expect(names, isNot(contains('dynamicallyRead')));
+          expect(names, isNot(contains('alsoDynamicallyRead')));
+        });
+
+        test('reports unused public members of every type kind', () {
+          final names = namesFor('public_type_kinds.dart');
+
+          expect(
+            names,
+            unorderedEquals([
+              'unusedInMixin',
+              'second',
+              'unusedEnumMethod',
+              'unusedInExtensionType',
+            ]),
+          );
+
+          // Used from the mixing in class, from another member of the same
+          // enum or extension type, suppressed with an ignore comment on the
+          // constant, and redeclaring a member of the implemented type.
+          expect(names, isNot(contains('usedInMixin')));
+          expect(names, isNot(contains('first')));
+          expect(names, isNot(contains('suppressedConstant')));
+          expect(names, isNot(contains('usedEnumMethod')));
+          expect(names, isNot(contains('usedInExtensionType')));
+          expect(names, isNot(contains('abs')));
+        });
+
+        test('does not report members annotated as reachable', () {
+          final names = namesFor('annotated_members.dart');
+
+          expect(names, unorderedEquals(['plainUnused', 'notAnEntryPoint']));
+        });
+
+        // Characterization test, green on arrival: it pins the SDK semantics
+        // that a type level `vm:entry-point` covers allocation only, so that
+        // the deliberate asymmetry with `@JSExport` (which does cover the whole
+        // class) is not "fixed" into a false negative later.
+        test(
+          'characterization: a type level vm:entry-point pragma does not '
+          'protect its members',
+          () {
+            final names = namesFor('annotated_members.dart');
+
+            // No pragma of its own, so still dead code despite the class
+            // carrying one.
+            expect(names, contains('notAnEntryPoint'));
+            // Carries its own pragma, so it is retained.
+            expect(names, isNot(contains('calledFromNative')));
+          },
+        );
+
+        // Characterization test for the one skip reason that is a judgement
+        // call rather than a reachability fact: a `@JS` binding's callers are
+        // Dart-side and visible here, so it is reportable in principle and is
+        // skipped only to avoid flagging the unused part of an interop surface.
+        test('does not report members bound to JavaScript with @JS', () {
+          final names = namesFor('js_binding_members.dart');
+
+          // `clear` is the control: equally unreferenced, but unannotated.
+          expect(names, ['clear']);
+          expect(names, isNot(contains('writeLine')));
+        });
+
+        test('does not report members exported to JavaScript', () {
+          final names = namesFor('js_exported_members.dart');
+
+          expect(
+            names,
+            unorderedEquals([
+              'unusedStatic',
+              'unusedStaticField',
+              'unusedMember',
+              'prefixUnusedMember',
+              'alsoUnused',
+            ]),
+          );
+
+          // Wrapped by `createJSInteropWrapper` because the class carries
+          // `@JSExport`, so JavaScript reaches these with no Dart reference.
+          expect(names, isNot(contains('handleEvent')));
+          expect(names, isNot(contains('currentValue')));
+          expect(names, isNot(contains('exportedField')));
+          // Exported by its own member level annotation instead.
+          expect(names, isNot(contains('exportedMember')));
+          // Annotated through an import prefix (`@js.JSExport()`).
+          expect(names, isNot(contains('prefixExportedMember')));
+          // A class level `@JSExport` wraps only instance members, so statics
+          // in an exported class are still reported. Both kinds are checked:
+          // methods and fields carry staticness on different AST nodes.
+          expect(names, contains('unusedStatic'));
+          expect(names, contains('unusedStaticField'));
+        });
+
+        test('records unary operator and increment usages', () {
+          final names = namesFor('unary_operators.dart');
+
+          expect(names, ['~']);
+
+          // `-counter` reaches `unary-` and `counter++` reaches `+`.
+          expect(names, isNot(contains('unary-')));
+          expect(names, isNot(contains('+')));
+        });
+
+        test('records the combiner of a compound assignment', () {
+          final names = namesFor('compound_assignment.dart');
+
+          // `-` is the control: declared and never reached.
+          expect(names, ['-']);
+
+          // `accumulator += 2` reaches `operator +` through the combiner.
+          expect(names, isNot(contains('+')));
+        });
+
+        test(
+          'still reports unused members of a file that is re-exported by a '
+          "barrel, even though the file's own top level declarations are "
+          'exempt',
+          () {
+            final names = namesFor('reexported_members.dart');
+
+            expect(names, ['deadMethod']);
+
+            // Exempt because the file is exported: reachable through the
+            // package's public API, which whole-program usage tracking
+            // cannot see into.
+            expect(names, isNot(contains('useReexportedApi')));
+            expect(names, isNot(contains('ReexportedApi')));
+          },
+        );
+
+        test(
+          'reports a method that only shares its name with an unrelated '
+          "record field access, since the field has no element of its own "
+          'to be mistaken for a dynamic target',
+          () {
+            final names = namesFor('record_field_access.dart');
+
+            expect(names, contains('name'));
+          },
+        );
+
+        test(
+          'reports a dead instance method that only shares its name with an '
+          'unrelated static member on a supertype, since statics are never '
+          'inherited',
+          () {
+            final names = namesFor('static_name_collision.dart');
+
+            expect(names, contains('log'));
+          },
+        );
+
+        test(
+          'reports a dead named constructor that only shares its name with '
+          'an unrelated instance method on a supertype, since constructors '
+          'and instance members are separate namespaces',
+          () {
+            final names = namesFor('constructor_supertype_collision.dart');
+
+            expect(names, contains('Derived.build'));
+          },
+        );
+
+        test(
+          'does not report a member annotated with vm:entry-point through a '
+          'prefixed import',
+          () {
+            final names = namesFor('prefixed_entry_point_pragma.dart');
+
+            expect(names, ['deadControl']);
+            expect(names, isNot(contains('calledFromNative')));
+          },
+        );
+
+        test('records operator, call and extension member usages', () {
+          final names = namesFor('operators_and_extensions.dart');
+
+          expect(names, unorderedEquals(['*', 'tripled']));
+
+          // `+` and `[]` are used through expressions, `call` through an
+          // implicit invocation, and `==`/`hashCode` are inherited from Object.
+          expect(names, isNot(contains('+')));
+          expect(names, isNot(contains('[]')));
+          expect(names, isNot(contains('call')));
+          expect(names, isNot(contains('==')));
+          expect(names, isNot(contains('hashCode')));
+          expect(names, isNot(contains('doubled')));
+          // `wrapper += 1` reaches the extension's `operator +` through the
+          // compound assignment's combiner, which also marks the extension
+          // declaration itself used.
+          expect(names, isNot(contains('WrapperMath')));
+        });
+
+        test(
+          'reports a dead operator []= that only shares its name with one '
+          'reached through a plain, statically typed index write',
+          () {
+            final names = namesFor('index_operator_write.dart');
+
+            expect(names, ['[]=']);
+          },
+        );
+
+        test(
+          'does not report a private-named enum constant, since privacy '
+          'routes it into analyzePrivateMembers instead',
+          () {
+            final report = result.firstWhereOrNull((report) =>
+                report.path.endsWith('private_named_enum_constant.dart'));
+
+            // A file with no issues at all is omitted from the result set
+            // entirely.
+            expect(report, null);
+          },
+        );
+
+        test(
+          'does not report any member of a type whose own supertype fails '
+          'to resolve, since allSupertypes then comes back incomplete and '
+          'an unannotated override could be falsely flagged as unused',
+          () {
+            final report = result.firstWhereOrNull(
+                (report) => report.path.endsWith('unresolved_supertype.dart'));
+
+            // A file with no issues at all is omitted from the result set
+            // entirely. `unrelated`, which shares no name with anything, is
+            // exempted too: once a type's hierarchy fails to resolve, every
+            // member of it is treated as possibly declared by the missing
+            // supertype, trading a missed detection for no false positive.
+            expect(report, null);
+          },
+        );
+      });
+
+      group('dynamic operator usages', () {
+        final dynamicOperatorsFolders = [
+          normalize(
+              File('test/resources/unused_code_dynamic_operators_analyzer')
+                  .absolute
+                  .path),
+        ];
+
+        // In its own folder because dynamically used names are matched
+        // program-wide: the `~host` in the fixture would otherwise defuse the
+        // `~` control member of unary_operators.dart.
+        test('does not report operators reached through a dynamic target',
+            () async {
+          final result = await analyzer.runCliAnalysis(
+            dynamicOperatorsFolders,
+            rootDirectory,
+            _createConfig(analyzePublicMembers: true),
+          );
+
+          final names = result
+              .firstWhere(
+                (report) => report.path.endsWith('dynamic_operators.dart'),
+              )
+              .issues
+              .map((issue) => issue.declarationName);
+
+          // `%` is the control: declared and never reached, so it is the one
+          // member reported.
+          expect(names, ['%']);
+
+          // One operator per expression kind on a `dynamic` target: binary,
+          // postfix increment, compound assignment combiner, unary minus,
+          // tilde, index read, index write and implicit `call`. The reported
+          // name of a unary minus is its display name `unary-`.
+          expect(names, isNot(contains('~/')));
+          expect(names, isNot(contains('+')));
+          expect(names, isNot(contains('*')));
+          expect(names, isNot(contains('unary-')));
+          expect(names, isNot(contains('-')));
+          expect(names, isNot(contains('~')));
+          expect(names, isNot(contains('[]')));
+          expect(names, isNot(contains('[]=')));
+          expect(names, isNot(contains('call')));
+        });
+      });
+
+      group(
+        'operator usages are bridged across a conditional import',
+        () {
+          test(
+            'does not report the unselected sibling of an operator that is '
+            'used only through the conditionally imported declaration',
+            () async {
+              final folders = [
+                normalize(File(
+                  'test/resources/unused_code_conditional_operator_member_analyzer',
+                ).absolute.path),
+              ];
+
+              final result = await analyzer.runCliAnalysis(
+                folders,
+                rootDirectory,
+                _createConfig(analyzePublicMembers: true),
+              );
+
+              final report = result.firstWhereOrNull(
+                (report) => report.path.endsWith('conditional_impl.dart'),
+              );
+
+              expect(
+                report?.issues.map((issue) => issue.declarationName) ?? [],
+                isNot(contains('+')),
+              );
+            },
+          );
+        },
+      );
+
+      group(
+        'member usages do not mask top level declarations through a '
+        'conditional import',
+        () {
+          test(
+            'reports a dead top level declaration that shares a name and '
+            'kind with a used member reached through a conditional import',
+            () async {
+              final folders = [
+                normalize(File(
+                  'test/resources/unused_code_conditional_masked_top_level_analyzer',
+                ).absolute.path),
+              ];
+
+              final result = await analyzer.runCliAnalysis(
+                folders,
+                rootDirectory,
+                _createConfig(),
+              );
+
+              final report = result.firstWhere(
+                (report) => report.path.endsWith('conditional_impl.dart'),
+              );
+
+              expect(
+                report.issues.map((issue) => issue.declarationName),
+                contains('value'),
+              );
+            },
+          );
+        },
+      );
+
+      group('member usages do not mask top level declarations', () {
+        final maskedFolders = [
+          normalize(File('test/resources/unused_code_masked_top_level_analyzer')
+              .absolute
+              .path),
+        ];
+
+        for (final analyzePrivateMembers in [false, true]) {
+          test(
+            'reports dead top level declarations sharing a name with a used '
+            'member (analyze-private-members: $analyzePrivateMembers)',
+            () async {
+              final result = await analyzer.runCliAnalysis(
+                maskedFolders,
+                rootDirectory,
+                _createConfig(analyzePrivateMembers: analyzePrivateMembers),
+              );
+
+              final report = result.firstWhere(
+                (report) => report.path.endsWith('masked_top_level.dart'),
+              );
+
+              expect(
+                report.issues.map((issue) => issue.declarationName),
+                unorderedEquals(['reset', 'counter']),
+              );
+            },
+          );
+        }
       });
     },
     testOn: 'posix',
@@ -316,6 +839,7 @@ void main() {
 UnusedCodeConfig _createConfig({
   Iterable<String> analyzerExcludePatterns = const [],
   bool analyzePrivateMembers = false,
+  bool analyzePublicMembers = false,
 }) =>
     UnusedCodeConfig(
       excludePatterns: const [],
@@ -323,4 +847,5 @@ UnusedCodeConfig _createConfig({
       isMonorepo: false,
       shouldPrintConfig: false,
       analyzePrivateMembers: analyzePrivateMembers,
+      analyzePublicMembers: analyzePublicMembers,
     );
