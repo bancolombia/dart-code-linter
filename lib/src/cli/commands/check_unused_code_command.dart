@@ -44,12 +44,15 @@ class CheckUnusedCodeCommand extends BaseCommand {
     final shouldPrintConfig = _boolFlagOrNull(FlagNames.printConfig);
     final analyzePrivateMembers =
         _boolFlagOrNull(FlagNames.analyzePrivateMembers);
+    final analyzePublicMembers =
+        _boolFlagOrNull(FlagNames.analyzePublicMembers);
 
     final config = ConfigBuilder.getUnusedCodeConfigFromArgs(
       [excludePath],
       isMonorepo: isMonorepo,
       shouldPrintConfig: shouldPrintConfig,
       analyzePrivateMembers: analyzePrivateMembers,
+      analyzePublicMembers: analyzePublicMembers,
     );
 
     final unusedCodeResult = await _analyzer.runCliAnalysis(
@@ -87,6 +90,7 @@ class CheckUnusedCodeCommand extends BaseCommand {
     addCommonFlags();
     _usesIsMonorepoOption();
     _usesAnalyzePrivateMembersOption();
+    _usesAnalyzePublicMembersOption();
     _usesExitOption();
   }
 
@@ -122,6 +126,18 @@ class CheckUnusedCodeCommand extends BaseCommand {
         FlagNames.analyzePrivateMembers,
         help: 'Also report unused private members in type declarations '
             '(methods, fields, getters, setters and named constructors).',
+      );
+  }
+
+  void _usesAnalyzePublicMembersOption() {
+    argParser
+      ..addSeparator('')
+      ..addFlag(
+        FlagNames.analyzePublicMembers,
+        help: 'Also report unused public members in type declarations. Less '
+            'reliable than the private members check: members reached only '
+            'through dynamic calls, reflection or code generation may be '
+            'reported.',
       );
   }
 
