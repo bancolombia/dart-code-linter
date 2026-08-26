@@ -20,16 +20,23 @@ from pathlib import Path
 # analyzer major spanned by the pubspec range (>=8.2.0 <15.0.0), plus extra rows
 # straddling API reshapes (see the 8.4.0 and 13.3.0 entries).
 # Each entry: (analyzer_version, analyzer_plugin_version, extra_overrides).
-# `extra_overrides` lets us pin test/test_core/test_api when a given analyzer
-# version requires a newer test stack than the lowest-allowed by pubspec.
-# test_core 0.6.19+ uses the `NamedArgument` type, which only exists from
-# analyzer 13, but declares a loose `analyzer: >=13.0.0 <15.0.0`; test_core
-# 0.6.18 declares `>=8.0.0 <14.0.0` and never names that type. So every row
-# below analyzer 14 has to pin the older test stack explicitly, otherwise the
-# row silently inherits whatever the developer's lockfile happens to hold and
-# fails to compile the test runner. The analyzer 14 rows must NOT pin it, since
-# 0.6.18 excludes analyzer 14.
-_PRE_14_TEST_STACK = {
+# `extra_overrides` pins whatever else a row needs on top of the analyzer pair.
+
+# The test runner stack, pinned on every row rather than left to resolution:
+# pubspec.lock is gitignored, so an unpinned row inherits whatever lock happens
+# to be lying around, and a clean checkout fails inside test_core itself, which
+# looks nothing like a code regression.
+#
+# There is no slack in the value. test_core 0.6.18 is both the floor (analyzer
+# 13+ fails on NodeList<Argument> below it) and the ceiling (0.6.19 fails against
+# analyzer 10 with "'NamedArgument' isn't a type"), so a bump breaks one end.
+# test_core 0.6.18's own pubspec declares `analyzer: >=8.0.0 <14.0.0`, which on
+# paper excludes analyzer 14, but that constraint is never checked here: both
+# packages are forced through dependency_overrides, and pub does not re-verify
+# an overridden package's declared constraint against another overridden
+# package. The 14.0.0/14.1.0 rows below already pinned this same stack before
+# the 8.x rows existed, so it stays applied uniformly across the matrix.
+TEST_STACK = {
     "test": "1.31.1",
     "test_core": "0.6.18",
     "test_api": "0.7.12",
@@ -71,9 +78,9 @@ VERSION_PAIRS = [
         "8.2.0",
         "0.13.8",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.0",
             "dart_style": _DART_STYLE_BY_ANALYZER["8.2.0"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
@@ -84,9 +91,9 @@ VERSION_PAIRS = [
         "8.4.0",
         "0.13.10",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.3",
             "dart_style": _DART_STYLE_BY_ANALYZER["8.4.0"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
@@ -96,46 +103,46 @@ VERSION_PAIRS = [
         "9.0.0",
         "0.13.11",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.4",
             "dart_style": _DART_STYLE_BY_ANALYZER["9.0.0"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
-        # 10.x: .0.1 patch is the lowest that resolves with meta 1.17.0.
+        # 10.x: the pubspec floor. .0.1 patch is the lowest that resolves with meta 1.17.0.
         "10.0.1",
         "0.14.1",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.7",
             "dart_style": _DART_STYLE_BY_ANALYZER["10.0.1"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
-        "11.0.0",
+        "11.0.0",  # 11.x
         "0.14.5",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.11",
             "dart_style": _DART_STYLE_BY_ANALYZER["11.0.0"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
-        "12.1.0",
+        "12.1.0",  # 12.x
         "0.14.8",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.14",
             "dart_style": _DART_STYLE_BY_ANALYZER["12.1.0"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
         "13.0.0",
         "0.14.9",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.15",
             "dart_style": _DART_STYLE_BY_ANALYZER["13.0.0"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
@@ -147,9 +154,9 @@ VERSION_PAIRS = [
         "13.3.0",
         "0.14.12",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.18",
             "dart_style": _DART_STYLE_BY_ANALYZER["13.3.0"],
-            **_PRE_14_TEST_STACK,
         },
     ),
     (
@@ -158,6 +165,7 @@ VERSION_PAIRS = [
         "14.0.0",
         "0.14.13",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.19",
             "dart_style": _DART_STYLE_BY_ANALYZER["14.0.0"],
         },
@@ -168,6 +176,7 @@ VERSION_PAIRS = [
         "14.1.0",
         "0.14.14",
         {
+            **TEST_STACK,
             "analysis_server_plugin": "0.3.20",
             "dart_style": _DART_STYLE_BY_ANALYZER["14.1.0"],
         },

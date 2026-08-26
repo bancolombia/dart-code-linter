@@ -15,12 +15,22 @@ class UnusedCodeConfig {
   /// to top-level declarations.
   final bool? analyzePrivateMembers;
 
+  /// Whether unused public members in type declarations should be reported in
+  /// addition to top-level declarations.
+  ///
+  /// Independent from [analyzePrivateMembers]: public members need more
+  /// guesswork (dispatch through supertypes, dynamic calls, reflection), so a
+  /// project can keep the cheap private members check on while leaving this
+  /// one off.
+  final bool? analyzePublicMembers;
+
   const UnusedCodeConfig({
     required this.excludePatterns,
     required this.analyzerExcludePatterns,
     required this.isMonorepo,
     required this.shouldPrintConfig,
     required this.analyzePrivateMembers,
+    required this.analyzePublicMembers,
   });
 
   /// Creates the config from analysis [options].
@@ -35,6 +45,10 @@ class UnusedCodeConfig {
           ['unused-code', 'analyze-private-members'],
           packageRelated: true,
         ),
+        analyzePublicMembers: options.readBoolOrNull(
+          ['unused-code', 'analyze-public-members'],
+          packageRelated: true,
+        ),
       );
 
   /// Creates the config from cli args. Pass `null` for an unparsed flag.
@@ -43,6 +57,7 @@ class UnusedCodeConfig {
     required bool? isMonorepo,
     required bool? shouldPrintConfig,
     required bool? analyzePrivateMembers,
+    required bool? analyzePublicMembers,
   }) =>
       UnusedCodeConfig(
         shouldPrintConfig: shouldPrintConfig,
@@ -50,6 +65,7 @@ class UnusedCodeConfig {
         analyzerExcludePatterns: const [],
         isMonorepo: isMonorepo,
         analyzePrivateMembers: analyzePrivateMembers,
+        analyzePublicMembers: analyzePublicMembers,
       );
 
   /// Merges two configs into a single one.
@@ -66,5 +82,7 @@ class UnusedCodeConfig {
         shouldPrintConfig: overrides.shouldPrintConfig ?? shouldPrintConfig,
         analyzePrivateMembers:
             overrides.analyzePrivateMembers ?? analyzePrivateMembers,
+        analyzePublicMembers:
+            overrides.analyzePublicMembers ?? analyzePublicMembers,
       );
 }

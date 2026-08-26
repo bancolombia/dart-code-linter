@@ -14,6 +14,7 @@ import '../../logger/logger.dart';
 import '../../reporters/models/reporter.dart';
 import '../../utils/analyzer_utils.dart';
 import '../../utils/suppression.dart';
+import 'element_utils.dart';
 import 'models/file_elements_usage.dart';
 import 'models/unused_code_file_report.dart';
 import 'models/unused_code_issue.dart';
@@ -90,7 +91,7 @@ class UnusedCodeAnalyzer {
 
         final codeUsage = _analyzeFileCodeUsages(
           unit,
-          unusedCodeAnalysisConfig.analyzePrivateMembers,
+          unusedCodeAnalysisConfig,
         );
         if (codeUsage != null) {
           codeUsages.merge(codeUsage);
@@ -100,7 +101,7 @@ class UnusedCodeAnalyzer {
             .any((pattern) => pattern.matches(filePath))) {
           publicCode[filePath] = _analyzeFilePublicCode(
             unit,
-            unusedCodeAnalysisConfig.analyzePrivateMembers,
+            unusedCodeAnalysisConfig,
           );
         }
       }
@@ -110,7 +111,24 @@ class UnusedCodeAnalyzer {
       _logger?.infoVerbose(
         'Removing globally exported files with code usages from the analysis: ${codeUsages.exports.length}',
       );
-      codeUsages.exports.forEach(publicCode.remove);
+      // Only top level declarations are part of the package's exported
+      // surface here: a member is reachable from outside only through a
+      // reference to its enclosing type, which the type's own top level
+      // exemption already covers, so exporting a file must not excuse the
+      // dead members of the types it declares.
+      for (final exportedPath in codeUsages.exports) {
+        final elements = publicCode[exportedPath];
+        if (elements == null) {
+          continue;
+        }
+
+        final members = elements.where(isMemberElement).toSet();
+        if (members.isEmpty) {
+          publicCode.remove(exportedPath);
+        } else {
+          publicCode[exportedPath] = members;
+        }
+      }
     }
 
     return _getReports(codeUsages, publicCode, rootFolder);
@@ -133,11 +151,11 @@ class UnusedCodeAnalyzer {
 
   FileElementsUsage? _analyzeFileCodeUsages(
     SomeResolvedUnitResult unit,
-    bool analyzePrivateMembers,
+    UnusedCodeAnalysisConfig config,
   ) {
     if (unit is ResolvedUnitResult) {
       final visitor =
-          UsedCodeVisitor(recordClassMembers: analyzePrivateMembers);
+          UsedCodeVisitor(recordClassMembers: config.analyzeMembers);
       unit.unit.visitChildren(visitor);
 
       return visitor.fileElementsUsage;
@@ -148,7 +166,7 @@ class UnusedCodeAnalyzer {
 
   Set<Element> _analyzeFilePublicCode(
     SomeResolvedUnitResult unit,
-    bool analyzePrivateMembers,
+    UnusedCodeAnalysisConfig config,
   ) {
     if (unit is ResolvedUnitResult) {
       final suppression = Suppression(unit.content, unit.lineInfo);
@@ -160,7 +178,8 @@ class UnusedCodeAnalyzer {
       final visitor = PublicCodeVisitor(
         suppression,
         _ignoreName,
-        analyzePrivateMembers: analyzePrivateMembers,
+        analyzePrivateMembers: config.analyzePrivateMembers,
+        analyzePublicMembers: config.analyzePublicMembers,
       );
       unit.unit.visitChildren(visitor);
 
@@ -203,12 +222,12 @@ class UnusedCodeAnalyzer {
     return unusedCodeReports;
   }
 
-  bool _isUsed(Element usedElement, Element element) =>
-      _isEqualElements(usedElement, element) ||
+  bool _isUsed(Element usedElement, Element element, bool elementIsMember) =>
+      _isEqualElements(usedElement, element, elementIsMember) ||
       element is PropertyInducingElement &&
-          _isEqualElements(usedElement, element.getter);
+          _isEqualElements(usedElement, element.getter, elementIsMember);
 
-  bool _isEqualElements(Element left, Element? right) {
+  bool _isEqualElements(Element left, Element? right, bool rightIsMember) {
     if (left == right) {
       return true;
     }
@@ -219,25 +238,55 @@ class UnusedCodeAnalyzer {
     // This is a hack to fix incorrect libraries resolution.
     // Should be removed after new analyzer version is available.
     // see: https://github.com/dart-lang/sdk/issues/49182
+    //
+    // The name based fallback below is deliberately loose, and with member
+    // analysis enabled a used member would otherwise mark a dead library
+    // level declaration of the same name as used (a class calling its own
+    // `dispose` hiding an unused top level `dispose` function). Requiring
+    // both sides to agree on member-ness cannot introduce false positives:
+    // member dispatch never resolves to a library level declaration, so the
+    // fallback was never needed across that boundary. Member to member
+    // matching stays loose, since that is what keeps overrides from being
+    // reported. `_isUnused`'s conditional import fallback carries the same
+    // member-ness guard for the same reason.
     return usedLibrary != null &&
         declaredSource != null &&
+        isMemberElement(left) == rightIsMember &&
         left.name == right?.name &&
         usedLibrary.fragments
             .map((fragment) => fragment.source.fullName)
             .contains(declaredSource.fullName);
   }
 
-  bool _isUnused(FileElementsUsage codeUsages, String path, Element element) =>
-      !codeUsages.conditionalElements.entries.any((entry) =>
-          entry.key.contains(path) &&
-          entry.value.any((usedElement) =>
-              _isUsed(usedElement, element) ||
-              (usedElement.name == element.name &&
-                  usedElement.kind == element.kind))) &&
-      !codeUsages.elements
-          .any((usedElement) => _isUsed(usedElement, element)) &&
-      !codeUsages.usedExtensions
-          .any((usedElement) => _isUsed(usedElement, element));
+  /// Whether [element] is a member that some invocation on an unknown type
+  /// could reach.
+  ///
+  /// Only members are considered: a reference on a target, dynamic or not, can
+  /// never resolve to a library level declaration.
+  bool _isUsedDynamically(FileElementsUsage codeUsages, Element element) {
+    final name = element.name;
+
+    return name != null &&
+        isMemberElement(element) &&
+        codeUsages.dynamicallyUsedNames.contains(name);
+  }
+
+  bool _isUnused(FileElementsUsage codeUsages, String path, Element element) {
+    final elementIsMember = isMemberElement(element);
+
+    return !_isUsedDynamically(codeUsages, element) &&
+        !codeUsages.conditionalElements.entries.any((entry) =>
+            entry.key.contains(path) &&
+            entry.value.any((usedElement) =>
+                _isUsed(usedElement, element, elementIsMember) ||
+                (isMemberElement(usedElement) == elementIsMember &&
+                    usedElement.name == element.name &&
+                    usedElement.kind == element.kind))) &&
+        !codeUsages.elements.any(
+            (usedElement) => _isUsed(usedElement, element, elementIsMember)) &&
+        !codeUsages.usedExtensions.any(
+            (usedElement) => _isUsed(usedElement, element, elementIsMember));
+  }
 
   UnusedCodeIssue _createUnusedCodeIssue(
     ElementImpl element,

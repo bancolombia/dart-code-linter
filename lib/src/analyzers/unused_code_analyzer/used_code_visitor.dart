@@ -1,15 +1,20 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 import '../../utils/flutter_types_utils.dart';
+import 'element_utils.dart';
 import 'models/file_elements_usage.dart';
 
 // Copied from https://github.com/dart-lang/sdk/blob/main/pkg/analyzer/lib/src/error/imports_verifier.dart#L15
 
 class UsedCodeVisitor extends RecursiveAstVisitor<void> {
+  static const _enumValuesName = 'values';
+
   final fileElementsUsage = FileElementsUsage();
 
   final bool _recordClassMembers;
@@ -77,29 +82,75 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitAssignmentExpression(AssignmentExpression node) {
     _recordAssignmentTarget(node, node.leftHandSide);
+    // `a += b` reaches the combiner `operator +` without naming it.
+    _recordMemberUsage(node.element);
+    _recordDynamicOperator(node.element, _assignmentOperatorName(node.operator));
 
     super.visitAssignmentExpression(node);
   }
 
   @override
   void visitBinaryExpression(BinaryExpression node) {
-    _recordIfExtensionMember(node.element);
+    _recordMemberUsage(node.element);
+    _recordDynamicOperator(node.element, _binaryOperatorName(node.operator));
 
     super.visitBinaryExpression(node);
   }
 
   @override
   void visitFunctionExpressionInvocation(FunctionExpressionInvocation node) {
-    _recordIfExtensionMember(node.element);
+    _recordMemberUsage(node.element);
+    // An invocation of an unknown type reaches any `call` member. One of an
+    // actual function type reaches none, so it records nothing.
+    if (node.function.staticType is DynamicType) {
+      _recordDynamicOperator(node.element, 'call');
+    }
 
     super.visitFunctionExpressionInvocation(node);
   }
 
   @override
   void visitIndexExpression(IndexExpression node) {
-    _recordIfExtensionMember(node.element);
+    // An index expression that is the target of an assignment, an increment
+    // or a decrement is resolved through `resolveForWrite`, which never sets
+    // `node.element`; the read/write elements live on the enclosing
+    // `CompoundAssignmentExpression` instead and are recorded from there, in
+    // `_recordAssignmentTarget`. Treating a null `node.element` as "reached
+    // through a dynamic target" here would mark `[]`/`[]=` used everywhere in
+    // the program on every ordinary, statically typed index write.
+    if (!node.inSetterContext()) {
+      _recordMemberUsage(node.element);
+      _recordDynamicOperator(node.element, '[]');
+    }
 
     super.visitIndexExpression(node);
+  }
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    if (node.realTarget?.staticType is! RecordType) {
+      _recordDynamicUsage(node.methodName);
+    }
+
+    super.visitMethodInvocation(node);
+  }
+
+  @override
+  void visitPropertyAccess(PropertyAccess node) {
+    if (node.realTarget.staticType is! RecordType) {
+      _recordDynamicUsage(node.propertyName);
+    }
+
+    super.visitPropertyAccess(node);
+  }
+
+  @override
+  void visitPrefixedIdentifier(PrefixedIdentifier node) {
+    if (node.prefix.staticType is! RecordType) {
+      _recordDynamicUsage(node.identifier);
+    }
+
+    super.visitPrefixedIdentifier(node);
   }
 
   @override
@@ -123,12 +174,8 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     // SimpleIdentifier, so visitSimpleIdentifier never sees it.
     final element = node.element;
     _recordIfExtensionMember(element);
-    if (_recordClassMembers && element != null) {
-      final enclosingElement = element.enclosingElement;
-      if (enclosingElement is InterfaceElement ||
-          enclosingElement is ExtensionElement) {
-        _recordUsedElement(element);
-      }
+    if (_recordClassMembers && element != null && isMemberElement(element)) {
+      _recordUsedElement(element);
     }
 
     super.visitPatternField(node);
@@ -137,6 +184,9 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitPostfixExpression(PostfixExpression node) {
     _recordAssignmentTarget(node, node.operand);
+    // `a++` reaches `operator +` without naming it.
+    _recordMemberUsage(node.element);
+    _recordDynamicOperator(node.element, _incrementOperatorName(node.operator));
 
     super.visitPostfixExpression(node);
   }
@@ -144,7 +194,8 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitPrefixExpression(PrefixExpression node) {
     _recordAssignmentTarget(node, node.operand);
-    _recordIfExtensionMember(node.element);
+    _recordMemberUsage(node.element);
+    _recordDynamicOperator(node.element, _prefixOperatorName(node.operator));
 
     super.visitPrefixExpression(node);
   }
@@ -208,6 +259,15 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     } else if (target is SimpleIdentifier) {
       _visitIdentifier(target, node.readElement);
       _visitIdentifier(target, node.writeElement);
+    } else if (target is IndexExpression) {
+      _recordMemberUsage(node.readElement);
+      _recordMemberUsage(node.writeElement);
+      if (target.inGetterContext()) {
+        _recordDynamicOperator(node.readElement, '[]');
+      }
+      if (target.inSetterContext()) {
+        _recordDynamicOperator(node.writeElement, '[]=');
+      }
     }
   }
 
@@ -216,6 +276,117 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
       final enclosingElement = element.enclosingElement;
       if (enclosingElement is ExtensionElement) {
         _recordUsedExtension(enclosingElement);
+      }
+    }
+  }
+
+  /// Records usage of a member that is reached without an identifier naming it,
+  /// such as an operator (`a + b`, `a[b]`, `-a`) or a `call` invocation.
+  void _recordMemberUsage(Element? element) {
+    _recordIfExtensionMember(element);
+
+    if (!_recordClassMembers || element == null) {
+      return;
+    }
+
+    // `baseElement` unwraps the member produced by a generic instantiation, so
+    // the recorded element is the declaration itself.
+    final baseElement = element.baseElement;
+    if (isMemberElement(baseElement)) {
+      _recordConditionalElement(baseElement);
+      _recordUsedElement(baseElement);
+    }
+  }
+
+  /// Records a member reference on a target of an unknown type by name.
+  ///
+  /// Such a reference resolves to no element, so there is nothing to record in
+  /// [FileElementsUsage.elements], but it can reach any member of that name.
+  ///
+  /// Callers must not call this for a record field access: a record field
+  /// also resolves to no element (records carry no [Element] for their
+  /// fields at all), but it is a fully statically typed reference rather than
+  /// a dynamic one, so it must not be treated the same way.
+  void _recordDynamicUsage(SimpleIdentifier identifier) {
+    if (_recordClassMembers && identifier.element == null) {
+      fileElementsUsage.dynamicallyUsedNames.add(identifier.name);
+    }
+  }
+
+  /// Records an operator or `call` reached on a target of an unknown type.
+  ///
+  /// Mirrors [_recordDynamicUsage] for expressions that reach a member without
+  /// an identifier: [name] is the member name the expression reaches (`+`,
+  /// `[]=`, `call`), or `null` when the operator is not user-definable (`&&`,
+  /// `!`, a plain `=`) and reaches no member at all.
+  void _recordDynamicOperator(Element? element, String? name) {
+    if (_recordClassMembers && element == null && name != null) {
+      fileElementsUsage.dynamicallyUsedNames.add(name);
+    }
+  }
+
+  /// The member name a binary expression reaches: `a != b` reaches
+  /// `operator ==`, every other user-definable operator reaches the member
+  /// named by its own lexeme, and the rest (`&&`, `||`, `??`) reach no member.
+  static String? _binaryOperatorName(Token operator) {
+    if (operator.type == TokenType.BANG_EQ) {
+      return '==';
+    }
+
+    return operator.type.isUserDefinableOperator ? operator.lexeme : null;
+  }
+
+  /// The member name a compound assignment reaches through its combiner:
+  /// `a += b` reaches `operator +`. A plain `=` and `??=` reach no member.
+  static String? _assignmentOperatorName(Token operator) {
+    if (operator.type == TokenType.EQ ||
+        operator.type == TokenType.QUESTION_QUESTION_EQ) {
+      return null;
+    }
+
+    final lexeme = operator.lexeme;
+
+    return lexeme.substring(0, lexeme.length - 1);
+  }
+
+  /// The member name a prefix expression reaches: `-a` reaches the unary
+  /// minus, whose [Element.name] is `-` just like the binary one (`unary-` is
+  /// only its lookup and display name), `~a` reaches `~`, the increments reach
+  /// the binary `+`/`-` they desugar to, and `!a` reaches no member.
+  static String? _prefixOperatorName(Token operator) {
+    if (operator.type == TokenType.MINUS) {
+      return '-';
+    }
+    if (operator.type == TokenType.TILDE) {
+      return '~';
+    }
+
+    return _incrementOperatorName(operator);
+  }
+
+  /// The member name an increment or decrement reaches: `a++` desugars to the
+  /// binary `+`, `a--` to the binary `-`. The other postfix operator, the null
+  /// assertion `!`, reaches no member.
+  static String? _incrementOperatorName(Token operator) {
+    if (operator.type == TokenType.PLUS_PLUS) {
+      return '+';
+    }
+    if (operator.type == TokenType.MINUS_MINUS) {
+      return '-';
+    }
+
+    return null;
+  }
+
+  /// Records every constant of [element] as used.
+  ///
+  /// Called when the enum's `values` is referenced: iteration, `byName` and
+  /// name based deserialization all reach the constants without naming any of
+  /// them.
+  void _recordEnumConstants(EnumElement element) {
+    for (final field in element.fields) {
+      if (field.isEnumConstant) {
+        _recordUsedElement(field);
       }
     }
   }
@@ -275,9 +446,12 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     if (enclosingElement is LibraryElement ||
         enclosingElement is LibraryFragment) {
       _recordUsedElement(element);
-    } else if (_recordClassMembers &&
-        enclosingElement is InterfaceElement) {
+    } else if (_recordClassMembers && enclosingElement is InterfaceElement) {
       _recordUsedElement(element);
+
+      if (element.name == _enumValuesName && enclosingElement is EnumElement) {
+        _recordEnumConstants(enclosingElement);
+      }
     } else if (enclosingElement is ExtensionElement) {
       _recordUsedExtension(enclosingElement);
 

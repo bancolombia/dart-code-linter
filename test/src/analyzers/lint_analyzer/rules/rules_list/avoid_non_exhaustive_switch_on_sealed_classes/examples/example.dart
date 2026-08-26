@@ -69,3 +69,14 @@ String describeExpressionWithGuardedWildcard(Shape shape, bool flag) =>
       _ when flag => 'flagged',
       Square() => 'square',
     };
+
+// A parenthesized wildcard defeats exhaustiveness exactly like a bare `_`, so
+// it must be flagged the same way.
+String describeStatementWithParenthesizedWildcard(Shape shape) {
+  switch (shape) {
+    case Circle():
+      return 'circle';
+    case (_):
+      return 'unknown';
+  }
+}
