@@ -3,6 +3,7 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 import '../../utils/node_utils.dart';
 import '../../utils/suppression.dart';
@@ -50,6 +51,7 @@ class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
         _suppression,
         _pattern,
         enclosingMetadata: node.metadata,
+        hierarchyUnresolved: _hasUnresolvedHierarchyClause(node),
         analyzePrivateMembers: _analyzePrivateMembers,
         analyzePublicMembers: _analyzePublicMembers,
       ));
@@ -84,6 +86,43 @@ class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
       node is EnumDeclaration ||
       node is ExtensionDeclaration ||
       node is ExtensionTypeDeclaration;
+
+  /// Whether [node]'s own `extends`/`implements`/`with`/`on` clause names a
+  /// type that failed to resolve (a broken import, the unselected branch of a
+  /// conditional import, an unrelated resolution error elsewhere in the
+  /// hierarchy).
+  ///
+  /// A failure here means `InterfaceElement.allSupertypes` for [node]'s
+  /// declared element silently comes back incomplete: the analyzer's recovery
+  /// drops the unresolved supertype and everything above it rather than
+  /// erroring, so a subtype cut off this way still resolves the rest of its
+  /// hierarchy correctly (only the type declared directly on [node] loses
+  /// visibility into what it may be overriding). See `_isDeclaredBySupertype`
+  /// on `_MemberVisitor`, which uses this to fall back to treating every
+  /// member of such a type as possibly inherited, rather than risk a false
+  /// positive from a hierarchy it cannot see all of.
+  bool _hasUnresolvedHierarchyClause(CompilationUnitMember node) {
+    bool isUnresolved(NamedType type) => type.type is InvalidType;
+    bool anyUnresolved(NodeList<NamedType>? types) =>
+        types?.any(isUnresolved) ?? false;
+
+    return switch (node) {
+      ClassDeclaration() => (node.extendsClause != null &&
+              isUnresolved(node.extendsClause!.superclass)) ||
+          anyUnresolved(node.implementsClause?.interfaces) ||
+          anyUnresolved(node.withClause?.mixinTypes),
+      MixinDeclaration() =>
+        anyUnresolved(node.onClause?.superclassConstraints) ||
+            anyUnresolved(node.implementsClause?.interfaces),
+      EnumDeclaration() => anyUnresolved(node.implementsClause?.interfaces) ||
+          anyUnresolved(node.withClause?.mixinTypes),
+      ExtensionTypeDeclaration() =>
+        anyUnresolved(node.implementsClause?.interfaces),
+      // Extensions have no supertype in the sense [_isDeclaredBySupertype]
+      // cares about: `ExtensionElement` is never an `InterfaceElement`.
+      _ => false,
+    };
+  }
 }
 
 /// Collects members (methods, fields, getters, setters, named constructors and
@@ -131,6 +170,11 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
   /// https://github.com/dart-lang/sdk/blob/master/runtime/docs/compiler/aot/entry_point_pragma.md
   final bool _enclosingIsJSExported;
 
+  /// Whether the enclosing type's own `extends`/`implements`/`with`/`on`
+  /// clause names a type that failed to resolve, making its
+  /// `allSupertypes` incomplete. See [_isDeclaredBySupertype].
+  final bool _hierarchyUnresolved;
+
   /// Names of all members declared by supertypes, computed on first use.
   final Map<InterfaceElement, Set<String>> _inheritedNames = {};
 
@@ -139,9 +183,11 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
     this._suppression,
     this._pattern, {
     required Iterable<Annotation> enclosingMetadata,
+    required bool hierarchyUnresolved,
     required bool analyzePrivateMembers,
     required bool analyzePublicMembers,
   })  : _enclosingIsJSExported = hasJSExportAnnotation(enclosingMetadata),
+        _hierarchyUnresolved = hierarchyUnresolved,
         _analyzePrivateMembers = analyzePrivateMembers,
         _analyzePublicMembers = analyzePublicMembers;
 
@@ -297,15 +343,12 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
   /// so a supertype method or field of the same name is unrelated and must
   /// not exempt a dead named constructor.
   ///
-  /// Known limitation: if the enclosing type's own `extends`/`implements`/
-  /// `with` clause fails to resolve (a broken import, the unselected branch
-  /// of a conditional import, an unrelated resolution error elsewhere in the
-  /// hierarchy), [_inheritedNamesOf] silently comes back incomplete, and an
-  /// override of the same name that carries no `@override`/`@redeclare`
-  /// annotation (see [_hasReachabilityAnnotation]) is then a false positive:
-  /// a genuinely used override reported as dead code. There is currently no
-  /// detection for "this type's hierarchy didn't fully resolve" to suppress
-  /// candidacy more broadly in that case; closing this gap for real needs one.
+  /// When [_hierarchyUnresolved] is set, [_inheritedNamesOf] cannot be
+  /// trusted: the enclosing type's own hierarchy failed to resolve, so
+  /// `allSupertypes` silently came back incomplete and may be missing the
+  /// very supertype a member here overrides. Every member of such a type is
+  /// then treated as possibly declared by a supertype, favoring a missed
+  /// detection over reporting a genuinely used override as dead code.
   bool _isDeclaredBySupertype(Element element) {
     final enclosingElement = element.enclosingElement;
     final name = element.name;
@@ -315,7 +358,8 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
       return false;
     }
 
-    return _inheritedNamesOf(enclosingElement).contains(name);
+    return _hierarchyUnresolved ||
+        _inheritedNamesOf(enclosingElement).contains(name);
   }
 
   Set<String> _inheritedNamesOf(InterfaceElement element) =>
@@ -350,11 +394,10 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
   bool _hasReachabilityAnnotation(Element element) {
     final metadata = element.metadata;
 
-    // `@override` and `@redeclare` are redundant with [_isDeclaredBySupertype]
-    // whenever the hierarchy resolves, since both are only valid on a member
-    // that has an inherited counterpart of the same name. They are kept as a
-    // cheap fast path that still holds when a supertype fails to resolve and
-    // `allSupertypes` comes back empty.
+    // `@override` and `@redeclare` are redundant with [_isDeclaredBySupertype],
+    // since both are only valid on a member that has an inherited counterpart
+    // of the same name. Kept anyway as a cheap fast path that avoids walking
+    // `allSupertypes` at all.
     return metadata.hasOverride ||
         metadata.hasRedeclare ||
         // The rest say nothing about the hierarchy, so only the annotation can

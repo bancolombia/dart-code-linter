@@ -671,6 +671,23 @@ void main() {
             expect(report, null);
           },
         );
+
+        test(
+          'does not report any member of a type whose own supertype fails '
+          'to resolve, since allSupertypes then comes back incomplete and '
+          'an unannotated override could be falsely flagged as unused',
+          () {
+            final report = result.firstWhereOrNull(
+                (report) => report.path.endsWith('unresolved_supertype.dart'));
+
+            // A file with no issues at all is omitted from the result set
+            // entirely. `unrelated`, which shares no name with anything, is
+            // exempted too: once a type's hierarchy fails to resolve, every
+            // member of it is treated as possibly declared by the missing
+            // supertype, trading a missed detection for no false positive.
+            expect(report, null);
+          },
+        );
       });
 
       group('dynamic operator usages', () {
