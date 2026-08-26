@@ -171,11 +171,13 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    // Enum constants are always public members of the enum, so they only take
-    // part in the public members analysis. A constant reached exclusively
-    // through `values` (iteration, `byName`, deserialization) is marked used by
-    // the usage visitor, which records every constant of an enum whose `values`
-    // is referenced.
+    // Enum constant names follow the same privacy rules as any other member
+    // (`_hidden` is library-scoped, not enum-scoped), so `_addCandidate`
+    // routes a private-named constant to analyzePrivateMembers rather than
+    // analyzePublicMembers, exactly like a private field or method. A
+    // constant reached exclusively through `values` (iteration, `byName`,
+    // deserialization) is marked used by the usage visitor, which records
+    // every constant of an enum whose `values` is referenced.
     _addCandidate(node.declaredFragment?.element, node);
   }
 
@@ -254,6 +256,13 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
   /// binding surface is normally written complete on purpose and reporting
   /// the unused part of it is noise rather than a finding. Pinned by the
   /// `js_binding_members.dart` fixture.
+  ///
+  /// The `'JSExport'` half of the check below duplicates [hasJSExportAnnotation]
+  /// rather than calling it, to keep this a single pass over [metadata].
+  /// Flagged in review as worth reusing the helper instead, at the cost of a
+  /// second pass over a metadata list that in practice holds a handful of
+  /// annotations at most; left as-is pending a maintainer call on whether
+  /// that single-pass saving is worth the duplication.
   bool _hasJSInteropAnnotation(Iterable<Annotation> metadata) => metadata.any(
         (annotation) => switch (annotationName(annotation)) {
           'JSExport' || 'JS' => true,
@@ -287,6 +296,16 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
   /// constructor's name lives in a separate namespace from instance members,
   /// so a supertype method or field of the same name is unrelated and must
   /// not exempt a dead named constructor.
+  ///
+  /// Known limitation: if the enclosing type's own `extends`/`implements`/
+  /// `with` clause fails to resolve (a broken import, the unselected branch
+  /// of a conditional import, an unrelated resolution error elsewhere in the
+  /// hierarchy), [_inheritedNamesOf] silently comes back incomplete, and an
+  /// override of the same name that carries no `@override`/`@redeclare`
+  /// annotation (see [_hasReachabilityAnnotation]) is then a false positive:
+  /// a genuinely used override reported as dead code. There is currently no
+  /// detection for "this type's hierarchy didn't fully resolve" to suppress
+  /// candidacy more broadly in that case; closing this gap for real needs one.
   bool _isDeclaredBySupertype(Element element) {
     final enclosingElement = element.enclosingElement;
     final name = element.name;

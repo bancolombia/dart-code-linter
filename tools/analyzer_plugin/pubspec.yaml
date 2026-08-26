@@ -1,6 +1,6 @@
 name: dart_code_linter_analyzer_plugin_loader
 description: This pubspec determines the version of the analyzer plugin to load.
-version: 4.3.1
+version: 4.3.0
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -10,4 +10,4 @@ dependencies:
   # copies this pubspec verbatim and resolves it against pub.dev, so any range
   # lets the IDE silently load a different DCL than the one this loader shipped
   # in. Enforced by test/src/version_test.dart.
-  dart_code_linter: 4.3.1
+  dart_code_linter: 4.3.0

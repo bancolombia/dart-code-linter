@@ -146,7 +146,7 @@ As DCL depends on the Dart `analyzer` package. The following table shows the com
 
 | DCL Version       | Analyzer Version   | Dart SDK          |
 |-------------------|--------------------|-------------------|
-| 4.3.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
+| 4.3.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.2             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
@@ -195,7 +195,7 @@ You can define one analysis_options.yaml at the root file.
 Reports code metrics, rules and anti-patterns violations. To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics analyze lib
+dart run dart_code_linter:metrics analyze lib
 ```
 
 It will produce a result in one of the format:
@@ -213,7 +213,7 @@ It will produce a result in one of the format:
 Checks unnecessary nullable parameters in functions, methods, constructors. To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics check-unnecessary-nullable lib
+dart run dart_code_linter:metrics check-unnecessary-nullable lib
 ```
 
 It will produce a result in one of the format:
@@ -228,7 +228,7 @@ It will produce a result in one of the format:
 Checks unused `*.dart` files. To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics check-unused-files lib
+dart run dart_code_linter:metrics check-unused-files lib
 ```
 
 It will produce a result in one of the format:
@@ -259,7 +259,7 @@ class ClassWithLocalization {
 To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics check-unused-l10n lib
+dart run dart_code_linter:metrics check-unused-l10n lib
 ```
 
 It will produce a result in one of the format:
@@ -273,7 +273,7 @@ It will produce a result in one of the format:
 Checks unused code in `*.dart` files. To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics check-unused-code lib
+dart run dart_code_linter:metrics check-unused-code lib
 ```
 
 It will produce a result in one of the format:
@@ -287,7 +287,7 @@ getters, setters and named constructors) are reported too when the check is
 opted in:
 
 ```sh
-$ dart run dart_code_linter:metrics check-unused-code lib --analyze-private-members
+dart run dart_code_linter:metrics check-unused-code lib --analyze-private-members
 ```
 
 The same can be enabled through `analysis_options.yaml`, so it applies to every
@@ -312,7 +312,7 @@ Public members are covered by a separate opt in, because they need more
 guesswork than private ones and are therefore less reliable:
 
 ```sh
-$ dart run dart_code_linter:metrics check-unused-code lib --analyze-public-members
+dart run dart_code_linter:metrics check-unused-code lib --analyze-public-members
 ```
 
 ```yaml

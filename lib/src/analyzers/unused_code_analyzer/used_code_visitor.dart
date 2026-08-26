@@ -111,12 +111,16 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitIndexExpression(IndexExpression node) {
-    _recordMemberUsage(node.element);
-    if (node.inGetterContext()) {
+    // An index expression that is the target of an assignment, an increment
+    // or a decrement is resolved through `resolveForWrite`, which never sets
+    // `node.element`; the read/write elements live on the enclosing
+    // `CompoundAssignmentExpression` instead and are recorded from there, in
+    // `_recordAssignmentTarget`. Treating a null `node.element` as "reached
+    // through a dynamic target" here would mark `[]`/`[]=` used everywhere in
+    // the program on every ordinary, statically typed index write.
+    if (!node.inSetterContext()) {
+      _recordMemberUsage(node.element);
       _recordDynamicOperator(node.element, '[]');
-    }
-    if (node.inSetterContext()) {
-      _recordDynamicOperator(node.element, '[]=');
     }
 
     super.visitIndexExpression(node);
@@ -255,6 +259,15 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     } else if (target is SimpleIdentifier) {
       _visitIdentifier(target, node.readElement);
       _visitIdentifier(target, node.writeElement);
+    } else if (target is IndexExpression) {
+      _recordMemberUsage(node.readElement);
+      _recordMemberUsage(node.writeElement);
+      if (target.inGetterContext()) {
+        _recordDynamicOperator(node.readElement, '[]');
+      }
+      if (target.inSetterContext()) {
+        _recordDynamicOperator(node.writeElement, '[]=');
+      }
     }
   }
 

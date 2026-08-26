@@ -347,6 +347,26 @@ void main() {
             expect(report, null);
           },
         );
+
+        test(
+          'reports a private-named enum constant, since privacy routes it '
+          'here rather than into analyzePublicMembers',
+          () async {
+            final result = await analyzer.runCliAnalysis(
+              privateMembersFolders,
+              rootDirectory,
+              _createConfig(analyzePrivateMembers: true),
+            );
+
+            final report = result.firstWhere(
+              (report) => report.path.endsWith('private_enum_constant.dart'),
+            );
+
+            final names = report.issues.map((issue) => issue.declarationName);
+
+            expect(names, ['_unusedConstant']);
+          },
+        );
       });
 
       group('analyze-public-members', () {
@@ -628,6 +648,29 @@ void main() {
           // declaration itself used.
           expect(names, isNot(contains('WrapperMath')));
         });
+
+        test(
+          'reports a dead operator []= that only shares its name with one '
+          'reached through a plain, statically typed index write',
+          () {
+            final names = namesFor('index_operator_write.dart');
+
+            expect(names, ['[]=']);
+          },
+        );
+
+        test(
+          'does not report a private-named enum constant, since privacy '
+          'routes it into analyzePrivateMembers instead',
+          () {
+            final report = result.firstWhereOrNull((report) =>
+                report.path.endsWith('private_named_enum_constant.dart'));
+
+            // A file with no issues at all is omitted from the result set
+            // entirely.
+            expect(report, null);
+          },
+        );
       });
 
       group('dynamic operator usages', () {
