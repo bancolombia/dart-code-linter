@@ -34,8 +34,8 @@ from pathlib import Path
 # paper excludes analyzer 14, but that constraint is never checked here: both
 # packages are forced through dependency_overrides, and pub does not re-verify
 # an overridden package's declared constraint against another overridden
-# package. The 14.0.0/14.1.0 rows below already pinned this same stack before
-# the 8.x rows existed, so it stays applied uniformly across the matrix.
+# package. Verified: the full matrix below passes on every row, 8.2.0 through
+# 14.1.0, with this single stack applied uniformly.
 TEST_STACK = {
     "test": "1.31.1",
     "test_core": "0.6.18",
