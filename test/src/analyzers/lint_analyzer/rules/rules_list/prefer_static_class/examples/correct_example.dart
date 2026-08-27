@@ -2,7 +2,7 @@ void main() {}
 
 Future<void> main() {}
 
-class Example {
+class Example(final int primaryConstructorVariable) {
   void classMethod() {}
   static void staticClassMethod() {}
   var classVariable = 42;
