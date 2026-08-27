@@ -389,6 +389,50 @@ void main() {
       });
     }
 
+    // A doc comment and metadata are listed first in `childEntities`, ahead of
+    // the declaration's own children, so reading the name must step over them.
+    const decoratedCases = {
+      '/// Doc.\nclass Documented {}': 'Documented',
+      '@Deprecated("x")\nclass Annotated {}': 'Annotated',
+      '/// Doc.\n@Deprecated("x")\nabstract class Both {}': 'Both',
+      '@Deprecated("x")\nfinal class Modified {}': 'Modified',
+    };
+
+    for (final entry in decoratedCases.entries) {
+      final label = entry.key.replaceAll('\n', ' ');
+      test('reads the class name from "$label"', () {
+        final node = _firstOfType<ClassDeclaration>(_parse(entry.key));
+
+        expect(typeDeclarationName(node), equals(entry.value));
+        expect(typeDeclarationNameToken(node)?.lexeme, equals(entry.value));
+      });
+    }
+
+    const decoratedEnumCases = {
+      '/// Doc.\nenum Documented { a }': 'Documented',
+      '@Deprecated("x")\nenum Annotated { a }': 'Annotated',
+    };
+
+    for (final entry in decoratedEnumCases.entries) {
+      final label = entry.key.replaceAll('\n', ' ');
+      test('reads the enum name from "$label"', () {
+        final node = _firstOfType<EnumDeclaration>(_parse(entry.key));
+
+        expect(typeDeclarationName(node), equals(entry.value));
+      });
+    }
+
+    test('returns a name token that points at the name, not the metadata', () {
+      const source = '/// Doc.\n@Deprecated("x")\nclass Anchored {}';
+      final node = _firstOfType<ClassDeclaration>(_parse(source));
+      final token = typeDeclarationNameToken(node);
+
+      expect(token, isNotNull);
+      // Callers report on this token, so a doc comment or annotation must not
+      // drag the reported location onto the wrong line.
+      expect(token!.offset, equals(source.indexOf('Anchored')));
+    });
+
     test('returns the name token itself, not just its lexeme', () {
       final node = _firstOfType<ClassDeclaration>(_parse('class Anchored {}'));
       final token = typeDeclarationNameToken(node);
@@ -428,7 +472,28 @@ base class Based {}
 
 class _Private {}
 
+/// A documented class.
+///
+/// A doc comment and metadata are listed before the declaration's own children,
+/// so a reading that takes the first child node lands on the comment or the
+/// annotation instead of the name. Doc comments on public types are the norm,
+/// which makes this the common case rather than an edge one.
+class Documented {}
+
+@Deprecated('annotated')
+class Annotated {}
+
+/// A documented and annotated class.
+@Deprecated('both')
+abstract class DocumentedAndAnnotated {}
+
 enum Simple { a, b }
+
+/// A documented enum.
+enum DocumentedEnum { a, b }
+
+@Deprecated('annotated')
+enum AnnotatedEnum { a, b }
 
 enum Configured<T> {
   first,
@@ -473,7 +538,7 @@ enum Configured<T> {
     test('finds every declaration in the fixture', () {
       // Guards the two tests below from passing vacuously if the walk stops
       // finding declarations on some analyzer row.
-      expect(typeDeclarations(), hasLength(8));
+      expect(typeDeclarations(), hasLength(13));
     });
 
     test('matches the declared fragment name', () {
@@ -667,6 +732,22 @@ enum Level {
       );
 
       expect(extensionTypeName(node), equals('Celsius'));
+    });
+
+    test('returns the name of a documented extension type', () {
+      final node = parseExtensionType(
+        '/// Doc.\nextension type Meters(int value) {}',
+      );
+
+      expect(extensionTypeName(node), equals('Meters'));
+    });
+
+    test('returns the name of an annotated extension type', () {
+      final node = parseExtensionType(
+        '@Deprecated("x")\nextension type Meters(int value) {}',
+      );
+
+      expect(extensionTypeName(node), equals('Meters'));
     });
 
     test(

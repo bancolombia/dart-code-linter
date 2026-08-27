@@ -228,8 +228,23 @@ AstNode? debugExtensionTypeNamePart(ExtensionTypeDeclaration node) =>
     _firstChildNode(node);
 
 AstNode? _firstChildNode(AstNode node) {
+  // An `AnnotatedNode` lists its documentation comment and its metadata ahead
+  // of its own children, so a declaration carrying either would otherwise
+  // resolve to the comment or to the first annotation instead of to the node
+  // the callers want. Neither carries an identifier token of its own (an
+  // annotation's name is a nested node), so the reading did not land on a
+  // wrong name, it produced none at all.
+  final skipped = <AstNode>{};
+  if (node is AnnotatedNode) {
+    final comment = node.documentationComment;
+    if (comment != null) {
+      skipped.add(comment);
+    }
+    skipped.addAll(node.metadata);
+  }
+
   for (final entity in node.childEntities) {
-    if (entity is AstNode) {
+    if (entity is AstNode && !skipped.contains(entity)) {
       return entity;
     }
   }
