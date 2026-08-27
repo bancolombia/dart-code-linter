@@ -109,7 +109,8 @@ VERSION_PAIRS = [
         },
     ),
     (
-        # 10.x: the pubspec floor. .0.1 patch is the lowest that resolves with meta 1.17.0.
+        # 10.x: the pubspec floor before 4.4.0 lowered it to 8.2.0.
+        # .0.1 patch is the lowest that resolves with meta 1.17.0.
         "10.0.1",
         "0.14.1",
         {
