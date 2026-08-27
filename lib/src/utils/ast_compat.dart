@@ -317,15 +317,19 @@ const _typeDeclarationKeywords = {'class', 'enum'};
 /// Returns the declared name token of a class or enum declaration across
 /// analyzer versions, or `null` if it can't be located.
 ///
-/// analyzer 8.2–8.3 expose the name directly, because `ClassDeclaration` and
-/// `EnumDeclaration` implement `NamedCompilationUnitMember` there. analyzer
-/// 8.4+ moved it behind `namePart.typeName` (nullable on 8.4, non-nullable
-/// from 9.0) and dropped `NamedCompilationUnitMember` from both interfaces, so
-/// neither `name` nor `namePart` is callable on every supported row. The token
-/// is read structurally instead: on the older rows the name is the first
-/// identifier token following the `class`/`enum` keyword (anchoring after the
-/// keyword skips leading contextual identifiers such as `augment`), and on the
-/// newer rows it is the first identifier token of the name-part child node.
+/// No single getter spans the supported range, and the two do not replace one
+/// another cleanly. `ClassDeclaration` and `EnumDeclaration` inherit `name`
+/// from `NamedCompilationUnitMember` up to analyzer 10.2 (deprecated from
+/// 10.0); analyzer 11.0 drops the supertype and the getter together.
+/// `namePart.typeName` arrives from the other end: absent before analyzer 8.4,
+/// nullable on 8.4, non-nullable from 9.0. They overlap on 8.4 through 10.2,
+/// but neither alone reaches both ends of the range.
+///
+/// The token is read structurally instead: on the flat rows the name is the
+/// first identifier token following the `class`/`enum` keyword (anchoring
+/// after the keyword skips leading contextual identifiers such as `augment`),
+/// and on the nested rows it is the first identifier token of the name-part
+/// child node.
 Token? typeDeclarationNameToken(AstNode node) {
   final direct = _identifierAfterDeclarationKeyword(node);
   if (direct != null) {
@@ -345,13 +349,17 @@ String? typeDeclarationName(AstNode node) =>
 /// Returns the members declared in the block body of a class-like declaration,
 /// or `null` when the declaration has no block body.
 ///
-/// analyzer 8.2–8.3 hang members directly off the declaration
-/// (`ClassDeclaration.members`); analyzer 8.4+ introduced a `ClassBody` child
-/// (`BlockClassBody` for the `{ ... }` form, a type that doesn't exist on the
-/// earlier rows) and dropped the direct `members` getter, so neither shape is
-/// callable everywhere. The block body is recognised structurally by its `{`
-/// token: on the older rows that token is a direct child of the declaration,
-/// on the newer rows it belongs to the body node. Returning `null` mirrors the
+/// As with the name, the two access paths overlap rather than replacing one
+/// another. `ClassDeclaration.members` is available up to analyzer 10.2 and is
+/// dropped in 11.0; the `ClassBody` child (`BlockClassBody` for the `{ ... }`
+/// form) appears on the declaration in analyzer 9.0. The tree itself only
+/// nests at analyzer 10.0: through 9.0 the members hang directly off the
+/// declaration even though `body` is already there, and from 10.0 they hang
+/// off the body node. Neither getter alone covers 8.2 through 14.
+///
+/// The block body is recognised structurally by its `{` token instead: on the
+/// flat rows that token is a direct child of the declaration, on the nested
+/// rows it belongs to the body node. Returning `null` mirrors the
 /// `body is! BlockClassBody` guard callers used against the newer API.
 List<ClassMember>? classBodyMembers(AstNode node) =>
     _blockBodyChildren<ClassMember>(node);
