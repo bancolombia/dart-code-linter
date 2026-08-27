@@ -12,8 +12,9 @@ class _Visitor extends ScopeVisitor {
   void visitEnumDeclaration(EnumDeclaration node) {
     super.visitEnumDeclaration(node);
 
-    if (!validator.isValid(node.namePart.typeName.lexeme)) {
-      _nodes.add(node.namePart.typeName);
+    final name = typeDeclarationNameToken(node);
+    if (name != null && !validator.isValid(name.lexeme)) {
+      _nodes.add(name);
     }
   }
 
@@ -39,8 +40,9 @@ class _Visitor extends ScopeVisitor {
   void visitClassDeclaration(ClassDeclaration node) {
     super.visitClassDeclaration(node);
 
-    if (!validator.isValid(node.namePart.typeName.lexeme)) {
-      _nodes.add(node.namePart.typeName);
+    final name = typeDeclarationNameToken(node);
+    if (name != null && !validator.isValid(name.lexeme)) {
+      _nodes.add(name);
     }
   }
 }

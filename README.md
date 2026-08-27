@@ -121,6 +121,16 @@ Do not put a map below `plugins.dart_code_linter.diagnostics.<rule>` on Flutter 
 
 Rules with mandatory configuration, such as `avoid-banned-imports` and `ban-name`, work with the modern plugin when their configuration lives under `dart_code_linter.rules`.
 
+> [!NOTE]
+> The `plugins` loader resolves `dart_code_linter` on its own, independently of your project's normal dependency resolution. A `dependency_overrides` entry pointing `dart_code_linter` at a local path or a fork is **not** picked up by it, so pinning to an unpublished version this way loads no diagnostics at all, with no error. To point the plugin itself at a local checkout (for example, when testing an unreleased branch or fork), add a `path` key under its own configuration block instead:
+> ```yaml title="analysis_options.yaml"
+> plugins:
+>   dart_code_linter:
+>     path: ../path/to/dart-code-linter
+>     diagnostics:
+>       avoid-dynamic: true
+> ```
+
 #### 2. Legacy Analyzer Plugin (Dart < 3.9)
 
 Configure the plugin under `analyzer` in your `analysis_options.yaml`:
@@ -144,8 +154,11 @@ Rules that are marked with 🛠 have auto-fixes available through the IDE contex
 
 As DCL depends on the Dart `analyzer` package. The following table shows the compatible versions:
 
+The Dart SDK column is the range DCL itself declares. The effective floor is higher: every `analyzer` release DCL supports requires Dart `^3.9.0`, so Dart 3.9 is the real minimum regardless of the declared range.
+
 | DCL Version       | Analyzer Version   | Dart SDK          |
 |-------------------|--------------------|-------------------|
+| 4.4.0             | >=8.2.0 <15.0.0    | >=3.5.0 <4.0.0   |
 | 4.3.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.2             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |

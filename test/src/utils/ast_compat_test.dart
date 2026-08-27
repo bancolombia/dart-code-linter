@@ -348,6 +348,353 @@ void main() {
     });
   });
 
+  group('typeDeclarationName', () {
+    // These must hold on both child shapes the matrix covers: analyzer 8.2-9.0
+    // keep the name as a direct token of the declaration, 10.0+ move it into a
+    // name-part child node. Modifier keywords that tokenize as contextual
+    // identifiers (`base`, `sealed`) are why the anchor is the `class`/`enum`
+    // keyword rather than simply the first identifier.
+    const classCases = {
+      'class Simple {}': 'Simple',
+      'abstract class Abstract {}': 'Abstract',
+      'final class Modifiers {}': 'Modifiers',
+      'sealed class Sealed {}': 'Sealed',
+      'base class Base {}': 'Base',
+      'class Generic<T> {}': 'Generic',
+      'class Extending extends Object {}': 'Extending',
+      'class Implementing implements Comparable<int> {}': 'Implementing',
+      'class _Private {}': '_Private',
+    };
+
+    for (final entry in classCases.entries) {
+      test('reads the class name from "${entry.key}"', () {
+        final node = _firstOfType<ClassDeclaration>(_parse(entry.key));
+
+        expect(typeDeclarationName(node), equals(entry.value));
+        expect(typeDeclarationNameToken(node)?.lexeme, equals(entry.value));
+      });
+    }
+
+    const enumCases = {
+      'enum Simple { a }': 'Simple',
+      'enum Generic<T> { a }': 'Generic',
+      'enum WithMembers { a; const WithMembers(); }': 'WithMembers',
+    };
+
+    for (final entry in enumCases.entries) {
+      test('reads the enum name from "${entry.key}"', () {
+        final node = _firstOfType<EnumDeclaration>(_parse(entry.key));
+
+        expect(typeDeclarationName(node), equals(entry.value));
+      });
+    }
+
+    // A doc comment and metadata are listed first in `childEntities`, ahead of
+    // the declaration's own children, so reading the name must step over them.
+    const decoratedCases = {
+      '/// Doc.\nclass Documented {}': 'Documented',
+      '@Deprecated("x")\nclass Annotated {}': 'Annotated',
+      '/// Doc.\n@Deprecated("x")\nabstract class Both {}': 'Both',
+      '@Deprecated("x")\nfinal class Modified {}': 'Modified',
+    };
+
+    for (final entry in decoratedCases.entries) {
+      final label = entry.key.replaceAll('\n', ' ');
+      test('reads the class name from "$label"', () {
+        final node = _firstOfType<ClassDeclaration>(_parse(entry.key));
+
+        expect(typeDeclarationName(node), equals(entry.value));
+        expect(typeDeclarationNameToken(node)?.lexeme, equals(entry.value));
+      });
+    }
+
+    const decoratedEnumCases = {
+      '/// Doc.\nenum Documented { a }': 'Documented',
+      '@Deprecated("x")\nenum Annotated { a }': 'Annotated',
+    };
+
+    for (final entry in decoratedEnumCases.entries) {
+      final label = entry.key.replaceAll('\n', ' ');
+      test('reads the enum name from "$label"', () {
+        final node = _firstOfType<EnumDeclaration>(_parse(entry.key));
+
+        expect(typeDeclarationName(node), equals(entry.value));
+      });
+    }
+
+    test('returns a name token that points at the name, not the metadata', () {
+      const source = '/// Doc.\n@Deprecated("x")\nclass Anchored {}';
+      final node = _firstOfType<ClassDeclaration>(_parse(source));
+      final token = typeDeclarationNameToken(node);
+
+      expect(token, isNotNull);
+      // Callers report on this token, so a doc comment or annotation must not
+      // drag the reported location onto the wrong line.
+      expect(token!.offset, equals(source.indexOf('Anchored')));
+    });
+
+    test('returns the name token itself, not just its lexeme', () {
+      final node = _firstOfType<ClassDeclaration>(_parse('class Anchored {}'));
+      final token = typeDeclarationNameToken(node);
+
+      expect(token, isNotNull);
+      // Callers report on this token, so its offset must point at the name
+      // rather than at the `class` keyword.
+      expect(token!.offset, equals('class '.length));
+    });
+  });
+
+  group('typeDeclarationName agrees with the element model', () {
+    // The typeDeclarationName cases above assert against hand-written
+    // expectations, which cannot catch a structural reading that is wrong in a
+    // way those cases do not happen to cover. This cross-checks the helper
+    // against the analyzer's own answer, the declared fragment, which is
+    // available on every row in the compatibility matrix. It mirrors the
+    // isAbstractMethod cross-check and fails if a future analyzer reshapes the
+    // declaration's children again.
+    const fixturePath = 'test/src/utils/type_declaration_name_fixture.dart';
+    const fixtureContent = '''
+class Plain {}
+
+abstract class Abstract {}
+
+final class Modified<T> extends Plain implements Comparable<T> {
+  Modified();
+
+  int field = 0;
+
+  void method() {}
+}
+
+sealed class Sealed {}
+
+base class Based {}
+
+class _Private {}
+
+/// A documented class.
+///
+/// A doc comment and metadata are listed before the declaration's own children,
+/// so a reading that takes the first child node lands on the comment or the
+/// annotation instead of the name. Doc comments on public types are the norm,
+/// which makes this the common case rather than an edge one.
+class Documented {}
+
+@Deprecated('annotated')
+class Annotated {}
+
+/// A documented and annotated class.
+@Deprecated('both')
+abstract class DocumentedAndAnnotated {}
+
+enum Simple { a, b }
+
+/// A documented enum.
+enum DocumentedEnum { a, b }
+
+@Deprecated('annotated')
+enum AnnotatedEnum { a, b }
+
+enum Configured<T> {
+  first,
+  second;
+
+  const Configured();
+
+  void describe() {}
+}
+''';
+
+    late CompilationUnit unit;
+
+    setUpAll(() async {
+      final file = File(fixturePath)..writeAsStringSync(fixtureContent);
+      try {
+        unit = (await FileResolver.resolve(fixturePath)).unit;
+      } finally {
+        file.deleteSync();
+      }
+    });
+
+    List<AstNode> typeDeclarations() {
+      final found = <AstNode>[];
+      _walk(unit, (node) {
+        if (node is ClassDeclaration || node is EnumDeclaration) {
+          found.add(node);
+        }
+      });
+
+      return found;
+    }
+
+    String? fragmentName(AstNode node) => node is ClassDeclaration
+        ? node.declaredFragment?.name
+        : (node as EnumDeclaration).declaredFragment?.name;
+
+    int? fragmentNameOffset(AstNode node) => node is ClassDeclaration
+        ? node.declaredFragment?.nameOffset
+        : (node as EnumDeclaration).declaredFragment?.nameOffset;
+
+    test('finds every declaration in the fixture', () {
+      // Guards the two tests below from passing vacuously if the walk stops
+      // finding declarations on some analyzer row.
+      expect(typeDeclarations(), hasLength(13));
+    });
+
+    test('matches the declared fragment name', () {
+      for (final node in typeDeclarations()) {
+        final oracle = fragmentName(node);
+
+        expect(
+          oracle,
+          isNotNull,
+          reason: 'fixture did not resolve for ${node.runtimeType}',
+        );
+        expect(
+          typeDeclarationName(node),
+          equals(oracle),
+          reason: 'structural reading disagrees with the element model',
+        );
+      }
+    });
+
+    test('matches the declared fragment name offset', () {
+      for (final node in typeDeclarations()) {
+        final oracle = fragmentNameOffset(node);
+
+        expect(oracle, isNotNull);
+        // Rules report on this token, so a wrong offset would misplace the
+        // diagnostic even when the lexeme happens to be right.
+        expect(typeDeclarationNameToken(node)?.offset, equals(oracle));
+      }
+    });
+  });
+
+  group('classBodyMembers', () {
+    test('collects members declared in the body', () {
+      final node = _firstOfType<ClassDeclaration>(_parse('''
+class Sample {
+  int field = 0;
+  Sample();
+  void method() {}
+  int get getter => 0;
+}
+'''));
+
+      final members = classBodyMembers(node);
+
+      expect(members, isNotNull);
+      expect(members!.length, equals(4));
+      expect(members.whereType<MethodDeclaration>().length, equals(2));
+      expect(members.whereType<ConstructorDeclaration>().length, equals(1));
+      expect(members.whereType<FieldDeclaration>().length, equals(1));
+    });
+
+    test('returns an empty list for an empty block body', () {
+      final node = _firstOfType<ClassDeclaration>(_parse('class Empty {}'));
+
+      expect(classBodyMembers(node), isEmpty);
+    });
+
+    test("does not reach into a member's own braces", () {
+      final node = _firstOfType<ClassDeclaration>(
+        _parse('class Outer { void m() { var x = 1; } }'),
+      );
+
+      // The method body also carries `{}`; only the class body must be read.
+      expect(classBodyMembers(node)?.length, equals(1));
+    });
+  });
+
+  group('enumConstants', () {
+    test('collects the declared constants', () {
+      final node = _firstOfType<EnumDeclaration>(
+        _parse('enum Direction { north, south, east, west }'),
+      );
+
+      expect(
+        enumConstants(node).map((constant) => constant.name.lexeme),
+        equals(['north', 'south', 'east', 'west']),
+      );
+    });
+
+    test('collects constants when the enum also declares members', () {
+      final node = _firstOfType<EnumDeclaration>(_parse('''
+enum Level {
+  low,
+  high;
+
+  const Level();
+
+  void describe() {}
+}
+'''));
+
+      expect(
+        enumConstants(node).map((constant) => constant.name.lexeme),
+        equals(['low', 'high']),
+      );
+    });
+  });
+
+  group('enclosingTypeDeclaration', () {
+    test('finds the class a method is declared in', () {
+      final node = _firstOfType<MethodDeclaration>(
+        _parse('class Host { void member() {} }'),
+      );
+
+      expect(enclosingTypeDeclaration(node), isA<ClassDeclaration>());
+    });
+
+    test('finds the class a constructor is declared in', () {
+      final node = _firstOfType<ConstructorDeclaration>(
+        _parse('class Host { factory Host() => Host._(); Host._(); }'),
+      );
+
+      expect(enclosingTypeDeclaration(node), isA<ClassDeclaration>());
+    });
+
+    test('finds the enclosing enum, mixin and extension', () {
+      expect(
+        enclosingTypeDeclaration(
+          _firstOfType<MethodDeclaration>(_parse('enum E { a; void m() {} }')),
+        ),
+        isA<EnumDeclaration>(),
+      );
+      expect(
+        enclosingTypeDeclaration(
+          _firstOfType<MethodDeclaration>(_parse('mixin M { void m() {} }')),
+        ),
+        isA<MixinDeclaration>(),
+      );
+      expect(
+        enclosingTypeDeclaration(
+          _firstOfType<MethodDeclaration>(
+            _parse('extension X on int { void m() {} }'),
+          ),
+        ),
+        isA<ExtensionDeclaration>(),
+      );
+    });
+
+    test('returns null for a top-level function', () {
+      final node = _firstOfType<FunctionDeclaration>(_parse('void free() {}'));
+
+      expect(enclosingTypeDeclaration(node), isNull);
+    });
+
+    test('stops at the nearest declaration', () {
+      // A fixed parent.parent hop overshoots to the compilation unit when no
+      // body node intervenes (analyzer 8.2-9.0); the walk must stop here.
+      final method =
+          _firstOfType<MethodDeclaration>(_parse('class Only { void m() {} }'));
+      final enclosing = enclosingTypeDeclaration(method);
+
+      expect(enclosing, isA<ClassDeclaration>());
+      expect(typeDeclarationName(enclosing!), equals('Only'));
+    });
+  });
+
   group('extensionTypeName', () {
     ExtensionTypeDeclaration parseExtensionType(String source) =>
         _firstOfType<ExtensionTypeDeclaration>(_parse(source));
@@ -387,9 +734,25 @@ void main() {
       expect(extensionTypeName(node), equals('Celsius'));
     });
 
+    test('returns the name of a documented extension type', () {
+      final node = parseExtensionType(
+        '/// Doc.\nextension type Meters(int value) {}',
+      );
+
+      expect(extensionTypeName(node), equals('Meters'));
+    });
+
+    test('returns the name of an annotated extension type', () {
+      final node = parseExtensionType(
+        '@Deprecated("x")\nextension type Meters(int value) {}',
+      );
+
+      expect(extensionTypeName(node), equals('Meters'));
+    });
+
     test(
-      'structural anchor holds: the name part is the first child node and its '
-      'first identifier token is the type name (validated per analyzer row)',
+      'resolves the type name on both child shapes, never the representation '
+      'field (validated per analyzer row)',
       () {
         const cases = {
           'extension type Meters(int value) {}': 'Meters',
@@ -406,18 +769,23 @@ void main() {
           expect(
             namePart,
             isNotNull,
-            reason: 'No name-part node resolved for "${entry.key}". '
+            reason: 'No first child node resolved for "${entry.key}". '
                 'ExtensionTypeDeclaration child shape changed in this '
                 'analyzer version.',
           );
-          // The name part must precede the implements clause and body.
+          // Deliberately not asserting that the first child node *is* the name
+          // part: on analyzer 8.2-9.0 the tree is flat and that node is the
+          // representation, so such an assertion would pass vacuously there.
+          // Every fixture names its representation field `value`, so requiring
+          // the type name and rejecting `value` is what actually pins the
+          // behaviour down on both shapes.
+          expect(extensionTypeName(node), equals(entry.value));
           expect(
-            namePart,
-            isNot(isA<ImplementsClause>()),
-            reason: 'Resolved the implements clause instead of the name part '
+            extensionTypeName(node),
+            isNot(equals('value')),
+            reason: 'Read the representation field instead of the type name '
                 'for "${entry.key}".',
           );
-          expect(extensionTypeName(node), equals(entry.value));
         }
       },
     );
