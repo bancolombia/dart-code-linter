@@ -5,26 +5,26 @@ void flatFunction(int a) {
   if (a == 1) {
     // +1
   } else if (a == 2) {
-    // +1
+    // +1 (hybrid increment: no nesting bonus of its own)
   } else {
-    // +1
+    // +1 (hybrid increment: no nesting bonus of its own)
   }
 
   for (var i = 0; i < a; i++) {
     // +1
   }
 
-  final b = a > 0 && a < 10;
+  final b = a > 0 && a < 10; // +1 for the sequence of like operators
 }
 
 // nested function: an if inside a for, each nesting level adds its own bonus
 void nestedFunction(int a) {
   for (var i = 0; i < a; i++) {
-    // +2 (base 1 + nesting level 1)
+    // +1 (base 1 + nesting level 0)
     if (i == a) {
-      // +3 (base 1 + nesting level 2)
+      // +2 (base 1 + nesting level 1)
       while (i > 0) {
-        // +4 (base 1 + nesting level 3)
+        // +3 (base 1 + nesting level 2)
         i--;
       }
     }
