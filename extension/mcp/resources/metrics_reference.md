@@ -21,6 +21,7 @@ Measures how difficult a function is for a human to read and understand, based o
 - **Config key:** `cognitive-complexity`
 - **Default threshold:** 20
 - **Measured on:** Functions and methods
+- **Scoring rules:** see `docs/cognitive-complexity/`
 
 ### Lines of Code (LOC)
 

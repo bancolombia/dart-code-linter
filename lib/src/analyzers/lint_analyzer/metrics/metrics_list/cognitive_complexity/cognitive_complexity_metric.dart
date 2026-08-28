@@ -26,6 +26,9 @@ const _documentation = MetricDocumentation(
 /// human to read and understand, based on SonarSource's Cognitive Complexity
 /// algorithm. Unlike cyclomatic complexity, it penalizes control flow that
 /// is nested more heavily than the same control flow written flat.
+///
+/// The scoring rules, how they map onto Dart, and the gaps the implementation
+/// still has are documented in `docs/cognitive-complexity/`.
 class CognitiveComplexityMetric extends FunctionMetric<int> {
   static const String metricId = 'cognitive-complexity';
 
