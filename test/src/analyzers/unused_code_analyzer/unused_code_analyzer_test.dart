@@ -475,6 +475,33 @@ void main() {
           },
         );
 
+        test(
+          'reports a dead member whose name a statically resolved prefix or '
+          'postfix operator also reaches, while keeping one a dynamic '
+          'negation could reach',
+          () {
+            // Nothing is dead in the file holding the operators themselves.
+            expect(
+              result.where((report) =>
+                  basename(report.path) == 'non_writing_operators.dart'),
+              isEmpty,
+            );
+
+            // `!x`, `x!`, `-x` and `~x` write nothing, so the null write
+            // element of the expression enclosing them must not be read as a
+            // dynamic target the way an unresolved assignment is.
+            expect(
+              namesFor('non_writing_operators_name_twin.dart'),
+              unorderedEquals([
+                'negated',
+                'asserted',
+                'negatedNumber',
+                'complemented',
+              ]),
+            );
+          },
+        );
+
         test('reports unused public members of every type kind', () {
           final names = namesFor('public_type_kinds.dart');
 

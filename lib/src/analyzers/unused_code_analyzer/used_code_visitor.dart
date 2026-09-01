@@ -386,11 +386,20 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   /// The counterpart of [_recordDynamicUsage] for the write half of an
   /// assignment: a null write element on a named target means the assignment
   /// resolved to nothing, so it can reach any setter of that name.
+  ///
+  /// The setter context is what makes that reading valid. A prefix or postfix
+  /// operator that writes nothing (`!x`, `x!`, `-x`, `~x`) is a
+  /// [CompoundAssignmentExpression] all the same, and its write element is
+  /// null because there is no write rather than because one failed to
+  /// resolve, so without this guard every ordinary negation of a member would
+  /// mark that member's name used across the whole program.
   void _recordDynamicWrite(
     CompoundAssignmentExpression node,
     SimpleIdentifier identifier,
   ) {
-    if (_recordClassMembers && node.writeElement == null) {
+    if (_recordClassMembers &&
+        identifier.inSetterContext() &&
+        node.writeElement == null) {
       fileElementsUsage.dynamicallyUsedNames.add(identifier.name);
     }
   }
