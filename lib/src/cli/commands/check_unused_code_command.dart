@@ -2,12 +2,31 @@
 
 import 'dart:io';
 
+import '../../analyzers/unused_code_analyzer/models/unused_code_file_report.dart';
+import '../../analyzers/unused_code_analyzer/models/unused_code_issue.dart';
 import '../../analyzers/unused_code_analyzer/reporters/unused_code_report_params.dart';
 import '../../analyzers/unused_code_analyzer/unused_code_analyzer.dart';
 import '../../config_builder/config_builder.dart';
 import '../../logger/logger.dart';
 import '../models/flag_names.dart';
 import 'base_command.dart';
+
+/// Whether an unused code run should fail the build.
+///
+/// The two kinds of finding have separate gates: a could be private
+/// suggestion is about a declaration that *is* used, so it is not unused code
+/// and must not be governed by `--fatal-unused`.
+bool isFatalUnusedCodeResult(
+  Iterable<UnusedCodeFileReport> reports, {
+  required bool fatalOnUnused,
+  required bool fatalOnCouldBePrivate,
+}) =>
+    reports.expand((report) => report.issues).any(
+          (issue) => switch (issue.kind) {
+            UnusedCodeIssueKind.unused => fatalOnUnused,
+            UnusedCodeIssueKind.couldBePrivate => fatalOnCouldBePrivate,
+          },
+        );
 
 class CheckUnusedCodeCommand extends BaseCommand {
   final UnusedCodeAnalyzer _analyzer;
@@ -46,6 +65,8 @@ class CheckUnusedCodeCommand extends BaseCommand {
         _boolFlagOrNull(FlagNames.analyzePrivateMembers);
     final analyzePublicMembers =
         _boolFlagOrNull(FlagNames.analyzePublicMembers);
+    final suggestPrivateMembers =
+        _boolFlagOrNull(FlagNames.suggestPrivateMembers);
 
     final config = ConfigBuilder.getUnusedCodeConfigFromArgs(
       [excludePath],
@@ -53,6 +74,7 @@ class CheckUnusedCodeCommand extends BaseCommand {
       shouldPrintConfig: shouldPrintConfig,
       analyzePrivateMembers: analyzePrivateMembers,
       analyzePublicMembers: analyzePublicMembers,
+      suggestPrivateMembers: suggestPrivateMembers,
     );
 
     final unusedCodeResult = await _analyzer.runCliAnalysis(
@@ -75,8 +97,12 @@ class CheckUnusedCodeCommand extends BaseCommand {
               UnusedCodeReportParams(congratulate: !isNoCongratulate),
         );
 
-    if (unusedCodeResult.isNotEmpty &&
-        (argResults[FlagNames.fatalOnUnused] as bool)) {
+    if (isFatalUnusedCodeResult(
+      unusedCodeResult,
+      fatalOnUnused: argResults[FlagNames.fatalOnUnused] as bool,
+      fatalOnCouldBePrivate:
+          argResults[FlagNames.fatalOnCouldBePrivate] as bool,
+    )) {
       exit(1);
     }
   }
@@ -91,6 +117,7 @@ class CheckUnusedCodeCommand extends BaseCommand {
     _usesIsMonorepoOption();
     _usesAnalyzePrivateMembersOption();
     _usesAnalyzePublicMembersOption();
+    _usesSuggestPrivateMembersOption();
     _usesExitOption();
   }
 
@@ -141,12 +168,28 @@ class CheckUnusedCodeCommand extends BaseCommand {
       );
   }
 
+  void _usesSuggestPrivateMembersOption() {
+    argParser
+      ..addSeparator('')
+      ..addFlag(
+        FlagNames.suggestPrivateMembers,
+        help: 'Also report public declarations that are only referenced from '
+            'within their own library, and so could be made private. Reports '
+            'code that is used, not dead code, so it has its own fatal flag.',
+      );
+  }
+
   void _usesExitOption() {
     argParser
       ..addSeparator('')
       ..addFlag(
         FlagNames.fatalOnUnused,
         help: 'Treat find unused code as fatal.',
+        defaultsTo: true,
+      )
+      ..addFlag(
+        FlagNames.fatalOnCouldBePrivate,
+        help: 'Treat finding declarations that could be private as fatal.',
         defaultsTo: true,
       );
   }

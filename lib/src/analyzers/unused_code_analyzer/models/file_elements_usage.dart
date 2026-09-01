@@ -18,6 +18,21 @@ class FileElementsUsage {
   /// The map of referenced prefix elements and the elements that they prefix.
   final Map<PrefixElement, List<Element>> prefixMap = {};
 
+  /// The subset of [elements] and [usedExtensions] that is referenced from a
+  /// library other than the one declaring them.
+  ///
+  /// A declaration absent from this set is only ever reached from inside its
+  /// own library, which is what makes it a candidate for being made private.
+  final Set<Element> externallyUsedElements = {};
+
+  /// Keys, as built by `memberKey`, of members that a type in another library
+  /// redeclares somewhere in its own hierarchy.
+  ///
+  /// Making such a member private silently breaks that subtype: a private
+  /// member is inherited across libraries but can no longer be overridden or
+  /// implemented there, so dispatch stops reaching the subtype's declaration.
+  final Set<String> externallyRedeclaredMembers = {};
+
   /// The names of members invoked or read on a target of an unknown type.
   ///
   /// Such an invocation resolves to no element at all, so it cannot be recorded
@@ -32,5 +47,7 @@ class FileElementsUsage {
     conditionalFiles.addAll(other.conditionalFiles);
     prefixMap.addAll(other.prefixMap);
     dynamicallyUsedNames.addAll(other.dynamicallyUsedNames);
+    externallyUsedElements.addAll(other.externallyUsedElements);
+    externallyRedeclaredMembers.addAll(other.externallyRedeclaredMembers);
   }
 }

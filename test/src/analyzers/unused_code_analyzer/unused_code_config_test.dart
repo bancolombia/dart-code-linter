@@ -17,6 +17,7 @@ const _defaults = UnusedCodeConfig(
   shouldPrintConfig: false,
   analyzePrivateMembers: false,
   analyzePublicMembers: false,
+  suggestPrivateMembers: false,
 );
 
 const _empty = UnusedCodeConfig(
@@ -26,6 +27,7 @@ const _empty = UnusedCodeConfig(
   shouldPrintConfig: false,
   analyzePrivateMembers: false,
   analyzePublicMembers: false,
+  suggestPrivateMembers: false,
 );
 
 const _merged = UnusedCodeConfig(
@@ -35,6 +37,7 @@ const _merged = UnusedCodeConfig(
   shouldPrintConfig: true,
   analyzePrivateMembers: true,
   analyzePublicMembers: true,
+  suggestPrivateMembers: true,
 );
 
 const _overrides = UnusedCodeConfig(
@@ -44,6 +47,7 @@ const _overrides = UnusedCodeConfig(
   shouldPrintConfig: true,
   analyzePrivateMembers: true,
   analyzePublicMembers: true,
+  suggestPrivateMembers: true,
 );
 
 void main() {
@@ -60,6 +64,7 @@ void main() {
         expect(config.shouldPrintConfig, null);
         expect(config.analyzePrivateMembers, null);
         expect(config.analyzePublicMembers, null);
+        expect(config.suggestPrivateMembers, null);
       });
 
       test('data', () {
@@ -93,6 +98,20 @@ void main() {
         expect(config.analyzePublicMembers, true);
         expect(config.analyzePrivateMembers, null);
       });
+
+      test('suggest-private-members option', () {
+        final config = UnusedCodeConfig.fromAnalysisOptions(
+          const AnalysisOptions('path', {
+            'dart_code_linter': {
+              'unused-code': {'suggest-private-members': true},
+            },
+          }),
+        );
+
+        expect(config.suggestPrivateMembers, true);
+        expect(config.analyzePrivateMembers, null);
+        expect(config.analyzePublicMembers, null);
+      });
     });
 
     group('fromArgs constructs instance from passed', () {
@@ -103,6 +122,7 @@ void main() {
           shouldPrintConfig: true,
           analyzePrivateMembers: true,
           analyzePublicMembers: true,
+          suggestPrivateMembers: true,
         );
 
         expect(config.excludePatterns, equals(['hello']));
@@ -111,6 +131,7 @@ void main() {
         expect(config.shouldPrintConfig, true);
         expect(config.analyzePrivateMembers, true);
         expect(config.analyzePublicMembers, true);
+        expect(config.suggestPrivateMembers, true);
       });
     });
 
@@ -157,10 +178,15 @@ void main() {
           result.analyzePublicMembers,
           equals(_merged.analyzePublicMembers),
         );
+        expect(
+          result.suggestPrivateMembers,
+          equals(_merged.suggestPrivateMembers),
+        );
       });
 
       // Tri-state (bool?) precedence for isMonorepo, shouldPrintConfig,
-      // analyzePrivateMembers and analyzePublicMembers: an explicit override
+      // analyzePrivateMembers, analyzePublicMembers and
+      // suggestPrivateMembers: an explicit override
       // must be able to disable what the base config enabled, and an unset
       // override must not.
       const enabledBase = UnusedCodeConfig(
@@ -170,6 +196,7 @@ void main() {
         shouldPrintConfig: true,
         analyzePrivateMembers: true,
         analyzePublicMembers: true,
+        suggestPrivateMembers: true,
       );
 
       test('explicit false override wins over an enabled base', () {
@@ -180,6 +207,7 @@ void main() {
           shouldPrintConfig: false,
           analyzePrivateMembers: false,
           analyzePublicMembers: false,
+          suggestPrivateMembers: false,
         );
 
         final result = enabledBase.merge(overrides);
@@ -188,6 +216,7 @@ void main() {
         expect(result.shouldPrintConfig, false);
         expect(result.analyzePrivateMembers, false);
         expect(result.analyzePublicMembers, false);
+        expect(result.suggestPrivateMembers, false);
       });
 
       test('unset (null) override falls back to the base config', () {
@@ -198,6 +227,7 @@ void main() {
           shouldPrintConfig: null,
           analyzePrivateMembers: null,
           analyzePublicMembers: null,
+          suggestPrivateMembers: null,
         );
 
         final result = enabledBase.merge(overrides);
@@ -206,6 +236,7 @@ void main() {
         expect(result.shouldPrintConfig, true);
         expect(result.analyzePrivateMembers, true);
         expect(result.analyzePublicMembers, true);
+        expect(result.suggestPrivateMembers, true);
       });
     });
   });

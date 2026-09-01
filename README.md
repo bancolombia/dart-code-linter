@@ -146,6 +146,7 @@ As DCL depends on the Dart `analyzer` package. The following table shows the com
 
 | DCL Version       | Analyzer Version   | Dart SDK          |
 |-------------------|--------------------|-------------------|
+| 4.4.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.3.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.2             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
@@ -355,6 +356,56 @@ Members reached only through code generation, reflection or a package that
 depends on yours cannot be seen at all. Note also that members used only by
 your tests are reported when the analysis covers `lib` alone; pass the test
 folder too (`check-unused-code lib test`) if you want those usages counted.
+
+A third opt in reports the opposite situation: public declarations that are
+used, but only ever from inside the library that declares them, and so could
+carry a private name instead.
+
+```sh
+dart run dart_code_linter:metrics check-unused-code lib --suggest-private-members
+```
+
+```yaml
+dart_code_linter:
+  unused-code:
+    suggest-private-members: true
+```
+
+It covers both type members and top level declarations, and is independent of
+the other two options. Because it reports code that is used rather than dead
+code, it has its own exit gate, `--[no-]fatal-could-be-private`, so a project
+can keep the suggestions visible without failing the build on them.
+
+A declaration nothing references at all is never reported here: that is dead
+code, which is what the two options above are for. When both checks are on, an
+unused declaration is reported once, as unused.
+
+Every exemption of the public members check applies here too, since an analysis
+that cannot see how a declaration is reached cannot tell that everything
+reaching it sits in one library either. On top of those, these are never
+suggested:
+
+- Operators, which have no private spelling at all, and enum constants, whose
+  identifier is observable at run time through `name` and `toString`, so
+  renaming one can silently change serialized output.
+- Fields bound by a named `this.x` or `super.x` formal. Dart forbids a named
+  parameter starting with an underscore, so the rename does not compile even
+  for a constructor nothing outside the library calls.
+- Instance members redeclared by a type in another library, anywhere in that
+  type's own hierarchy. Making such a member private compiles, but silently
+  stops dispatch from reaching the override or the interface implementation.
+  A member that no foreign subtype mentions is still suggested: a private
+  member is inherited across libraries and keeps working untouched.
+- Top level declarations of a file that is re-exported by another file in the
+  analysis (a barrel), since any consumer of the package can name them. The
+  members of the types in such a file are not on that surface and are still
+  analyzed. `--monorepo` lifts this exemption, exactly as it does for the
+  unused check, since it says there are no unseen consumers to protect.
+
+The same blind spot as above applies: a subtype or a reference living in a
+package that depends on yours, or in a folder outside the analysis, cannot be
+seen, so run the check over every folder that uses the code
+(`check-unused-code lib test`).
 
 
 

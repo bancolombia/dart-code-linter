@@ -44,4 +44,6 @@ class FlagNames {
 
   static const analyzePrivateMembers = 'analyze-private-members';
   static const analyzePublicMembers = 'analyze-public-members';
+  static const suggestPrivateMembers = 'suggest-private-members';
+  static const fatalOnCouldBePrivate = 'fatal-could-be-private';
 }

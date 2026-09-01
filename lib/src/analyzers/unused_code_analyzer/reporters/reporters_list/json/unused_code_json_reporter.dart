@@ -40,6 +40,7 @@ class UnusedCodeJsonReporter
       };
 
   Map<String, Object> _issueToJson(UnusedCodeIssue issue) => {
+        'issueKind': issue.kind.id,
         'declarationType': issue.declarationType,
         'declarationName': issue.declarationName,
         'column': issue.location.column,

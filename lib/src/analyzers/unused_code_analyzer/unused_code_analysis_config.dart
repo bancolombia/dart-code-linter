@@ -7,10 +7,16 @@ class UnusedCodeAnalysisConfig {
   final bool isMonorepo;
   final bool analyzePrivateMembers;
   final bool analyzePublicMembers;
+  final bool suggestPrivateMembers;
 
   /// Whether members of type declarations take part in the analysis at all,
   /// either as candidates or as recorded usages.
-  bool get analyzeMembers => analyzePrivateMembers || analyzePublicMembers;
+  ///
+  /// [suggestPrivateMembers] counts: it reports members too, and needs the
+  /// same member level usage recording to tell a local reference from a
+  /// foreign one.
+  bool get analyzeMembers =>
+      analyzePrivateMembers || analyzePublicMembers || suggestPrivateMembers;
 
   const UnusedCodeAnalysisConfig(
     this.globalExcludes,
@@ -18,6 +24,7 @@ class UnusedCodeAnalysisConfig {
     required this.isMonorepo,
     required this.analyzePrivateMembers,
     required this.analyzePublicMembers,
+    required this.suggestPrivateMembers,
   });
 
   Map<String, Object?> toJson() => {
@@ -27,5 +34,6 @@ class UnusedCodeAnalysisConfig {
         'is-monorepo': isMonorepo,
         'analyze-private-members': analyzePrivateMembers,
         'analyze-public-members': analyzePublicMembers,
+        'suggest-private-members': suggestPrivateMembers,
       };
 }
