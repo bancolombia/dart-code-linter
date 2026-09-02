@@ -1007,6 +1007,31 @@ void main() {
           expect(suggestionsFor('suppressed_file.dart'), isEmpty);
         });
 
+        test('does not suggest a member of an already private type', () {
+          final names = suggestionsFor('private_enclosing_types.dart');
+
+          expect(
+            names,
+            unorderedEquals([
+              // An unnamed extension reads as private through
+              // `Element.isPrivate`, but its members apply in every importing
+              // library, so it stays a candidate.
+              'unnamedExtensionMember',
+              'PublicHost',
+              'publicHostMember',
+              'PublicMixesInPrivate',
+            ]),
+          );
+
+          // Pointless: the enclosing type cannot be named from outside.
+          expect(names, isNot(contains('hostMember')));
+          expect(names, isNot(contains('enumMember')));
+          expect(names, isNot(contains('extensionMember')));
+          expect(names, isNot(contains('typeMember')));
+          // Not merely pointless: `PublicMixesInPrivate` republishes this one.
+          expect(names, isNot(contains('mixinMember')));
+        });
+
         test('does not suggest a top level declaration that is exported', () {
           final names = suggestionsFor('export_surface_src.dart');
 

@@ -396,6 +396,13 @@ suggested:
   stops dispatch from reaching the override or the interface implementation.
   A member that no foreign subtype mentions is still suggested: a private
   member is inherited across libraries and keeps working untouched.
+- Members of a type that is already private. No other library can name the
+  type, so the rename would change nothing. For a mixin it would change more
+  than nothing, since a public class can mix a private mixin in and republish
+  its members under a name other libraries do reach, which is the other reason
+  to leave the whole group alone. An *unnamed* extension does not count as
+  private here: its members apply in every library that imports the declaring
+  one, so they are still suggested.
 - Top level declarations of a library any consumer of the package can import,
   which is either of two things: a file another file in the analysis
   re-exports (a barrel), or a file that simply sits under `lib/` outside

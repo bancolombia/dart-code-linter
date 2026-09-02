@@ -385,10 +385,34 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
       _elements.add(element);
     }
 
-    if (_suggestPrivateMembers && _canBeRenamedPrivate(node)) {
+    if (_suggestPrivateMembers &&
+        _canBeRenamedPrivate(node) &&
+        !_enclosingTypeIsPrivate(element)) {
       _pendingSuggestions
           .add((element, node is FieldDeclaration ? element.name : null));
     }
+  }
+
+  /// Whether the type declaring [element] is itself private.
+  ///
+  /// For most kinds the rename is then simply pointless: no other library can
+  /// name the type, so nothing out there was reaching the member to begin
+  /// with. For a mixin it is more than pointless, since a public class can mix
+  /// a private mixin in and republish its members under a name other
+  /// libraries do reach, so skipping is the right direction for the whole
+  /// group rather than only its harmless part.
+  ///
+  /// The name check is load bearing rather than defensive: [Element.isPrivate]
+  /// answers `true` for a null name, which is what an *unnamed* extension has.
+  /// Its members apply in every library that imports this one, so it is a
+  /// genuine candidate and must not be swept up here. Pinned by the
+  /// `private_enclosing_types.dart` fixture.
+  bool _enclosingTypeIsPrivate(Element element) {
+    final enclosingElement = element.enclosingElement;
+
+    return enclosingElement != null &&
+        enclosingElement.name != null &&
+        enclosingElement.isPrivate;
   }
 
   /// Whether the member [node] declares could carry a private name at all.
