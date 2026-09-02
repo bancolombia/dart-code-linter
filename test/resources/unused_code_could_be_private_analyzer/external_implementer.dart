@@ -1,7 +1,11 @@
-// An implementer in another library has to supply every member of the
-// interface, and cannot supply one with a private name, so nothing on the
-// instance surface of this class can be renamed. Statics are not part of the
-// interface and stay suggestible.
+// An implementer in another library supplies the interface members that it or
+// its own superclasses declare, and every one of those is blocked: a private
+// name would compile here and silently stop lining up with the implementation
+// over there. Statics are not part of the interface and stay suggestible.
+//
+// A member the implementer declares nowhere in its hierarchy is not blocked.
+// That shape only exists for an abstract implementer, or one answering
+// through `noSuchMethod`, where the rename does compile.
 
 class Interface {
   int suppliedByASuperclass() => 1;
