@@ -117,7 +117,10 @@ class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
   /// already sees them. Only the reachability annotations have to be read
   /// here, plus `main` and the Flutter entry points, which
   /// [visitCompilationUnitMember] has already dropped before this runs.
-  bool _isPrivatizableTopLevel(Element element, Iterable<Annotation> metadata) =>
+  bool _isPrivatizableTopLevel(
+    Element element,
+    Iterable<Annotation> metadata,
+  ) =>
       !element.isPrivate &&
       !hasEntryPointPragma(metadata) &&
       !_hasJSInteropAnnotation(metadata) &&

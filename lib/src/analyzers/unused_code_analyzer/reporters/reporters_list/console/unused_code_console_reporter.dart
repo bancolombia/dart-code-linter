@@ -40,8 +40,7 @@ class UnusedCodeConsoleReporter
         final offset = ''.padRight(3);
         final pathOffset = offset.padRight(5);
 
-        final description =
-            switch (issue.kind) {
+        final description = switch (issue.kind) {
           UnusedCodeIssueKind.unused =>
             'unused ${issue.declarationType} ${issue.declarationName}',
           UnusedCodeIssueKind.couldBePrivate =>
