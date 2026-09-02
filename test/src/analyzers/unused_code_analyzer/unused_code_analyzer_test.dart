@@ -967,6 +967,31 @@ void main() {
           },
         );
 
+        test(
+          'KNOWN LIMITATION, not desired behavior: suggests a member that a '
+          'foreign mock supplies through noSuchMethod (see '
+          'known_limitation_mock_implementer.dart)',
+          () {
+            final names =
+                suggestionsFor('known_limitation_mock_implementer.dart');
+
+            // What we want here is the opposite of what is asserted. The
+            // rename compiles, and the hand written mock in the other library
+            // then silently stops matching the call, since a mock of that
+            // shape dispatches on the member name at run time. The guard has
+            // nothing to match it against: neither the mock nor the abstract
+            // implementer declares the member anywhere in its hierarchy.
+            // Asserted so that a change to the guard fails here and gets a
+            // decision, rather than passing unnoticed. Documented in the
+            // README as a limitation of the check.
+            expect(names, contains('stubbedByName'));
+
+            // The control, and the half that does work: a generated style
+            // mock declares a concrete override, which the guard sees.
+            expect(names, isNot(contains('declaredByTheMock')));
+          },
+        );
+
         test('is unaffected by a subtype in the same library', () {
           expect(
             suggestionsFor('same_library_subtype.dart'),
