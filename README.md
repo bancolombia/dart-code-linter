@@ -396,11 +396,14 @@ suggested:
   stops dispatch from reaching the override or the interface implementation.
   A member that no foreign subtype mentions is still suggested: a private
   member is inherited across libraries and keeps working untouched.
-- Top level declarations of a file that is re-exported by another file in the
-  analysis (a barrel), since any consumer of the package can name them. The
-  members of the types in such a file are not on that surface and are still
-  analyzed. `--monorepo` lifts this exemption, exactly as it does for the
-  unused check, since it says there are no unseen consumers to protect.
+- Top level declarations of a library any consumer of the package can import,
+  which is either of two things: a file another file in the analysis
+  re-exports (a barrel), or a file that simply sits under `lib/` outside
+  `lib/src`, since Dart lets a consumer import that directly whether or not
+  anything exports it. The members of the types in such a library are not on
+  that surface and are still analyzed. `--monorepo` lifts this exemption,
+  exactly as it does for the unused check, since it says there are no unseen
+  consumers to protect.
 
 The same blind spot as above applies: a subtype or a reference living in a
 package that depends on yours, or in a folder outside the analysis, cannot be

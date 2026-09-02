@@ -13,6 +13,7 @@ import '../../config_builder/models/analysis_options.dart';
 import '../../logger/logger.dart';
 import '../../reporters/models/reporter.dart';
 import '../../utils/analyzer_utils.dart';
+import '../../utils/path_utils.dart';
 import '../../utils/suppression.dart';
 import 'element_utils.dart';
 import 'models/file_elements_usage.dart';
@@ -59,6 +60,11 @@ class UnusedCodeAnalyzer {
     final codeUsages = FileElementsUsage();
     final publicCode = <String, _FileCandidates>{};
 
+    // Files any consumer of their package can import directly. Collected
+    // during the walk, where each unit's resolved library URI says whether it
+    // sits in some package's `lib/`, outside `lib/src`.
+    final packageImportSurface = <String>{};
+
     for (final context in collection.contexts) {
       final unusedCodeAnalysisConfig =
           _getAnalysisConfig(context, rootFolder, config);
@@ -103,6 +109,12 @@ class UnusedCodeAnalyzer {
             unit,
             unusedCodeAnalysisConfig,
           );
+
+          if (unusedCodeAnalysisConfig.suggestPrivateMembers &&
+              unit is ResolvedUnitResult &&
+              isOnPackageImportSurface(unit.libraryElement.uri)) {
+            packageImportSurface.add(filePath);
+          }
         }
       }
     }
@@ -132,6 +144,32 @@ class UnusedCodeAnalyzer {
           publicCode.remove(exportedPath);
         } else {
           publicCode[exportedPath] = members;
+        }
+      }
+
+      // Being re-exported is not the only way onto a package's import
+      // surface: a library under `lib/` outside `lib/src` is importable
+      // directly, with nothing exporting it, so its top level declarations
+      // are just as unsafe to suggest privatizing.
+      //
+      // Unlike the loop above, this drops the suggestions alone and leaves
+      // the unused candidates in place. The two verdicts want different
+      // things here: whether anything in the analyzed code references a
+      // declaration is a fact about that code, which is what the unused
+      // check has always reported for these files, while a suggestion to
+      // rename one is a claim about every library that could reach it,
+      // including the ones outside the analysis.
+      for (final publicPath in packageImportSurface) {
+        final candidates = publicCode[publicPath];
+        if (candidates == null) {
+          continue;
+        }
+
+        final kept = candidates.withoutTopLevelSuggestions();
+        if (kept.isEmpty) {
+          publicCode.remove(publicPath);
+        } else {
+          publicCode[publicPath] = kept;
         }
       }
     }
@@ -426,6 +464,13 @@ class _FileCandidates {
   /// The same candidates with every top level declaration dropped.
   _FileCandidates membersOnly() => _FileCandidates(
         unused.where(isMemberElement).toSet(),
+        privatizable.where(isMemberElement).toSet(),
+      );
+
+  /// The same candidates with only the top level *suggestions* dropped, so
+  /// the unused verdict keeps seeing every declaration of the file.
+  _FileCandidates withoutTopLevelSuggestions() => _FileCandidates(
+        unused,
         privatizable.where(isMemberElement).toSet(),
       );
 }

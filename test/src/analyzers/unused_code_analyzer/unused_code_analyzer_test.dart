@@ -1017,6 +1017,89 @@ void main() {
         });
       });
 
+      group('suggest-private-members on a package import surface', () {
+        const fixtureRoot =
+            'test/resources/unused_code_public_library_analyzer';
+        final publicLibraryFolders = [
+          normalize(File(fixtureRoot).absolute.path),
+        ];
+
+        setUpAll(() {
+          // The fixture is only on an import surface if it resolves as a
+          // package, which is what gives its libraries `package:` URIs. Its
+          // package config is generated rather than committed: `.dart_tool`
+          // is git ignored, and this keeps the test exercising the same code
+          // path a real, resolved project does.
+          File('$fixtureRoot/.dart_tool/package_config.json')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "unused_code_public_library_fixture",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    }
+  ]
+}
+''');
+        });
+
+        Future<Iterable<String>> suggestionsFor(
+          String fileName, {
+          bool isMonorepo = false,
+        }) async =>
+            _namesOfKind(
+              await analyzer.runCliAnalysis(
+                publicLibraryFolders,
+                rootDirectory,
+                _createConfig(
+                  suggestPrivateMembers: true,
+                  isMonorepo: isMonorepo,
+                ),
+              ),
+              fileName,
+              UnusedCodeIssueKind.couldBePrivate,
+            );
+
+        test(
+          'does not suggest a top level declaration of a library any consumer '
+          'can import',
+          () async {
+            // `lib/public_api.dart` is importable as
+            // `package:.../public_api.dart` with nothing exporting it, so the
+            // barrel exemption never sees it.
+            final names = await suggestionsFor('public_api.dart');
+
+            expect(names, isNot(contains('SurfaceType')));
+            // The members of its types are not on that surface.
+            expect(names, unorderedEquals(['usedOnlyHere', 'caller']));
+          },
+        );
+
+        test('suggests everything under lib/src', () async {
+          expect(
+            await suggestionsFor('internal.dart'),
+            unorderedEquals([
+              'InternalType',
+              'internalMember',
+              'internalCaller',
+            ]),
+          );
+        });
+
+        test('--monorepo lifts the exemption', () async {
+          // The flag says there are no unseen consumers to protect, exactly as
+          // it does for the barrel exemption.
+          expect(
+            await suggestionsFor('public_api.dart', isMonorepo: true),
+            contains('SurfaceType'),
+          );
+        });
+      });
+
       group('dynamic operator usages', () {
         final dynamicOperatorsFolders = [
           normalize(
@@ -1181,11 +1264,12 @@ UnusedCodeConfig _createConfig({
   bool analyzePrivateMembers = false,
   bool analyzePublicMembers = false,
   bool suggestPrivateMembers = false,
+  bool isMonorepo = false,
 }) =>
     UnusedCodeConfig(
       excludePatterns: const [],
       analyzerExcludePatterns: analyzerExcludePatterns,
-      isMonorepo: false,
+      isMonorepo: isMonorepo,
       shouldPrintConfig: false,
       analyzePrivateMembers: analyzePrivateMembers,
       analyzePublicMembers: analyzePublicMembers,
