@@ -252,12 +252,19 @@ class UnusedCodeAnalyzer {
       void report(Element element, UnusedCodeIssueKind kind) {
         final unit = element.firstFragment.libraryFragment;
         if (unit != null) {
-          issues.add(_createUnusedCodeIssue(element as ElementImpl, unit, kind));
+          issues.add(
+            _createUnusedCodeIssue(element as ElementImpl, unit, kind),
+          );
         }
       }
 
+      // The declarations this file is reporting as dead code, so a member of
+      // one of them can be left out of the suggestions below.
+      final deadDeclarations = <Element>{};
+
       for (final element in candidates.unused) {
         if (_isUnused(codeUsages, path, element)) {
+          deadDeclarations.add(element);
           report(element, UnusedCodeIssueKind.unused);
         }
       }
@@ -266,8 +273,16 @@ class UnusedCodeAnalyzer {
       // declaration to be used, which is the opposite of what the loop above
       // reports, so an element in both candidate sets yields at most one
       // issue.
+      //
+      // A member of a type that *is* being reported dead is dropped all the
+      // same. Nothing can reach such a member except through the loose same
+      // library name fallback for dart-lang/sdk#49182, which matches any
+      // same-named member of the library and is what makes it look used at
+      // all, and the answer for the whole type is to delete it rather than to
+      // privatize its members one at a time.
       for (final element in candidates.privatizable) {
-        if (_couldBePrivate(codeUsages, path, element)) {
+        if (_couldBePrivate(codeUsages, path, element) &&
+            !deadDeclarations.contains(element.enclosingElement)) {
           report(element, UnusedCodeIssueKind.couldBePrivate);
         }
       }

@@ -838,8 +838,34 @@ void main() {
           final names = suggestionsFor('precedence.dart');
 
           expect(names, isNot(contains('neverUsed')));
-          expect(names, unorderedEquals(['Precedence', 'usedLocally', 'caller']));
+          expect(
+            names,
+            unorderedEquals(['Precedence', 'usedLocally', 'caller']),
+          );
           expect(unusedFor('precedence.dart'), isEmpty);
+        });
+
+        test('does not suggest a member of a type reported as dead code', () {
+          final report = result.firstWhere(
+            (report) => report.path.endsWith('unused_enclosing_type.dart'),
+          );
+
+          expect(
+            unusedFor('unused_enclosing_type.dart'),
+            contains('NeverReferenced'),
+          );
+
+          // Both classes here declare a `sharedName`, which is what makes the
+          // dead one look used to the loose same library name fallback, so
+          // the suggestions have to be counted rather than looked up by name:
+          // only the one on the referenced class is reported.
+          final suggestedLines = report.issues
+              .where((issue) =>
+                  issue.kind == UnusedCodeIssueKind.couldBePrivate &&
+                  issue.declarationName == 'sharedName')
+              .map((issue) => issue.location.line);
+
+          expect(suggestedLines, [14]);
         });
 
         test('reports a dead member as unused rather than as a suggestion',
@@ -906,6 +932,38 @@ void main() {
             expect(names, isNot(contains('useEverything')));
             // A static is never part of the interface an implementer supplies.
             expect(names, contains('neverInherited'));
+          },
+        );
+
+        test(
+          'blocks a member redeclared through a supertype edge that is not a '
+          'class declaration',
+          () {
+            final names = suggestionsFor('external_subtype_kinds.dart');
+
+            // A mixin's `on` constraint, a mixin application written as a
+            // class type alias, an enum's `implements` and an extension
+            // type's `implements` each carry the supertype edge on a
+            // declaration kind of its own, and none of them is a class.
+            expect(names, isNot(contains('mixedRedeclared')));
+            expect(names, isNot(contains('aliasRedeclared')));
+            expect(names, isNot(contains('enumRedeclared')));
+            expect(names, isNot(contains('wrappedRedeclared')));
+
+            // The controls: the other library declares no member of these
+            // names, and a private member is inherited across libraries
+            // untouched, so the rename is safe.
+            expect(names, contains('mixedUntouched'));
+            expect(names, contains('aliasUntouched'));
+            expect(names, contains('wrappedUntouched'));
+            // A static is never inherited, so no implementer redeclares one.
+            expect(names, contains('enumNeverInherited'));
+
+            // Every host type is named by the other library.
+            expect(names, isNot(contains('MixinHost')));
+            expect(names, isNot(contains('AliasHost')));
+            expect(names, isNot(contains('EnumInterface')));
+            expect(names, isNot(contains('ExtensionTypeHost')));
           },
         );
 

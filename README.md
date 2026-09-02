@@ -378,7 +378,13 @@ can keep the suggestions visible without failing the build on them.
 
 A declaration nothing references at all is never reported here: that is dead
 code, which is what the two options above are for. When both checks are on, an
-unused declaration is reported once, as unused.
+unused declaration is reported once, as unused. One shape slips through that
+rule: a dead declaration sharing its name with a used declaration of the same
+library is matched by the deliberately loose name comparison that works around
+[dart-lang/sdk#49182](https://github.com/dart-lang/sdk/issues/49182), so it
+reads as used and can be reported as a suggestion rather than as dead code.
+Members of a type that is itself reported dead are dropped, so what is left of
+this is a dead member of a live type.
 
 Every exemption of the public members check applies here too, since an analysis
 that cannot see how a declaration is reached cannot tell that everything
@@ -395,7 +401,11 @@ suggested:
   type's own hierarchy. Making such a member private compiles, but silently
   stops dispatch from reaching the override or the interface implementation.
   A member that no foreign subtype mentions is still suggested: a private
-  member is inherited across libraries and keeps working untouched.
+  member is inherited across libraries and keeps working untouched. An
+  implementer that declares the member nowhere in its hierarchy is the one
+  gap, since there is nothing to match it against: an abstract class, or a
+  hand written mock answering through `noSuchMethod`. The rename compiles
+  there, but a mock that stubs by name stops matching the call.
 - Members of a type that is already private. No other library can name the
   type, so the rename would change nothing. For a mixin it would change more
   than nothing, since a public class can mix a private mixin in and republish
@@ -410,7 +420,9 @@ suggested:
   anything exports it. The members of the types in such a library are not on
   that surface and are still analyzed. `--monorepo` lifts this exemption,
   exactly as it does for the unused check, since it says there are no unseen
-  consumers to protect.
+  consumers to protect. An application is in that same position, since nothing
+  outside it can import its `lib/` at all, so pass `--monorepo` there too if
+  you want the top level suggestions rather than only the member ones.
 
 The same blind spot as above applies: a subtype or a reference living in a
 package that depends on yours, or in a folder outside the analysis, cannot be
