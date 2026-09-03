@@ -544,10 +544,16 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
     final supertypes = element.allSupertypes.map((type) => type.element);
 
-    // Which types in this hierarchy declare each member name.
+    // Which types in this hierarchy declare each member name, and the names
+    // each type declares. The second loop needs the per type names again, and
+    // this runs for every type declaration in the project, so they are kept
+    // rather than walked a second time.
     final declarers = <String, Set<InterfaceElement>>{};
+    final declaredNames = <InterfaceElement, List<String>>{};
     for (final type in [element, ...supertypes]) {
-      for (final name in _declaredMemberNames(type)) {
+      final names = _declaredMemberNames(type).toList();
+      declaredNames[type] = names;
+      for (final name in names) {
         declarers.putIfAbsent(name, () => {}).add(type);
       }
     }
@@ -565,7 +571,7 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
       // member names drive the loop. Each of those names is in `declarers`
       // with at least the supertype in it, which makes a second declarer
       // anywhere in this hierarchy exactly the condition to block on.
-      for (final name in _declaredMemberNames(supertype)) {
+      for (final name in declaredNames[supertype] ?? const <String>[]) {
         if ((declarers[name]?.length ?? 0) > 1) {
           final key = memberKey(supertype, name);
           if (key != null) {
