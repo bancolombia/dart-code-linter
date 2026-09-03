@@ -13,6 +13,7 @@ import '../../config_builder/models/analysis_options.dart';
 import '../../logger/logger.dart';
 import '../../reporters/models/reporter.dart';
 import '../../utils/analyzer_utils.dart';
+import '../../utils/path_utils.dart';
 import '../../utils/suppression.dart';
 import 'element_utils.dart';
 import 'models/file_elements_usage.dart';
@@ -57,7 +58,12 @@ class UnusedCodeAnalyzer {
         createAnalysisContextCollection(folders, rootFolder, sdkPath);
 
     final codeUsages = FileElementsUsage();
-    final publicCode = <String, Set<Element>>{};
+    final publicCode = <String, _FileCandidates>{};
+
+    // Files any consumer of their package can import directly. Collected
+    // during the walk, where each unit's resolved library URI says whether it
+    // sits in some package's `lib/`, outside `lib/src`.
+    final packageImportSurface = <String>{};
 
     for (final context in collection.contexts) {
       final unusedCodeAnalysisConfig =
@@ -103,6 +109,12 @@ class UnusedCodeAnalyzer {
             unit,
             unusedCodeAnalysisConfig,
           );
+
+          if (unusedCodeAnalysisConfig.suggestPrivateMembers &&
+              unit is ResolvedUnitResult &&
+              isOnPackageImportSurface(unit.libraryElement.uri)) {
+            packageImportSurface.add(filePath);
+          }
         }
       }
     }
@@ -112,21 +124,54 @@ class UnusedCodeAnalyzer {
         'Removing globally exported files with code usages from the analysis: ${codeUsages.exports.length}',
       );
       // Only top level declarations are part of the package's exported
-      // surface here: a member is reachable from outside only through a
-      // reference to its enclosing type, which the type's own top level
-      // exemption already covers, so exporting a file must not excuse the
-      // dead members of the types it declares.
+      // surface for the *unused* verdict: a member is reachable from outside
+      // only through a reference to its enclosing type, which the type's own
+      // top level exemption already covers, so exporting a file must not
+      // excuse the dead members of the types it declares.
+      //
+      // The suggestions are cut whole instead, top level and member alike. A
+      // consumer that can import the file names the type and reaches the
+      // public members of that type just as directly, so a rename here breaks
+      // it either way. Only members of a *private* type would be safe, and
+      // those never reach this set: the member visitor drops them long
+      // before, so there is nothing left here worth keeping.
       for (final exportedPath in codeUsages.exports) {
-        final elements = publicCode[exportedPath];
-        if (elements == null) {
+        final candidates = publicCode[exportedPath];
+        if (candidates == null) {
           continue;
         }
 
-        final members = elements.where(isMemberElement).toSet();
-        if (members.isEmpty) {
+        final kept = candidates.unusedMembersOnly();
+        if (kept.isEmpty) {
           publicCode.remove(exportedPath);
         } else {
-          publicCode[exportedPath] = members;
+          publicCode[exportedPath] = kept;
+        }
+      }
+
+      // Being re-exported is not the only way onto a package's import
+      // surface: a library under `lib/` outside `lib/src` is importable
+      // directly, with nothing exporting it, so its declarations are just as
+      // unsafe to suggest privatizing.
+      //
+      // Unlike the loop above, this drops the suggestions alone and leaves
+      // the unused candidates in place, top level ones included. The two
+      // verdicts want different things here: whether anything in the analyzed
+      // code references a declaration is a fact about that code, which is
+      // what the unused check has always reported for these files, while a
+      // suggestion to rename one is a claim about every library that could
+      // reach it, including the ones outside the analysis.
+      for (final publicPath in packageImportSurface) {
+        final candidates = publicCode[publicPath];
+        if (candidates == null) {
+          continue;
+        }
+
+        final kept = candidates.withoutSuggestions();
+        if (kept.isEmpty) {
+          publicCode.remove(publicPath);
+        } else {
+          publicCode[publicPath] = kept;
         }
       }
     }
@@ -154,8 +199,11 @@ class UnusedCodeAnalyzer {
     UnusedCodeAnalysisConfig config,
   ) {
     if (unit is ResolvedUnitResult) {
-      final visitor =
-          UsedCodeVisitor(recordClassMembers: config.analyzeMembers);
+      final visitor = UsedCodeVisitor(
+        recordClassMembers: config.analyzeMembers,
+        recordPrivatizationBlockers: config.suggestPrivateMembers,
+        library: unit.libraryElement,
+      );
       unit.unit.visitChildren(visitor);
 
       return visitor.fileElementsUsage;
@@ -164,7 +212,7 @@ class UnusedCodeAnalyzer {
     return null;
   }
 
-  Set<Element> _analyzeFilePublicCode(
+  _FileCandidates _analyzeFilePublicCode(
     SomeResolvedUnitResult unit,
     UnusedCodeAnalysisConfig config,
   ) {
@@ -172,7 +220,7 @@ class UnusedCodeAnalyzer {
       final suppression = Suppression(unit.content, unit.lineInfo);
       final isSuppressed = suppression.isSuppressed(_ignoreName);
       if (isSuppressed) {
-        return {};
+        return const _FileCandidates.empty();
       }
 
       final visitor = PublicCodeVisitor(
@@ -180,31 +228,64 @@ class UnusedCodeAnalyzer {
         _ignoreName,
         analyzePrivateMembers: config.analyzePrivateMembers,
         analyzePublicMembers: config.analyzePublicMembers,
+        suggestPrivateMembers: config.suggestPrivateMembers,
       );
       unit.unit.visitChildren(visitor);
 
-      return visitor.topLevelElements;
+      return _FileCandidates(
+        visitor.topLevelElements,
+        visitor.privatizableElements,
+      );
     }
 
-    return {};
+    return const _FileCandidates.empty();
   }
 
   Iterable<UnusedCodeFileReport> _getReports(
     FileElementsUsage codeUsages,
-    Map<String, Set<Element>> publicCodeElements,
+    Map<String, _FileCandidates> publicCodeElements,
     String rootFolder,
   ) {
     final unusedCodeReports = <UnusedCodeFileReport>[];
 
-    publicCodeElements.forEach((path, elements) {
+    publicCodeElements.forEach((path, candidates) {
       final issues = <UnusedCodeIssue>[];
 
-      for (final element in elements) {
+      void report(Element element, UnusedCodeIssueKind kind) {
+        final unit = element.firstFragment.libraryFragment;
+        if (unit != null) {
+          issues.add(
+            _createUnusedCodeIssue(element as ElementImpl, unit, kind),
+          );
+        }
+      }
+
+      // The declarations this file is reporting as dead code, so a member of
+      // one of them can be left out of the suggestions below.
+      final deadDeclarations = <Element>{};
+
+      for (final element in candidates.unused) {
         if (_isUnused(codeUsages, path, element)) {
-          final unit = element.firstFragment.libraryFragment;
-          if (unit != null) {
-            issues.add(_createUnusedCodeIssue(element as ElementImpl, unit));
-          }
+          deadDeclarations.add(element);
+          report(element, UnusedCodeIssueKind.unused);
+        }
+      }
+
+      // The two verdicts cannot collide: [_couldBePrivate] requires the
+      // declaration to be used, which is the opposite of what the loop above
+      // reports, so an element in both candidate sets yields at most one
+      // issue.
+      //
+      // A member of a type that *is* being reported dead is dropped all the
+      // same. Nothing can reach such a member except through the loose same
+      // library name fallback for dart-lang/sdk#49182, which matches any
+      // same-named member of the library and is what makes it look used at
+      // all, and the answer for the whole type is to delete it rather than to
+      // privatize its members one at a time.
+      for (final element in candidates.privatizable) {
+        if (_couldBePrivate(codeUsages, path, element) &&
+            !deadDeclarations.contains(element.enclosingElement)) {
+          report(element, UnusedCodeIssueKind.couldBePrivate);
         }
       }
 
@@ -288,9 +369,71 @@ class UnusedCodeAnalyzer {
             (usedElement) => _isUsed(usedElement, element, elementIsMember));
   }
 
+  /// Whether [element] is used, but only ever from inside the library that
+  /// declares it, so it could carry a private name instead.
+  bool _couldBePrivate(
+    FileElementsUsage codeUsages,
+    String path,
+    Element element,
+  ) =>
+      // A declaration nothing references at all is dead code rather than a
+      // rename candidate, and is reported as such by the unused verdict when
+      // that check is enabled.
+      !_isUnused(codeUsages, path, element) &&
+      // An invocation on an unknown type can come from anywhere, including
+      // another library, so locality cannot be established.
+      !_isUsedDynamically(codeUsages, element) &&
+      !_isUsedOutsideDeclaringLibrary(codeUsages, element) &&
+      !_isRedeclaredOutsideDeclaringLibrary(codeUsages, element);
+
+  /// Whether any reference to [element] sits in a library other than the one
+  /// declaring it.
+  ///
+  /// Matched with the same loose comparison the unused verdict uses, so the
+  /// name based fallback for dart-lang/sdk#49182 cannot turn a foreign
+  /// reference it failed to resolve into a suggestion.
+  bool _isUsedOutsideDeclaringLibrary(
+    FileElementsUsage codeUsages,
+    Element element,
+  ) {
+    final elementIsMember = isMemberElement(element);
+
+    return codeUsages.externallyUsedElements
+        .any((usedElement) => _isUsed(usedElement, element, elementIsMember));
+  }
+
+  /// Whether a type in another library redeclares [element] somewhere in its
+  /// own hierarchy, which a private name would silently stop lining up with.
+  ///
+  /// Only instance members can be reached this way. A static, a constructor
+  /// and a top level declaration are never inherited, so no subtype can
+  /// redeclare one, and an extension has no subtypes at all.
+  bool _isRedeclaredOutsideDeclaringLibrary(
+    FileElementsUsage codeUsages,
+    Element element,
+  ) {
+    final enclosingElement = element.enclosingElement;
+    if (enclosingElement is! InterfaceElement ||
+        element is ConstructorElement ||
+        _isStaticMember(element)) {
+      return false;
+    }
+
+    final key = memberKey(enclosingElement, element.name);
+
+    return key != null && codeUsages.externallyRedeclaredMembers.contains(key);
+  }
+
+  bool _isStaticMember(Element element) => switch (element) {
+        ExecutableElement() => element.isStatic,
+        VariableElement() => element.isStatic,
+        _ => false,
+      };
+
   UnusedCodeIssue _createUnusedCodeIssue(
     ElementImpl element,
     LibraryFragment unit,
+    UnusedCodeIssueKind kind,
   ) {
     final offset = element.firstFragment.codeOffset!;
     final lineInfo = unit.lineInfo;
@@ -301,6 +444,7 @@ class UnusedCodeAnalyzer {
     return UnusedCodeIssue(
       declarationName: element.displayName,
       declarationType: element.kind.displayName,
+      kind: kind,
       location: SourceLocation(
         offset,
         sourceUrl: sourceUrl,
@@ -309,4 +453,39 @@ class UnusedCodeAnalyzer {
       ),
     );
   }
+}
+
+/// The declarations of one file that the analysis has to reach a verdict on.
+///
+/// The two sets are collected independently and overlap only partially: a
+/// public member is in both when both checks are on, a private one or one that
+/// cannot be renamed only in [unused], and one collected while the unused
+/// checks are off only in [privatizable]. Which sets are populated at all
+/// depends on the options of the context the file belongs to, which is why
+/// they travel with the file rather than being re-derived at report time.
+class _FileCandidates {
+  /// Declarations that are reported when nothing references them.
+  final Set<Element> unused;
+
+  /// Declarations that are reported when only their own library does.
+  final Set<Element> privatizable;
+
+  const _FileCandidates(this.unused, this.privatizable);
+
+  const _FileCandidates.empty()
+      : unused = const {},
+        privatizable = const {};
+
+  bool get isEmpty => unused.isEmpty && privatizable.isEmpty;
+
+  /// The same candidates with every top level declaration dropped from the
+  /// unused verdict, and every suggestion dropped outright.
+  _FileCandidates unusedMembersOnly() => _FileCandidates(
+        unused.where(isMemberElement).toSet(),
+        const {},
+      );
+
+  /// The same candidates with only the *suggestions* dropped, so the unused
+  /// verdict keeps seeing every declaration of the file.
+  _FileCandidates withoutSuggestions() => _FileCandidates(unused, const {});
 }

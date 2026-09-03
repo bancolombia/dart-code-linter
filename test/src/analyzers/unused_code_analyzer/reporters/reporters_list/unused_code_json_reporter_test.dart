@@ -41,6 +41,12 @@ void main() {
               declarationType: 'class',
               location: SourceLocation(10, line: 5, column: 3),
             ),
+            UnusedCodeIssue(
+              declarationName: 'someMethod',
+              declarationType: 'method',
+              kind: UnusedCodeIssueKind.couldBePrivate,
+              location: SourceLocation(20, line: 7, column: 3),
+            ),
           ],
         ),
       ];
@@ -60,11 +66,20 @@ void main() {
             'path': 'example.dart',
             'issues': [
               {
+                'issueKind': 'unused',
                 'declarationName': 'SomeClass',
                 'declarationType': 'class',
                 'column': 3,
                 'line': 5,
                 'offset': 10,
+              },
+              {
+                'issueKind': 'could-be-private',
+                'declarationName': 'someMethod',
+                'declarationType': 'method',
+                'column': 3,
+                'line': 7,
+                'offset': 20,
               },
             ],
           },

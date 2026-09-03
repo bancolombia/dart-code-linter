@@ -1,0 +1,7 @@
+# Makes this folder a package root, so `lib/` below is a real package import
+# surface rather than a directory that merely happens to be called `lib`.
+name: unused_code_public_library_fixture
+publish_to: none
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
