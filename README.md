@@ -391,9 +391,13 @@ that cannot see how a declaration is reached cannot tell that everything
 reaching it sits in one library either. On top of those, these are never
 suggested:
 
-- Operators, which have no private spelling at all, and enum constants, whose
+- Operators, which have no private spelling at all; enum constants, whose
   identifier is observable at run time through `name` and `toString`, so
-  renaming one can silently change serialized output.
+  renaming one can silently change serialized output; and the `call` method
+  that makes its type callable, since `obj(...)` binds a member spelled
+  exactly `call`, so the rename fails to compile even inside the declaring
+  library. Only a method is exempt: a field, a getter or a static named `call`
+  is reached by an ordinary reference and is still suggested.
 - Fields bound by a named `this.x` or `super.x` formal. Dart forbids a named
   parameter starting with an underscore, so the rename does not compile even
   for a constructor nothing outside the library calls.

@@ -1042,6 +1042,32 @@ void main() {
           expect(names, contains('combine'));
         });
 
+        test('never suggests an implicitly invoked `call` method', () {
+          // Four members here are named `call`, so the suggestions are
+          // compared by line: a name comparison cannot tell the exempted one
+          // from its controls.
+          final lines = _linesOfKind(
+            result,
+            'callable_members.dart',
+            UnusedCodeIssueKind.couldBePrivate,
+          );
+
+          // `obj(...)` binds only a member literally named `call`, so the
+          // rename never compiles.
+          expect(lines, isNot(contains(13)));
+
+          // Only a method makes an object callable. A field, a getter and a
+          // static named `call` are reached by an ordinary reference and are
+          // renameable, so the exemption must not swallow them.
+          expect(lines, containsAll([21, 27, 33]));
+
+          // The control: the enclosing type is otherwise ordinary.
+          expect(
+            suggestionsFor('callable_members.dart'),
+            contains('viaImplicitInvocation'),
+          );
+        });
+
         test('does not suggest a field bound by a named formal', () {
           final names = suggestionsFor('named_initializing_formals.dart');
 
@@ -1366,6 +1392,17 @@ Iterable<String> _namesOfKind(
         .expand((report) => report.issues)
         .where((issue) => issue.kind == kind)
         .map((issue) => issue.declarationName);
+
+Iterable<int> _linesOfKind(
+  Iterable<UnusedCodeFileReport> result,
+  String fileName,
+  UnusedCodeIssueKind kind,
+) =>
+    result
+        .where((report) => basename(report.path) == fileName)
+        .expand((report) => report.issues)
+        .where((issue) => issue.kind == kind)
+        .map((issue) => issue.location.line);
 
 UnusedCodeConfig _createConfig({
   Iterable<String> analyzerExcludePatterns = const [],

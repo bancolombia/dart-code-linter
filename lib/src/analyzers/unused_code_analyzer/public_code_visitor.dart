@@ -425,13 +425,32 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
   /// cannot be renamed.
   bool _canBeRenamedPrivate(AnnotatedNode node) => switch (node) {
         // `operator +` has no private spelling.
-        MethodDeclaration() => node.operatorKeyword == null,
+        MethodDeclaration() =>
+          node.operatorKeyword == null && !_isImplicitlyInvokedCall(node),
         // An enum constant's identifier is observable at run time through
         // `name` and `toString`, so renaming one can silently change
         // serialized output in a way no reference based analysis can see.
         EnumConstantDeclaration() => false,
         _ => true,
       };
+
+  /// Whether [node] declares the `call` method that makes its type callable.
+  ///
+  /// `obj(...)` is rewritten to `obj.call(...)`, which binds a member spelled
+  /// exactly `call`, so the rename fails to compile wherever the implicit
+  /// invocation is written, including inside the declaring library. That is
+  /// what puts it here and not in [_isReachableWithoutReference]: the usage
+  /// visitor does record implicit invocations, so the callers are seen.
+  ///
+  /// Only a method makes an object callable. A field or a getter of function
+  /// type named `call` is `invocation_of_non_function_expression`, and a
+  /// static `call` is only ever reached by an explicit `Type.call(...)`, so
+  /// all three are renameable and stay suggested.
+  bool _isImplicitlyInvokedCall(MethodDeclaration node) =>
+      node.name.lexeme == 'call' &&
+      !node.isStatic &&
+      !node.isGetter &&
+      !node.isSetter;
 
   /// Whether [element] can be reached without any reference to it that the
   /// usage visitor could record.
