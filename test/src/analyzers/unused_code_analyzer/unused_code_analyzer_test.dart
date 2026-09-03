@@ -1141,13 +1141,16 @@ void main() {
           expect(names, isNot(contains('mixinMember')));
         });
 
-        test('does not suggest a top level declaration that is exported', () {
-          final names = suggestionsFor('export_surface_src.dart');
+        test('suggests nothing in a file that is exported', () {
+          // The barrel puts `Exported` on the package's import surface, and a
+          // consumer that names it reaches the public members of its type
+          // just as directly, so no suggestion here survives.
+          expect(suggestionsFor('export_surface_src.dart'), isEmpty);
 
-          // On the package's import surface through the barrel file.
-          expect(names, isNot(contains('Exported')));
-          // Its members are not, so they stay analyzed.
-          expect(names, unorderedEquals(['memberUsedLocally', 'caller']));
+          // The unused verdict is a fact about the analyzed code and is not
+          // cut with them: everything here is referenced, so it reports
+          // nothing either way, but the candidates stay in the set.
+          expect(unusedFor('export_surface_src.dart'), isEmpty);
         });
       });
 
@@ -1199,17 +1202,14 @@ void main() {
             );
 
         test(
-          'does not suggest a top level declaration of a library any consumer '
-          'can import',
+          'suggests nothing in a library any consumer can import',
           () async {
             // `lib/public_api.dart` is importable as
             // `package:.../public_api.dart` with nothing exporting it, so the
-            // barrel exemption never sees it.
-            final names = await suggestionsFor('public_api.dart');
-
-            expect(names, isNot(contains('SurfaceType')));
-            // The members of its types are not on that surface.
-            expect(names, unorderedEquals(['usedOnlyHere', 'caller']));
+            // barrel exemption never sees it. The type and the public members
+            // of the type go together: a consumer that can import the library
+            // can name `SurfaceType` and call `usedOnlyHere` on it.
+            expect(await suggestionsFor('public_api.dart'), isEmpty);
           },
         );
 
@@ -1226,10 +1226,10 @@ void main() {
 
         test('--monorepo lifts the exemption', () async {
           // The flag says there are no unseen consumers to protect, exactly as
-          // it does for the barrel exemption.
+          // it does for the barrel exemption, so the whole library comes back.
           expect(
             await suggestionsFor('public_api.dart', isMonorepo: true),
-            contains('SurfaceType'),
+            unorderedEquals(['SurfaceType', 'usedOnlyHere', 'caller']),
           );
         });
       });

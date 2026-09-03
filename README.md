@@ -417,16 +417,21 @@ suggested:
   to leave the whole group alone. An *unnamed* extension does not count as
   private here: its members apply in every library that imports the declaring
   one, so they are still suggested.
-- Top level declarations of a library any consumer of the package can import,
-  which is either of two things: a file another file in the analysis
-  re-exports (a barrel), or a file that simply sits under `lib/` outside
-  `lib/src`, since Dart lets a consumer import that directly whether or not
-  anything exports it. The members of the types in such a library are not on
-  that surface and are still analyzed. `--monorepo` lifts this exemption,
-  exactly as it does for the unused check, since it says there are no unseen
-  consumers to protect. An application is in that same position, since nothing
-  outside it can import its `lib/` at all, so pass `--monorepo` there too if
-  you want the top level suggestions rather than only the member ones.
+- Everything in a library any consumer of the package can import, which is
+  either of two things: a file another file in the analysis re-exports (a
+  barrel), or a file that simply sits under `lib/` outside `lib/src`, since
+  Dart lets a consumer import that directly whether or not anything exports
+  it. The cut covers the members of its types as well as its top level
+  declarations: a consumer that can name the type reaches the public members
+  of that type just as directly, so the rename breaks it either way. Only the
+  suggestions are dropped, and the unused check still reports these files
+  exactly as it always has. `--monorepo` lifts the exemption, as it does for
+  the unused check, since it says there are no unseen consumers to protect. An
+  application is in that same position, since nothing outside it can import
+  its `lib/` at all, so pass `--monorepo` there too. A published package that
+  keeps nothing under `lib/src` will otherwise see no suggestions at all,
+  which is the intended answer rather than a gap: every declaration it has is
+  reachable by a consumer this analysis cannot see.
 
 The same blind spot as above applies: a subtype or a reference living in a
 package that depends on yours, or in a folder outside the analysis, cannot be

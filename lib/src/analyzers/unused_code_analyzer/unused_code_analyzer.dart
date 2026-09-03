@@ -124,48 +124,50 @@ class UnusedCodeAnalyzer {
         'Removing globally exported files with code usages from the analysis: ${codeUsages.exports.length}',
       );
       // Only top level declarations are part of the package's exported
-      // surface here: a member is reachable from outside only through a
-      // reference to its enclosing type, which the type's own top level
-      // exemption already covers, so exporting a file must not excuse the
-      // dead members of the types it declares.
+      // surface for the *unused* verdict: a member is reachable from outside
+      // only through a reference to its enclosing type, which the type's own
+      // top level exemption already covers, so exporting a file must not
+      // excuse the dead members of the types it declares.
       //
-      // The same cut applies to the could be private suggestions, which is
-      // what keeps them off a package's export surface: an exported top level
-      // declaration can be imported by any consumer, seen or unseen, so it is
-      // never suggested, while the members of its types still are.
+      // The suggestions are cut whole instead, top level and member alike. A
+      // consumer that can import the file names the type and reaches the
+      // public members of that type just as directly, so a rename here breaks
+      // it either way. Only members of a *private* type would be safe, and
+      // those never reach this set: the member visitor drops them long
+      // before, so there is nothing left here worth keeping.
       for (final exportedPath in codeUsages.exports) {
         final candidates = publicCode[exportedPath];
         if (candidates == null) {
           continue;
         }
 
-        final members = candidates.membersOnly();
-        if (members.isEmpty) {
+        final kept = candidates.unusedMembersOnly();
+        if (kept.isEmpty) {
           publicCode.remove(exportedPath);
         } else {
-          publicCode[exportedPath] = members;
+          publicCode[exportedPath] = kept;
         }
       }
 
       // Being re-exported is not the only way onto a package's import
       // surface: a library under `lib/` outside `lib/src` is importable
-      // directly, with nothing exporting it, so its top level declarations
-      // are just as unsafe to suggest privatizing.
+      // directly, with nothing exporting it, so its declarations are just as
+      // unsafe to suggest privatizing.
       //
       // Unlike the loop above, this drops the suggestions alone and leaves
-      // the unused candidates in place. The two verdicts want different
-      // things here: whether anything in the analyzed code references a
-      // declaration is a fact about that code, which is what the unused
-      // check has always reported for these files, while a suggestion to
-      // rename one is a claim about every library that could reach it,
-      // including the ones outside the analysis.
+      // the unused candidates in place, top level ones included. The two
+      // verdicts want different things here: whether anything in the analyzed
+      // code references a declaration is a fact about that code, which is
+      // what the unused check has always reported for these files, while a
+      // suggestion to rename one is a claim about every library that could
+      // reach it, including the ones outside the analysis.
       for (final publicPath in packageImportSurface) {
         final candidates = publicCode[publicPath];
         if (candidates == null) {
           continue;
         }
 
-        final kept = candidates.withoutTopLevelSuggestions();
+        final kept = candidates.withoutSuggestions();
         if (kept.isEmpty) {
           publicCode.remove(publicPath);
         } else {
@@ -476,16 +478,14 @@ class _FileCandidates {
 
   bool get isEmpty => unused.isEmpty && privatizable.isEmpty;
 
-  /// The same candidates with every top level declaration dropped.
-  _FileCandidates membersOnly() => _FileCandidates(
+  /// The same candidates with every top level declaration dropped from the
+  /// unused verdict, and every suggestion dropped outright.
+  _FileCandidates unusedMembersOnly() => _FileCandidates(
         unused.where(isMemberElement).toSet(),
-        privatizable.where(isMemberElement).toSet(),
+        const {},
       );
 
-  /// The same candidates with only the top level *suggestions* dropped, so
-  /// the unused verdict keeps seeing every declaration of the file.
-  _FileCandidates withoutTopLevelSuggestions() => _FileCandidates(
-        unused,
-        privatizable.where(isMemberElement).toSet(),
-      );
+  /// The same candidates with only the *suggestions* dropped, so the unused
+  /// verdict keeps seeing every declaration of the file.
+  _FileCandidates withoutSuggestions() => _FileCandidates(unused, const {});
 }
