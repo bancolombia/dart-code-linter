@@ -32,36 +32,41 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   void _visitArguments(Iterable<AstNode> arguments) {
-    final notIgnoredArguments = arguments.whereNot(_isIgnored).toList();
+    final notIgnoredArguments =
+        arguments.whereNot(_isIgnored).cast<AstNode>().toList();
 
     for (final argument in notIgnoredArguments) {
-      final lastAppearance = notIgnoredArguments.lastWhere((arg) {
-        final argNamed = asNamedArgument(argument);
-        final otherNamed = asNamedArgument(arg);
-        if (argNamed != null &&
-            otherNamed != null &&
-            argNamed.expression is! Literal &&
-            otherNamed.expression is! Literal) {
-          return haveSameParameterType(
-                argNamed.expression,
-                otherNamed.expression,
-              ) &&
-              argNamed.expression.toString() == otherNamed.expression.toString();
-        }
+      final lastAppearance = notIgnoredArguments.lastWhere(
+        (arg) {
+          final argNamed = asNamedArgument(argument);
+          final otherNamed = asNamedArgument(arg);
+          if (argNamed != null &&
+              otherNamed != null &&
+              argNamed.expression is! Literal &&
+              otherNamed.expression is! Literal) {
+            return haveSameParameterType(
+                  argNamed.expression,
+                  otherNamed.expression,
+                ) &&
+                argNamed.expression.toString() ==
+                    otherNamed.expression.toString();
+          }
 
-        final argExpr = unwrapArgumentExpression(argument);
-        final otherExpr = unwrapArgumentExpression(arg);
-        if (argExpr == null || otherExpr == null) {
-          return false;
-        }
+          final argExpr = unwrapArgumentExpression(argument);
+          final otherExpr = unwrapArgumentExpression(arg);
+          if (argExpr == null || otherExpr == null) {
+            return false;
+          }
 
-        if (_bothLiterals(argExpr, otherExpr)) {
-          return argExpr == otherExpr;
-        }
+          if (_bothLiterals(argExpr, otherExpr)) {
+            return argExpr == otherExpr;
+          }
 
-        return haveSameParameterType(argExpr, otherExpr) &&
-            argExpr.toString() == otherExpr.toString();
-      });
+          return haveSameParameterType(argExpr, otherExpr) &&
+              argExpr.toString() == otherExpr.toString();
+        },
+        orElse: () => argument,
+      );
 
       if (argument != lastAppearance) {
         _arguments.add(lastAppearance);

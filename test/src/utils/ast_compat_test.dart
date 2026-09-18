@@ -58,6 +58,22 @@ void main() {
       expect(view.expression.toSource(), equals('42'));
     });
 
+    test(
+        'recognises a named argument whose label is a built-in-identifier '
+        'keyword', () {
+      // `on` lexes as a keyword token even though the parser accepts it as
+      // an identifier here; the label token's TokenType must not gate this.
+      final unit = _parse('void main() { foo(on: 42); }');
+      final call = _firstOfType<MethodInvocation>(unit);
+      final firstArg = call.argumentList.arguments.first;
+
+      final view = asNamedArgument(firstArg);
+
+      expect(view, isNotNull);
+      expect(view!.name, equals('on'));
+      expect(view.expression.toSource(), equals('42'));
+    });
+
     test('returns null for a positional argument', () {
       final unit = _parse('void main() { foo(42, 43); }');
       final call = _firstOfType<MethodInvocation>(unit);
