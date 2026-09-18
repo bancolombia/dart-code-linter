@@ -19,8 +19,59 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
 
   final bool _recordClassMembers;
 
-  UsedCodeVisitor({bool recordClassMembers = false})
-      : _recordClassMembers = recordClassMembers;
+  /// Whether to collect the extra information the could be private
+  /// suggestions need: which references come from another library, and which
+  /// members a foreign subtype redeclares.
+  final bool _recordPrivatizationBlockers;
+
+  /// The library of the unit being visited, against which a reference is
+  /// local or foreign.
+  final LibraryElement? _library;
+
+  UsedCodeVisitor({
+    bool recordClassMembers = false,
+    bool recordPrivatizationBlockers = false,
+    LibraryElement? library,
+  })  : _recordClassMembers = recordClassMembers,
+        _recordPrivatizationBlockers = recordPrivatizationBlockers,
+        _library = library;
+
+  @override
+  void visitClassDeclaration(ClassDeclaration node) {
+    _recordRedeclaredInheritedMembers(node.declaredFragment?.element);
+
+    super.visitClassDeclaration(node);
+  }
+
+  @override
+  void visitClassTypeAlias(ClassTypeAlias node) {
+    // `class S = Base with M;` inherits and mixes in exactly like the body
+    // form, so it blocks privatization the same way.
+    _recordRedeclaredInheritedMembers(node.declaredFragment?.element);
+
+    super.visitClassTypeAlias(node);
+  }
+
+  @override
+  void visitEnumDeclaration(EnumDeclaration node) {
+    _recordRedeclaredInheritedMembers(node.declaredFragment?.element);
+
+    super.visitEnumDeclaration(node);
+  }
+
+  @override
+  void visitExtensionTypeDeclaration(ExtensionTypeDeclaration node) {
+    _recordRedeclaredInheritedMembers(node.declaredFragment?.element);
+
+    super.visitExtensionTypeDeclaration(node);
+  }
+
+  @override
+  void visitMixinDeclaration(MixinDeclaration node) {
+    _recordRedeclaredInheritedMembers(node.declaredFragment?.element);
+
+    super.visitMixinDeclaration(node);
+  }
 
   @override
   void visitImportDirective(ImportDirective node) {
@@ -239,6 +290,11 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
         final map = fileElementsUsage.prefixMap[prefixElement] ??= [];
         if (element != null) {
           map.add(element);
+          // A prefixed type reference is kept out of `elements`, which is how
+          // the unused imports logic this was copied from wants it, but it is
+          // still a reference from this library and has to count against the
+          // declaration being made private.
+          _recordUsageLocality(element);
         }
       }
     } else if (element != null) {
@@ -253,12 +309,15 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     if (target is PrefixedIdentifier) {
       _visitIdentifier(target.identifier, node.readElement);
       _visitIdentifier(target.identifier, node.writeElement);
+      _recordDynamicWrite(node, target.identifier);
     } else if (target is PropertyAccess) {
       _visitIdentifier(target.propertyName, node.readElement);
       _visitIdentifier(target.propertyName, node.writeElement);
+      _recordDynamicWrite(node, target.propertyName);
     } else if (target is SimpleIdentifier) {
       _visitIdentifier(target, node.readElement);
       _visitIdentifier(target, node.writeElement);
+      _recordDynamicWrite(node, target);
     } else if (target is IndexExpression) {
       _recordMemberUsage(node.readElement);
       _recordMemberUsage(node.writeElement);
@@ -308,7 +367,39 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
   /// fields at all), but it is a fully statically typed reference rather than
   /// a dynamic one, so it must not be treated the same way.
   void _recordDynamicUsage(SimpleIdentifier identifier) {
-    if (_recordClassMembers && identifier.element == null) {
+    // A write resolves through the enclosing assignment rather than through
+    // the identifier: `host.value = 1` leaves `value.element` null however
+    // precisely `host` is typed, so reading a null element here as "reached
+    // through a dynamic target" would mark every member named `value` used
+    // across the whole program on an ordinary, statically typed assignment.
+    // The write half is recorded from `_recordAssignmentTarget` instead,
+    // which can tell the two apart. Same reasoning as `visitIndexExpression`.
+    if (_recordClassMembers &&
+        identifier.element == null &&
+        !identifier.inSetterContext()) {
+      fileElementsUsage.dynamicallyUsedNames.add(identifier.name);
+    }
+  }
+
+  /// Records a write to a member of a target of an unknown type.
+  ///
+  /// The counterpart of [_recordDynamicUsage] for the write half of an
+  /// assignment: a null write element on a named target means the assignment
+  /// resolved to nothing, so it can reach any setter of that name.
+  ///
+  /// The setter context is what makes that reading valid. A prefix or postfix
+  /// operator that writes nothing (`!x`, `x!`, `-x`, `~x`) is a
+  /// [CompoundAssignmentExpression] all the same, and its write element is
+  /// null because there is no write rather than because one failed to
+  /// resolve, so without this guard every ordinary negation of a member would
+  /// mark that member's name used across the whole program.
+  void _recordDynamicWrite(
+    CompoundAssignmentExpression node,
+    SimpleIdentifier identifier,
+  ) {
+    if (_recordClassMembers &&
+        identifier.inSetterContext() &&
+        node.writeElement == null) {
       fileElementsUsage.dynamicallyUsedNames.add(identifier.name);
     }
   }
@@ -415,12 +506,92 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     }
     // Remember the element.
     fileElementsUsage.elements.add(element);
+    _recordUsageLocality(element);
   }
 
   void _recordUsedExtension(ExtensionElement extension) {
     // Remember the element.
     fileElementsUsage.usedExtensions.add(extension);
+    _recordUsageLocality(extension);
   }
+
+  /// Remembers [element] as referenced from outside the library that declares
+  /// it, which is what rules it out as a candidate for being made private.
+  ///
+  /// SDK declarations are left out: they are referenced from everywhere and
+  /// are never candidates, so keeping them would grow this set by most of
+  /// `dart:core` and slow down every lookup against it for nothing.
+  void _recordUsageLocality(Element element) {
+    if (_recordPrivatizationBlockers &&
+        element.library != _library &&
+        !_isSdkElement(element)) {
+      fileElementsUsage.externallyUsedElements.add(element);
+    }
+  }
+
+  /// Records every member of [element]'s foreign supertypes that [element]'s
+  /// own hierarchy declares somewhere other than on that supertype.
+  ///
+  /// Such a member cannot be made private without breaking [element]: it is
+  /// the override or the interface implementation that would stop lining up
+  /// with the supertype's declaration. A member that [element]'s hierarchy
+  /// leaves entirely to the supertype is not recorded, since a private member
+  /// is still inherited across libraries and keeps working untouched.
+  void _recordRedeclaredInheritedMembers(Element? element) {
+    if (!_recordPrivatizationBlockers || element is! InterfaceElement) {
+      return;
+    }
+
+    final supertypes = element.allSupertypes.map((type) => type.element);
+
+    // Which types in this hierarchy declare each member name, and the names
+    // each type declares. The second loop needs the per type names again, and
+    // this runs for every type declaration in the project, so they are kept
+    // rather than walked a second time.
+    final declarers = <String, Set<InterfaceElement>>{};
+    final declaredNames = <InterfaceElement, List<String>>{};
+    for (final type in [element, ...supertypes]) {
+      final names = _declaredMemberNames(type).toList();
+      declaredNames[type] = names;
+      for (final name in names) {
+        declarers.putIfAbsent(name, () => {}).add(type);
+      }
+    }
+
+    for (final supertype in supertypes) {
+      // A supertype from this same library can be privatized freely: the
+      // override or implementation sits where the private name is visible.
+      // SDK types are never reportable, so walking their members is wasted
+      // work on every single class.
+      if (supertype.library == _library || _isSdkElement(supertype)) {
+        continue;
+      }
+
+      // Only what the supertype itself declares can be blocked, so its own
+      // member names drive the loop. Each of those names is in `declarers`
+      // with at least the supertype in it, which makes a second declarer
+      // anywhere in this hierarchy exactly the condition to block on.
+      for (final name in declaredNames[supertype] ?? const <String>[]) {
+        if ((declarers[name]?.length ?? 0) > 1) {
+          final key = memberKey(supertype, name);
+          if (key != null) {
+            fileElementsUsage.externallyRedeclaredMembers.add(key);
+          }
+        }
+      }
+    }
+  }
+
+  Iterable<String> _declaredMemberNames(InterfaceElement element) => [
+        ...element.methods.where((member) => !member.isStatic),
+        ...element.getters.where((member) => !member.isStatic),
+        ...element.setters.where((member) => !member.isStatic),
+        ...element.fields.where((member) => !member.isStatic),
+      ].map((member) => member.name).nonNulls;
+
+  bool _isSdkElement(Element element) =>
+      element.firstFragment.libraryFragment?.source.uri.isScheme('dart') ??
+      false;
 
   void _visitIdentifier(SimpleIdentifier identifier, Element? element) {
     if (element == null || element is PrefixElement) {
