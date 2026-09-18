@@ -11,18 +11,30 @@ import '../../utils/suppression.dart';
 class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
   final Set<Element> topLevelElements = {};
 
+  /// Declarations that could be made private if nothing outside their library
+  /// turns out to reference them.
+  ///
+  /// Deliberately a separate set rather than a filter over [topLevelElements]:
+  /// the two verdicts have different eligibility rules, and the unused
+  /// candidates must keep behaving exactly as they did before suggestions
+  /// existed. A declaration can be in both sets, in neither, or in one alone.
+  final Set<Element> privatizableElements = {};
+
   final Suppression _suppression;
   final String _pattern;
   final bool _analyzePrivateMembers;
   final bool _analyzePublicMembers;
+  final bool _suggestPrivateMembers;
 
   PublicCodeVisitor(
     this._suppression,
     this._pattern, {
     bool analyzePrivateMembers = false,
     bool analyzePublicMembers = false,
+    bool suggestPrivateMembers = false,
   })  : _analyzePrivateMembers = analyzePrivateMembers,
-        _analyzePublicMembers = analyzePublicMembers;
+        _analyzePublicMembers = analyzePublicMembers,
+        _suggestPrivateMembers = suggestPrivateMembers;
 
   @override
   void visitCompilationUnitMember(CompilationUnitMember node) {
@@ -37,24 +49,32 @@ class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
       }
     }
 
-    _getTopLevelElement(node);
+    _getTopLevelElement(node, node.metadata);
 
-    if ((_analyzePrivateMembers || _analyzePublicMembers) &&
+    if ((_analyzePrivateMembers ||
+            _analyzePublicMembers ||
+            _suggestPrivateMembers) &&
         _isTypeDeclaration(node)) {
       // Descend into the type body with a recursive visitor. The shape of the
       // members container (`ClassDeclaration.members` vs `body.members`) changed
       // across supported analyzer versions, so we rely on the visitor dispatch
       // for `MethodDeclaration`/`FieldDeclaration`, which is stable, instead of
       // typed member accessors.
-      node.accept(_MemberVisitor(
+      final memberVisitor = _MemberVisitor(
         topLevelElements,
+        privatizableElements,
         _suppression,
         _pattern,
         enclosingMetadata: node.metadata,
         hierarchyUnresolved: _hasUnresolvedHierarchyClause(node),
         analyzePrivateMembers: _analyzePrivateMembers,
         analyzePublicMembers: _analyzePublicMembers,
-      ));
+        suggestPrivateMembers: _suggestPrivateMembers,
+      );
+      node.accept(memberVisitor);
+      // Suggestions cannot be settled during the walk: whether a field can be
+      // renamed depends on the constructors, which may sit below it.
+      memberVisitor.finish();
     }
   }
 
@@ -68,17 +88,43 @@ class PublicCodeVisitor extends GeneralizingAstVisitor<void> {
     final variables = node.variables.variables;
 
     if (variables.isNotEmpty) {
-      _getTopLevelElement(variables.first);
+      // The annotations of a variable sit on the enclosing declaration, not on
+      // the variable itself.
+      _getTopLevelElement(variables.first, node.metadata);
     }
   }
 
-  void _getTopLevelElement(Declaration node) {
+  void _getTopLevelElement(Declaration node, Iterable<Annotation> metadata) {
     final element = node.declaredFragment?.element;
 
-    if (element != null) {
-      topLevelElements.add(element);
+    if (element == null) {
+      return;
+    }
+
+    topLevelElements.add(element);
+
+    if (_suggestPrivateMembers && _isPrivatizableTopLevel(element, metadata)) {
+      privatizableElements.add(element);
     }
   }
+
+  /// Whether [element] is a top level declaration that could carry a private
+  /// name, leaving aside whether anything outside its library references it.
+  ///
+  /// Unlike a member, a top level declaration needs no override or dispatch
+  /// reasoning: a subtype, an implementation or a reference from another
+  /// library all name the declaration itself, so ordinary usage tracking
+  /// already sees them. Only the reachability annotations have to be read
+  /// here, plus `main` and the Flutter entry points, which
+  /// [visitCompilationUnitMember] has already dropped before this runs.
+  bool _isPrivatizableTopLevel(
+    Element element,
+    Iterable<Annotation> metadata,
+  ) =>
+      !element.isPrivate &&
+      !hasEntryPointPragma(metadata) &&
+      !_hasJSInteropAnnotation(metadata) &&
+      !element.metadata.hasVisibleForTesting;
 
   bool _isTypeDeclaration(CompilationUnitMember node) =>
       node is ClassDeclaration ||
@@ -154,10 +200,24 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
   static const _conventionallyCalledNames = {'toJson'};
 
   final Set<Element> _elements;
+  final Set<Element> _privatizableElements;
   final Suppression _suppression;
   final String _pattern;
   final bool _analyzePrivateMembers;
   final bool _analyzePublicMembers;
+  final bool _suggestPrivateMembers;
+
+  /// Suggestion candidates found so far, each with the name of the field it
+  /// declares, or `null` when it is not a field. Settled by [finish].
+  final List<(Element, String?)> _pendingSuggestions = [];
+
+  /// Names of fields bound by a named `this.x` or `super.x` formal.
+  ///
+  /// Such a field cannot be renamed to a private name: Dart forbids a named
+  /// parameter starting with an underscore, so `this._x` does not compile in
+  /// a named parameter position, and the rename is impossible even for a
+  /// constructor nothing outside the library calls.
+  final Set<String> _namedFormalFieldNames = {};
 
   /// Whether the enclosing type carries `@JSExport`, which exports every one of
   /// its instance members to JavaScript.
@@ -180,16 +240,51 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
 
   _MemberVisitor(
     this._elements,
+    this._privatizableElements,
     this._suppression,
     this._pattern, {
     required Iterable<Annotation> enclosingMetadata,
     required bool hierarchyUnresolved,
     required bool analyzePrivateMembers,
     required bool analyzePublicMembers,
+    required bool suggestPrivateMembers,
   })  : _enclosingIsJSExported = hasJSExportAnnotation(enclosingMetadata),
         _hierarchyUnresolved = hierarchyUnresolved,
         _analyzePrivateMembers = analyzePrivateMembers,
-        _analyzePublicMembers = analyzePublicMembers;
+        _analyzePublicMembers = analyzePublicMembers,
+        _suggestPrivateMembers = suggestPrivateMembers;
+
+  /// Promotes the suggestion candidates that survived the whole type body.
+  ///
+  /// Must be called once the type declaration has been fully visited.
+  void finish() {
+    for (final (element, fieldName) in _pendingSuggestions) {
+      if (fieldName == null || !_namedFormalFieldNames.contains(fieldName)) {
+        _privatizableElements.add(element);
+      }
+    }
+  }
+
+  @override
+  void visitFieldFormalParameter(FieldFormalParameter node) {
+    if (node.isNamed) {
+      _namedFormalFieldNames.add(node.name.lexeme);
+    }
+
+    super.visitFieldFormalParameter(node);
+  }
+
+  @override
+  void visitSuperFormalParameter(SuperFormalParameter node) {
+    // A `super.x` formal binds a field of a supertype rather than one declared
+    // here, but the two share a name often enough that the cheap, conservative
+    // reading is the right one: a skipped suggestion costs nothing.
+    if (node.isNamed) {
+      _namedFormalFieldNames.add(node.name.lexeme);
+    }
+
+    super.visitSuperFormalParameter(node);
+  }
 
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
@@ -229,6 +324,13 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitConstructorDeclaration(ConstructorDeclaration node) {
+    // Descend into the formals first, and whatever the verdict below is: a
+    // named `this.x` formal blocks its field from being renamed even when the
+    // constructor holding it is suppressed or is not a candidate itself. The
+    // other member visits deliberately do not recurse, since nothing below
+    // them declares a member.
+    super.visitConstructorDeclaration(node);
+
     if (_isSuppressed(node)) {
       return;
     }
@@ -275,10 +377,80 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    if (_analyzePublicMembers && !_isReachableWithoutReference(element, node)) {
+    // Everything unreachable through a reference is out of both verdicts: an
+    // analysis that cannot see how a member is called cannot tell that the
+    // calls all sit in one library either.
+    if (_isReachableWithoutReference(element, node)) {
+      return;
+    }
+
+    if (_analyzePublicMembers) {
       _elements.add(element);
     }
+
+    if (_suggestPrivateMembers &&
+        _canBeRenamedPrivate(node) &&
+        !_enclosingTypeIsPrivate(element)) {
+      _pendingSuggestions
+          .add((element, node is FieldDeclaration ? element.name : null));
+    }
   }
+
+  /// Whether the type declaring [element] is itself private.
+  ///
+  /// For most kinds the rename is then simply pointless: no other library can
+  /// name the type, so nothing out there was reaching the member to begin
+  /// with. For a mixin it is more than pointless, since a public class can mix
+  /// a private mixin in and republish its members under a name other
+  /// libraries do reach, so skipping is the right direction for the whole
+  /// group rather than only its harmless part.
+  ///
+  /// The name check is load bearing rather than defensive: [Element.isPrivate]
+  /// answers `true` for a null name, which is what an *unnamed* extension has.
+  /// Its members apply in every library that imports this one, so it is a
+  /// genuine candidate and must not be swept up here. Pinned by the
+  /// `private_enclosing_types.dart` fixture.
+  bool _enclosingTypeIsPrivate(Element element) {
+    final enclosingElement = element.enclosingElement;
+
+    return enclosingElement != null &&
+        enclosingElement.name != null &&
+        enclosingElement.isPrivate;
+  }
+
+  /// Whether the member [node] declares could carry a private name at all.
+  ///
+  /// Separate from [_isReachableWithoutReference], which is about not seeing
+  /// the callers: these members have perfectly visible callers, they just
+  /// cannot be renamed.
+  bool _canBeRenamedPrivate(AnnotatedNode node) => switch (node) {
+        // `operator +` has no private spelling.
+        MethodDeclaration() =>
+          node.operatorKeyword == null && !_isImplicitlyInvokedCall(node),
+        // An enum constant's identifier is observable at run time through
+        // `name` and `toString`, so renaming one can silently change
+        // serialized output in a way no reference based analysis can see.
+        EnumConstantDeclaration() => false,
+        _ => true,
+      };
+
+  /// Whether [node] declares the `call` method that makes its type callable.
+  ///
+  /// `obj(...)` is rewritten to `obj.call(...)`, which binds a member spelled
+  /// exactly `call`, so the rename fails to compile wherever the implicit
+  /// invocation is written, including inside the declaring library. That is
+  /// what puts it here and not in [_isReachableWithoutReference]: the usage
+  /// visitor does record implicit invocations, so the callers are seen.
+  ///
+  /// Only a method makes an object callable. A field or a getter of function
+  /// type named `call` is `invocation_of_non_function_expression`, and a
+  /// static `call` is only ever reached by an explicit `Type.call(...)`, so
+  /// all three are renameable and stay suggested.
+  bool _isImplicitlyInvokedCall(MethodDeclaration node) =>
+      node.name.lexeme == 'call' &&
+      !node.isStatic &&
+      !node.isGetter &&
+      !node.isSetter;
 
   /// Whether [element] can be reached without any reference to it that the
   /// usage visitor could record.
@@ -291,30 +463,6 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
       // its instance members, or by this member's own annotation.
       (_enclosingIsJSExported && _isInstanceMember(node)) ||
       _hasJSInteropAnnotation(node.metadata);
-
-  /// Whether [metadata] carries `@JSExport` or `@JS`, checked in a single
-  /// pass over [metadata] rather than two.
-  ///
-  /// `@JSExport` marks a member JavaScript calls through
-  /// `createJSInteropWrapper`. `@JS` is the one case here that is not about
-  /// reachability: its callers are Dart-side and visible, so an unreferenced
-  /// one is reportable in principle. Skipped anyway, because an interop
-  /// binding surface is normally written complete on purpose and reporting
-  /// the unused part of it is noise rather than a finding. Pinned by the
-  /// `js_binding_members.dart` fixture.
-  ///
-  /// The `'JSExport'` half of the check below duplicates [hasJSExportAnnotation]
-  /// rather than calling it, to keep this a single pass over [metadata].
-  /// Flagged in review as worth reusing the helper instead, at the cost of a
-  /// second pass over a metadata list that in practice holds a handful of
-  /// annotations at most; left as-is pending a maintainer call on whether
-  /// that single-pass saving is worth the duplication.
-  bool _hasJSInteropAnnotation(Iterable<Annotation> metadata) => metadata.any(
-        (annotation) => switch (annotationName(annotation)) {
-          'JSExport' || 'JS' => true,
-          _ => false,
-        },
-      );
 
   /// Whether [node] declares an instance member, the only kind that a class
   /// level `@JSExport` wraps.
@@ -411,3 +559,27 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
     // through the resolved element. See [_hasJSInteropAnnotation].
   }
 }
+
+/// Whether [metadata] carries `@JSExport` or `@JS`, checked in a single
+/// pass over [metadata] rather than two.
+///
+/// `@JSExport` marks a declaration JavaScript calls through
+/// `createJSInteropWrapper`. `@JS` is the one case here that is not about
+/// reachability: its callers are Dart-side and visible, so an unreferenced
+/// one is reportable in principle. Skipped anyway, because an interop
+/// binding surface is normally written complete on purpose and reporting
+/// the unused part of it is noise rather than a finding. Pinned by the
+/// `js_binding_members.dart` fixture.
+///
+/// The `'JSExport'` half of the check below duplicates [hasJSExportAnnotation]
+/// rather than calling it, to keep this a single pass over [metadata].
+/// Flagged in review as worth reusing the helper instead, at the cost of a
+/// second pass over a metadata list that in practice holds a handful of
+/// annotations at most; left as-is pending a maintainer call on whether
+/// that single-pass saving is worth the duplication.
+bool _hasJSInteropAnnotation(Iterable<Annotation> metadata) => metadata.any(
+      (annotation) => switch (annotationName(annotation)) {
+        'JSExport' || 'JS' => true,
+        _ => false,
+      },
+    );

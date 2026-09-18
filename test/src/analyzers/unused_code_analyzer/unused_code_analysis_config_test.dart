@@ -5,6 +5,7 @@ import 'package:test/test.dart';
 UnusedCodeConfig _config({
   bool? analyzePrivateMembers,
   bool? analyzePublicMembers,
+  bool? suggestPrivateMembers,
 }) =>
     UnusedCodeConfig(
       excludePatterns: const [],
@@ -13,6 +14,7 @@ UnusedCodeConfig _config({
       shouldPrintConfig: null,
       analyzePrivateMembers: analyzePrivateMembers,
       analyzePublicMembers: analyzePublicMembers,
+      suggestPrivateMembers: suggestPrivateMembers,
     );
 
 void main() {
@@ -22,6 +24,7 @@ void main() {
 
       expect(config.analyzePrivateMembers, false);
       expect(config.analyzePublicMembers, false);
+      expect(config.suggestPrivateMembers, false);
       expect(config.analyzeMembers, false);
     });
 
@@ -34,6 +37,19 @@ void main() {
       expect(config.analyzePrivateMembers, true);
       expect(config.analyzePublicMembers, true);
       expect(config.analyzeMembers, true);
+    });
+
+    test('analyzeMembers is set by the suggestion flag alone', () {
+      // The suggestions need member level usage recording just as much: the
+      // whole verdict is about which library a member's references sit in.
+      final config = ConfigBuilder.getUnusedCodeConfig(
+        _config(suggestPrivateMembers: true),
+        '',
+      );
+
+      expect(config.analyzeMembers, true);
+      expect(config.analyzePrivateMembers, false);
+      expect(config.analyzePublicMembers, false);
     });
 
     test('analyzeMembers is set by either flag alone', () {
@@ -67,6 +83,7 @@ void main() {
           'is-monorepo': false,
           'analyze-private-members': false,
           'analyze-public-members': true,
+          'suggest-private-members': false,
         }),
       );
     });

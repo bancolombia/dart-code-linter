@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/models/unused_code_file_report.dart';
+import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/models/unused_code_issue.dart';
 import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/reporters/reporters_list/console/unused_code_console_reporter.dart';
 import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/unused_code_analyzer.dart';
 import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/unused_code_config.dart';
@@ -459,6 +460,48 @@ void main() {
           expect(names, isNot(contains('alsoDynamicallyRead')));
         });
 
+        test(
+          'reports a dead member whose name a statically resolved assignment '
+          'also writes, while keeping one a dynamic write could reach',
+          () {
+            // Nothing is dead in the file holding the writes themselves.
+            expect(
+              result.where((report) =>
+                  basename(report.path) == 'setter_write_resolution.dart'),
+              isEmpty,
+            );
+
+            expect(namesFor('setter_write_name_twin.dart'), ['shared']);
+          },
+        );
+
+        test(
+          'reports a dead member whose name a statically resolved prefix or '
+          'postfix operator also reaches, while keeping one a dynamic '
+          'negation could reach',
+          () {
+            // Nothing is dead in the file holding the operators themselves.
+            expect(
+              result.where((report) =>
+                  basename(report.path) == 'non_writing_operators.dart'),
+              isEmpty,
+            );
+
+            // `!x`, `x!`, `-x` and `~x` write nothing, so the null write
+            // element of the expression enclosing them must not be read as a
+            // dynamic target the way an unresolved assignment is.
+            expect(
+              namesFor('non_writing_operators_name_twin.dart'),
+              unorderedEquals([
+                'negated',
+                'asserted',
+                'negatedNumber',
+                'complemented',
+              ]),
+            );
+          },
+        );
+
         test('reports unused public members of every type kind', () {
           final names = namesFor('public_type_kinds.dart');
 
@@ -690,6 +733,507 @@ void main() {
         );
       });
 
+      group('suggest-private-members', () {
+        final couldBePrivateFolders = [
+          normalize(
+            File('test/resources/unused_code_could_be_private_analyzer')
+                .absolute
+                .path,
+          ),
+        ];
+
+        late Iterable<UnusedCodeFileReport> result;
+
+        setUpAll(() async {
+          result = await analyzer.runCliAnalysis(
+            couldBePrivateFolders,
+            rootDirectory,
+            _createConfig(suggestPrivateMembers: true),
+          );
+        });
+
+        Iterable<String> suggestionsFor(String fileName) =>
+            _namesOfKind(result, fileName, UnusedCodeIssueKind.couldBePrivate);
+
+        Iterable<String> unusedFor(String fileName) =>
+            _namesOfKind(result, fileName, UnusedCodeIssueKind.unused);
+
+        test('is disabled by default', () async {
+          final defaultResult = await analyzer.runCliAnalysis(
+            couldBePrivateFolders,
+            rootDirectory,
+            _createConfig(),
+          );
+
+          expect(
+            defaultResult
+                .expand((report) => report.issues)
+                .map((issue) => issue.kind),
+            isNot(contains(UnusedCodeIssueKind.couldBePrivate)),
+          );
+        });
+
+        test('suggests declarations referenced only from their own library',
+            () {
+          expect(
+            suggestionsFor('could_be_private.dart'),
+            unorderedEquals([
+              'localField',
+              'localGetter',
+              'localSetter',
+              'localMethod',
+              'localStatic',
+              'Api.localNamed',
+              'usesThePrivateOne',
+              // A top level declaration follows the same rule as a member.
+              'ApiCaller',
+              'run',
+            ]),
+          );
+        });
+
+        test('does not suggest declarations another library references', () {
+          final names = suggestionsFor('could_be_private.dart');
+
+          expect(names, isNot(contains('foreignField')));
+          expect(names, isNot(contains('foreignGetter')));
+          expect(names, isNot(contains('foreignSetter')));
+          expect(names, isNot(contains('foreignMethod')));
+          expect(names, isNot(contains('foreignStatic')));
+          expect(names, isNot(contains('Api.foreignNamed')));
+          // The class itself is named by the importing library.
+          expect(names, isNot(contains('Api')));
+          // Already private, and the unnamed constructor is never a candidate.
+          expect(names, isNot(contains('_privateMethod')));
+          expect(names, isNot(contains('Api')));
+        });
+
+        test('suggests a top level function used only by its own library', () {
+          expect(
+            suggestionsFor('could_be_private_consumer.dart'),
+            ['useForeignMembers'],
+          );
+        });
+
+        test('never reports a declaration as both unused and privatizable', () {
+          for (final report in result) {
+            final suggested = _namesOfKind(
+              [report],
+              basename(report.path),
+              UnusedCodeIssueKind.couldBePrivate,
+            ).toSet();
+            final unused = _namesOfKind(
+              [report],
+              basename(report.path),
+              UnusedCodeIssueKind.unused,
+            ).toSet();
+
+            expect(suggested.intersection(unused), isEmpty);
+          }
+        });
+
+        test('does not suggest a declaration nothing references at all', () {
+          // Dead code is the other flags' verdict: with only this flag on, an
+          // unreferenced member is silently skipped rather than mislabelled.
+          final names = suggestionsFor('precedence.dart');
+
+          expect(names, isNot(contains('neverUsed')));
+          expect(
+            names,
+            unorderedEquals(['Precedence', 'usedLocally', 'caller']),
+          );
+          expect(unusedFor('precedence.dart'), isEmpty);
+        });
+
+        test('does not suggest a member of a type reported as dead code', () {
+          final report = result.firstWhere(
+            (report) => report.path.endsWith('unused_enclosing_type.dart'),
+          );
+
+          expect(
+            unusedFor('unused_enclosing_type.dart'),
+            contains('NeverReferenced'),
+          );
+
+          // Both classes here declare a `sharedName`, which is what makes the
+          // dead one look used to the loose same library name fallback, so
+          // the suggestions have to be counted rather than looked up by name:
+          // only the one on the referenced class is reported.
+          final suggestedLines = report.issues
+              .where((issue) =>
+                  issue.kind == UnusedCodeIssueKind.couldBePrivate &&
+                  issue.declarationName == 'sharedName')
+              .map((issue) => issue.location.line);
+
+          expect(suggestedLines, [14]);
+        });
+
+        test('reports a dead member as unused rather than as a suggestion',
+            () async {
+          final withPublicMembers = await analyzer.runCliAnalysis(
+            couldBePrivateFolders,
+            rootDirectory,
+            _createConfig(
+              analyzePublicMembers: true,
+              suggestPrivateMembers: true,
+            ),
+          );
+
+          expect(
+            _namesOfKind(
+              withPublicMembers,
+              'precedence.dart',
+              UnusedCodeIssueKind.unused,
+            ),
+            ['neverUsed'],
+          );
+          expect(
+            _namesOfKind(
+              withPublicMembers,
+              'precedence.dart',
+              UnusedCodeIssueKind.couldBePrivate,
+            ),
+            unorderedEquals(['Precedence', 'usedLocally', 'caller']),
+          );
+        });
+
+        test('counts a reference from a part of the same library as local', () {
+          expect(
+            suggestionsFor('parts_owner.dart'),
+            unorderedEquals(['PartOwner', 'usedFromThePart']),
+          );
+        });
+
+        test(
+          'suggests a member a foreign subclass never redeclares',
+          () {
+            final names = suggestionsFor('external_subclass.dart');
+
+            // Inherited untouched by `Derived`: a private name is still
+            // inherited across libraries, so the rename changes nothing there.
+            expect(names, contains('untouchedBySubclass'));
+            // Overridden in `Derived`. The rename compiles and silently stops
+            // dispatching to the override, which is why this is blocked.
+            expect(names, isNot(contains('redeclaredBySubclass')));
+            // Called from the other library.
+            expect(names, isNot(contains('callBoth')));
+            expect(names, isNot(contains('Base')));
+          },
+        );
+
+        test(
+          'does not suggest the interface of a foreign implementer, even for a '
+          'member the implementer inherits from a third class',
+          () {
+            final names = suggestionsFor('external_implementer.dart');
+
+            expect(names, isNot(contains('suppliedByASuperclass')));
+            expect(names, isNot(contains('suppliedByTheImplementer')));
+            expect(names, isNot(contains('useEverything')));
+            // A static is never part of the interface an implementer supplies.
+            expect(names, contains('neverInherited'));
+          },
+        );
+
+        test(
+          'blocks a member redeclared through a supertype edge that is not a '
+          'class declaration',
+          () {
+            final names = suggestionsFor('external_subtype_kinds.dart');
+
+            // A mixin's `on` constraint, a mixin application written as a
+            // class type alias, an enum's `implements` and an extension
+            // type's `implements` each carry the supertype edge on a
+            // declaration kind of its own, and none of them is a class.
+            expect(names, isNot(contains('mixedRedeclared')));
+            expect(names, isNot(contains('aliasRedeclared')));
+            expect(names, isNot(contains('enumRedeclared')));
+            expect(names, isNot(contains('wrappedRedeclared')));
+
+            // The controls: the other library declares no member of these
+            // names, and a private member is inherited across libraries
+            // untouched, so the rename is safe.
+            expect(names, contains('mixedUntouched'));
+            expect(names, contains('aliasUntouched'));
+            expect(names, contains('wrappedUntouched'));
+            // A static is never inherited, so no implementer redeclares one.
+            expect(names, contains('enumNeverInherited'));
+
+            // Every host type is named by the other library.
+            expect(names, isNot(contains('MixinHost')));
+            expect(names, isNot(contains('AliasHost')));
+            expect(names, isNot(contains('EnumInterface')));
+            expect(names, isNot(contains('ExtensionTypeHost')));
+          },
+        );
+
+        test(
+          'KNOWN LIMITATION, not desired behavior: suggests a member that a '
+          'foreign mock supplies through noSuchMethod (see '
+          'known_limitation_mock_implementer.dart)',
+          () {
+            final names =
+                suggestionsFor('known_limitation_mock_implementer.dart');
+
+            // What we want here is the opposite of what is asserted. The
+            // rename compiles, and the hand written mock in the other library
+            // then silently stops matching the call, since a mock of that
+            // shape dispatches on the member name at run time. The guard has
+            // nothing to match it against: neither the mock nor the abstract
+            // implementer declares the member anywhere in its hierarchy.
+            // Asserted so that a change to the guard fails here and gets a
+            // decision, rather than passing unnoticed. Documented in the
+            // README as a limitation of the check.
+            expect(names, contains('stubbedByName'));
+
+            // The control, and the half that does work: a generated style
+            // mock declares a concrete override, which the guard sees.
+            expect(names, isNot(contains('declaredByTheMock')));
+          },
+        );
+
+        test('is unaffected by a subtype in the same library', () {
+          expect(
+            suggestionsFor('same_library_subtype.dart'),
+            unorderedEquals([
+              'LocalBase',
+              'LocalDerived',
+              'overriddenLocally',
+              'callIt',
+            ]),
+          );
+        });
+
+        test('does not suggest members that are reached without a reference',
+            () {
+          final names = suggestionsFor('annotated_members.dart');
+
+          expect(names, isNot(contains('protectedMember')));
+          expect(names, isNot(contains('testOnlyMember')));
+          expect(names, isNot(contains('overridableMember')));
+          expect(names, isNot(contains('mustBeOverriddenMember')));
+          expect(names, isNot(contains('nativeEntryPoint')));
+          expect(names, isNot(contains('toJson')));
+          expect(names, isNot(contains('toString')));
+          // The same annotations on a top level declaration.
+          expect(names, isNot(contains('testOnlyTopLevel')));
+          expect(names, isNot(contains('nativeTopLevel')));
+
+          expect(names, contains('plainMember'));
+        });
+
+        test('does not suggest a member whose name is called dynamically', () {
+          final names = suggestionsFor('dynamic_name_collision.dart');
+
+          expect(names, isNot(contains('shared')));
+          expect(names, contains('notShared'));
+          expect(names, contains('callBoth'));
+        });
+
+        test('never suggests an operator or an enum constant', () {
+          final names = suggestionsFor('enums_and_operators.dart');
+
+          // `operator +` has no private spelling at all.
+          expect(names, isNot(contains('+')));
+          // Renaming a constant changes `name` and `toString`.
+          expect(names, isNot(contains('spring')));
+          expect(names, isNot(contains('summer')));
+
+          expect(names, contains('combine'));
+        });
+
+        test('never suggests an implicitly invoked `call` method', () {
+          // Four members here are named `call`, so the suggestions are
+          // compared by line: a name comparison cannot tell the exempted one
+          // from its controls.
+          final lines = _linesOfKind(
+            result,
+            'callable_members.dart',
+            UnusedCodeIssueKind.couldBePrivate,
+          );
+
+          // `obj(...)` binds only a member literally named `call`, so the
+          // rename never compiles.
+          expect(lines, isNot(contains(13)));
+
+          // Only a method makes an object callable. A field, a getter and a
+          // static named `call` are reached by an ordinary reference and are
+          // renameable, so the exemption must not swallow them.
+          expect(lines, containsAll([21, 27, 33]));
+
+          // The control: the enclosing type is otherwise ordinary.
+          expect(
+            suggestionsFor('callable_members.dart'),
+            contains('viaImplicitInvocation'),
+          );
+        });
+
+        test('does not suggest a field bound by a named formal', () {
+          final names = suggestionsFor('named_initializing_formals.dart');
+
+          expect(names, isNot(contains('viaNamedFormal')));
+          expect(names, contains('viaPositionalFormal'));
+        });
+
+        test('counts a foreign super constructor call as a reference', () {
+          final names = suggestionsFor('super_constructor.dart');
+
+          expect(names, isNot(contains('SuperBase.namedForSuper')));
+          expect(names, contains('SuperBase.onlyLocal'));
+        });
+
+        test('counts a foreign write to a field as a reference', () {
+          final names = suggestionsFor('field_write_only.dart');
+
+          expect(names, isNot(contains('writtenElsewhere')));
+          expect(names, contains('readLocally'));
+        });
+
+        test('suggests extension members', () {
+          expect(
+            suggestionsFor('extension_members.dart'),
+            unorderedEquals(['LocalExtension', 'doubled', 'useTheExtension']),
+          );
+        });
+
+        test('counts a prefixed type reference from another library', () {
+          final names = suggestionsFor('prefixed_usage.dart');
+
+          expect(names, isNot(contains('PrefixedType')));
+          // Only the class is named over there, so its members are untouched.
+          expect(names, contains('member'));
+          expect(names, contains('makeLocally'));
+        });
+
+        test('answers to the unused-code ignore comment', () {
+          final names = suggestionsFor('suppressed.dart');
+
+          expect(names, isNot(contains('suppressedMember')));
+          expect(names, contains('reportedMember'));
+
+          // A file level ignore covers everything in the file, members and
+          // top level declarations alike.
+          expect(suggestionsFor('suppressed_file.dart'), isEmpty);
+        });
+
+        test('does not suggest a member of an already private type', () {
+          final names = suggestionsFor('private_enclosing_types.dart');
+
+          expect(
+            names,
+            unorderedEquals([
+              // An unnamed extension reads as private through
+              // `Element.isPrivate`, but its members apply in every importing
+              // library, so it stays a candidate.
+              'unnamedExtensionMember',
+              'PublicHost',
+              'publicHostMember',
+              'PublicMixesInPrivate',
+            ]),
+          );
+
+          // Pointless: the enclosing type cannot be named from outside.
+          expect(names, isNot(contains('hostMember')));
+          expect(names, isNot(contains('enumMember')));
+          expect(names, isNot(contains('extensionMember')));
+          expect(names, isNot(contains('typeMember')));
+          // Not merely pointless: `PublicMixesInPrivate` republishes this one.
+          expect(names, isNot(contains('mixinMember')));
+        });
+
+        test('suggests nothing in a file that is exported', () {
+          // The barrel puts `Exported` on the package's import surface, and a
+          // consumer that names it reaches the public members of its type
+          // just as directly, so no suggestion here survives.
+          expect(suggestionsFor('export_surface_src.dart'), isEmpty);
+
+          // The unused verdict is a fact about the analyzed code and is not
+          // cut with them: everything here is referenced, so it reports
+          // nothing either way, but the candidates stay in the set.
+          expect(unusedFor('export_surface_src.dart'), isEmpty);
+        });
+      });
+
+      group('suggest-private-members on a package import surface', () {
+        const fixtureRoot =
+            'test/resources/unused_code_public_library_analyzer';
+        final publicLibraryFolders = [
+          normalize(File(fixtureRoot).absolute.path),
+        ];
+
+        setUpAll(() {
+          // The fixture is only on an import surface if it resolves as a
+          // package, which is what gives its libraries `package:` URIs. Its
+          // package config is generated rather than committed: `.dart_tool`
+          // is git ignored, and this keeps the test exercising the same code
+          // path a real, resolved project does.
+          File('$fixtureRoot/.dart_tool/package_config.json')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "unused_code_public_library_fixture",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    }
+  ]
+}
+''');
+        });
+
+        Future<Iterable<String>> suggestionsFor(
+          String fileName, {
+          bool isMonorepo = false,
+        }) async =>
+            _namesOfKind(
+              await analyzer.runCliAnalysis(
+                publicLibraryFolders,
+                rootDirectory,
+                _createConfig(
+                  suggestPrivateMembers: true,
+                  isMonorepo: isMonorepo,
+                ),
+              ),
+              fileName,
+              UnusedCodeIssueKind.couldBePrivate,
+            );
+
+        test(
+          'suggests nothing in a library any consumer can import',
+          () async {
+            // `lib/public_api.dart` is importable as
+            // `package:.../public_api.dart` with nothing exporting it, so the
+            // barrel exemption never sees it. The type and the public members
+            // of the type go together: a consumer that can import the library
+            // can name `SurfaceType` and call `usedOnlyHere` on it.
+            expect(await suggestionsFor('public_api.dart'), isEmpty);
+          },
+        );
+
+        test('suggests everything under lib/src', () async {
+          expect(
+            await suggestionsFor('internal.dart'),
+            unorderedEquals([
+              'InternalType',
+              'internalMember',
+              'internalCaller',
+            ]),
+          );
+        });
+
+        test('--monorepo lifts the exemption', () async {
+          // The flag says there are no unseen consumers to protect, exactly as
+          // it does for the barrel exemption, so the whole library comes back.
+          expect(
+            await suggestionsFor('public_api.dart', isMonorepo: true),
+            unorderedEquals(['SurfaceType', 'usedOnlyHere', 'caller']),
+          );
+        });
+      });
+
       group('dynamic operator usages', () {
         final dynamicOperatorsFolders = [
           normalize(
@@ -836,16 +1380,43 @@ void main() {
   );
 }
 
+Iterable<String> _namesOfKind(
+  Iterable<UnusedCodeFileReport> result,
+  String fileName,
+  UnusedCodeIssueKind kind,
+) =>
+    result
+        // Compared as a whole file name: several fixtures here share a
+        // suffix, so `endsWith` would silently merge their reports.
+        .where((report) => basename(report.path) == fileName)
+        .expand((report) => report.issues)
+        .where((issue) => issue.kind == kind)
+        .map((issue) => issue.declarationName);
+
+Iterable<int> _linesOfKind(
+  Iterable<UnusedCodeFileReport> result,
+  String fileName,
+  UnusedCodeIssueKind kind,
+) =>
+    result
+        .where((report) => basename(report.path) == fileName)
+        .expand((report) => report.issues)
+        .where((issue) => issue.kind == kind)
+        .map((issue) => issue.location.line);
+
 UnusedCodeConfig _createConfig({
   Iterable<String> analyzerExcludePatterns = const [],
   bool analyzePrivateMembers = false,
   bool analyzePublicMembers = false,
+  bool suggestPrivateMembers = false,
+  bool isMonorepo = false,
 }) =>
     UnusedCodeConfig(
       excludePatterns: const [],
       analyzerExcludePatterns: analyzerExcludePatterns,
-      isMonorepo: false,
+      isMonorepo: isMonorepo,
       shouldPrintConfig: false,
       analyzePrivateMembers: analyzePrivateMembers,
       analyzePublicMembers: analyzePublicMembers,
+      suggestPrivateMembers: suggestPrivateMembers,
     );

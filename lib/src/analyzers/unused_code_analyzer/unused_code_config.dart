@@ -24,6 +24,15 @@ class UnusedCodeConfig {
   /// one off.
   final bool? analyzePublicMembers;
 
+  /// Whether public declarations that are only ever referenced from within
+  /// their own declaring library should be reported as candidates for being
+  /// made private.
+  ///
+  /// Independent from the two flags above: this reports declarations that
+  /// *are* used, so it says nothing about dead code and can be enabled on its
+  /// own.
+  final bool? suggestPrivateMembers;
+
   const UnusedCodeConfig({
     required this.excludePatterns,
     required this.analyzerExcludePatterns,
@@ -31,6 +40,7 @@ class UnusedCodeConfig {
     required this.shouldPrintConfig,
     required this.analyzePrivateMembers,
     required this.analyzePublicMembers,
+    required this.suggestPrivateMembers,
   });
 
   /// Creates the config from analysis [options].
@@ -49,6 +59,10 @@ class UnusedCodeConfig {
           ['unused-code', 'analyze-public-members'],
           packageRelated: true,
         ),
+        suggestPrivateMembers: options.readBoolOrNull(
+          ['unused-code', 'suggest-private-members'],
+          packageRelated: true,
+        ),
       );
 
   /// Creates the config from cli args. Pass `null` for an unparsed flag.
@@ -58,6 +72,7 @@ class UnusedCodeConfig {
     required bool? shouldPrintConfig,
     required bool? analyzePrivateMembers,
     required bool? analyzePublicMembers,
+    required bool? suggestPrivateMembers,
   }) =>
       UnusedCodeConfig(
         shouldPrintConfig: shouldPrintConfig,
@@ -66,6 +81,7 @@ class UnusedCodeConfig {
         isMonorepo: isMonorepo,
         analyzePrivateMembers: analyzePrivateMembers,
         analyzePublicMembers: analyzePublicMembers,
+        suggestPrivateMembers: suggestPrivateMembers,
       );
 
   /// Merges two configs into a single one.
@@ -84,5 +100,7 @@ class UnusedCodeConfig {
             overrides.analyzePrivateMembers ?? analyzePrivateMembers,
         analyzePublicMembers:
             overrides.analyzePublicMembers ?? analyzePublicMembers,
+        suggestPrivateMembers:
+            overrides.suggestPrivateMembers ?? suggestPrivateMembers,
       );
 }
