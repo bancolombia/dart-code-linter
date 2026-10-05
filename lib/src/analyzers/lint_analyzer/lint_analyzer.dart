@@ -525,8 +525,7 @@ class LintAnalyzer {
 
     for (final function in visitor.functions) {
       final metrics = <MetricValue>[];
-      final declarationLine =
-          _declarationLine(function.declaration, ignores);
+      final declarationLine = _declarationLine(function.declaration, ignores);
 
       for (final metric in config.methodsMetrics) {
         if (metric.supports(

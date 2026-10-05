@@ -64,8 +64,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
     if (_matchesContextType(node, typeElement)) {
       _candidates.add((
         node: node,
-        replacement:
-            '.${name?.name ?? 'new'}${node.argumentList.toSource()}',
+        replacement: '.${name?.name ?? 'new'}${node.argumentList.toSource()}',
       ));
     }
   }
