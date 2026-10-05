@@ -65,6 +65,7 @@ void main() {
         final metrics = {for (final m in report.metrics) m.metricsId: m.level};
 
         expect(metrics, {
+          'cognitive-complexity': MetricValueLevel.none,
           'cyclomatic-complexity': MetricValueLevel.none,
           'halstead-volume': MetricValueLevel.none,
           'lines-of-code': MetricValueLevel.none,
@@ -92,6 +93,7 @@ void main() {
         final metrics = {for (final m in report.metrics) m.metricsId: m.level};
 
         expect(metrics, {
+          'cognitive-complexity': MetricValueLevel.none,
           'cyclomatic-complexity': MetricValueLevel.none,
           'halstead-volume': MetricValueLevel.none,
           'lines-of-code': MetricValueLevel.warning,
