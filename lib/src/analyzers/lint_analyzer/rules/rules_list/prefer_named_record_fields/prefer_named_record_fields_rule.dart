@@ -90,9 +90,8 @@ class PreferNamedRecordFieldsRule extends DartRule {
   List<Replacement> _createReplacementForRecordLiteral(
     RecordLiteral recordLiteral,
   ) {
-    final positionalFields = recordLiteral.fields
-        .where((field) => !isNamedArgument(field))
-        .toList();
+    final positionalFields =
+        recordLiteral.fields.where((field) => !isNamedArgument(field)).toList();
 
     if (positionalFields.isEmpty) {
       return const [

@@ -351,7 +351,8 @@ class _MemberVisitor extends RecursiveAstVisitor<void> {
     // exists to prevent instantiation or extension, which counts as usage.
     // This hides no dead code: an entirely unused class is still reported by
     // the top-level check in [PublicCodeVisitor], independent of this visitor.
-    if (element.isPrivate && element.enclosingElement.constructors.length <= 1) {
+    if (element.isPrivate &&
+        element.enclosingElement.constructors.length <= 1) {
       return;
     }
 

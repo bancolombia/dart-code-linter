@@ -222,8 +222,7 @@ class UnnecessaryNullableAnalyzer {
         parameters.where((parameter) => !parameter.isNamed).toList();
 
     for (final usage in usages) {
-      final namedArguments =
-          usage.arguments.where(isNamedArgument).toList();
+      final namedArguments = usage.arguments.where(isNamedArgument).toList();
       final notNamedArguments =
           usage.arguments.whereNot(isNamedArgument).toList();
 

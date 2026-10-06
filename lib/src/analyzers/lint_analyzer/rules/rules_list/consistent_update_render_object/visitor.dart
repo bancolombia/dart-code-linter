@@ -53,8 +53,7 @@ class _Visitor extends GeneralizingAstVisitor<void> {
     }
   }
 
-  int _getCountableArgumentsLength(List<AstNode> arguments) =>
-      arguments.where(
+  int _getCountableArgumentsLength(List<AstNode> arguments) => arguments.where(
         (argument) {
           final expression = unwrapArgumentExpression(argument);
           if (expression == null) {
