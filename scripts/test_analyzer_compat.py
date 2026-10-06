@@ -55,7 +55,7 @@ _DART_STYLE_BY_ANALYZER = {
     "13.0.0": "3.1.9",  # ^13.0.0
     "13.3.0": "3.1.9",
     "14.0.0": "3.1.11",  # >=13.1.0 <15.0.0
-    "14.1.0": "3.1.12",
+    "14.4.0": "3.1.13",
 }
 
 VERSION_PAIRS = [
@@ -122,14 +122,19 @@ VERSION_PAIRS = [
         },
     ),
     (
-        # Upper boundary of the current <15.0.0 ceiling: latest 14.x patch,
-        # which is what `dart pub upgrade` actually resolves to today.
-        "14.1.0",
-        "0.14.14",
+        # Top of the `<15.0.0` ceiling, which is the analyzer a consumer's own
+        # `dart pub get` resolves. Move this row forward whenever a newer
+        # analyzer is published, or it stops being the boundary it claims to
+        # be: it sat at 14.1.0 while 14.2.0, 14.3.0 and 14.4.0 shipped, and
+        # 14.4.0 changed `ConstructorElement.displayName` for the unnamed
+        # constructor. That reached trunk with this matrix entirely green and
+        # broke CI, which resolves the real ceiling, instead.
+        "14.4.0",
+        "0.14.17",
         {
             **TEST_STACK,
-            "analysis_server_plugin": "0.3.20",
-            "dart_style": _DART_STYLE_BY_ANALYZER["14.1.0"],
+            "analysis_server_plugin": "0.3.23",
+            "dart_style": _DART_STYLE_BY_ANALYZER["14.4.0"],
         },
     ),
 ]
