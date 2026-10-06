@@ -41,50 +41,48 @@ class NoBlankLineBeforeSingleReturnRule extends DartRule {
         .where((statement) => statement.parent is Block)
         // Ensure the return statement is the only statement in the block
         .where((statement) {
-          final parentBlock = statement.parent as Block;
+      final parentBlock = statement.parent as Block;
 
-          return parentBlock.statements.length == 1;
-        })
+      return parentBlock.statements.length == 1;
+    })
         // Ensure there is no blank line before the return statement, ignoring comments
         .where((statement) {
-          final lineInfo = source.lineInfo;
+      final lineInfo = source.lineInfo;
 
-          // Get the last non-comment token before the return statement
-          final previousTokenLine = lineInfo
-              .getLocation(statement.returnKeyword.previous!.end)
-              .lineNumber;
+      // Get the last non-comment token before the return statement
+      final previousTokenLine = lineInfo
+          .getLocation(statement.returnKeyword.previous!.end)
+          .lineNumber;
 
-          final tokenLine = lineInfo
-              .getLocation(
-                _optimalToken(statement.returnKeyword, lineInfo).offset,
-              )
-              .lineNumber;
+      final tokenLine = lineInfo
+          .getLocation(
+            _optimalToken(statement.returnKeyword, lineInfo).offset,
+          )
+          .lineNumber;
 
-          return tokenLine != previousTokenLine + 1;
-        })
-        .map((statement) {
-          final content = source.content;
-          final startOffset =
-              content.indexOf('\n', statement.returnKeyword.previous!.end) + 1;
-          final endOffset = statement.end;
+      return tokenLine != previousTokenLine + 1;
+    }).map((statement) {
+      final content = source.content;
+      final startOffset =
+          content.indexOf('\n', statement.returnKeyword.previous!.end) + 1;
+      final endOffset = statement.end;
 
-          return createIssue(
-            rule: this,
-            location: _locationFromOffsets(
-              source: source,
-              startOffset: startOffset,
-              endOffset: endOffset,
-            ),
-            message: warning,
-            replacements: [
-              Replacement(
-                comment: _fixComment,
-                replacement: _buildReplacement(statement, startOffset, content),
-              ),
-            ],
-          );
-        })
-        .toList(growable: false);
+      return createIssue(
+        rule: this,
+        location: _locationFromOffsets(
+          source: source,
+          startOffset: startOffset,
+          endOffset: endOffset,
+        ),
+        message: warning,
+        replacements: [
+          Replacement(
+            comment: _fixComment,
+            replacement: _buildReplacement(statement, startOffset, content),
+          ),
+        ],
+      );
+    }).toList(growable: false);
   }
 }
 
