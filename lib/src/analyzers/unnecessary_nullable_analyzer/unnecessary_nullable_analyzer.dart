@@ -311,9 +311,7 @@ class UnnecessaryNullableAnalyzer {
     final sourceUrl = libraryFragment?.source.uri;
 
     return UnnecessaryNullableIssue(
-      declarationName: element is ConstructorElement && element.name == 'new'
-          ? element.enclosingElement?.displayName ?? element.displayName
-          : element.displayName,
+      declarationName: _declarationNameOf(element),
       declarationType: element.kind.displayName,
       parameters: parameters.map((parameter) => parameter.toString()),
       location: SourceLocation(
@@ -324,6 +322,20 @@ class UnnecessaryNullableAnalyzer {
       ),
     );
   }
+
+  /// The name to report for [element], writing the unnamed constructor as its
+  /// enclosing type rather than as `Type.new`.
+  ///
+  /// Analyzer 14.4.0 dropped the special case in
+  /// `ConstructorElement.displayName` that returned the bare type name for the
+  /// unnamed constructor, so without this the reported name would depend on
+  /// which analyzer the consumer resolved. `name` is `new` for the unnamed
+  /// constructor and `enclosingElement` is non-nullable on every analyzer this
+  /// package supports, 8.2.0 through 14.4.0.
+  String _declarationNameOf(Element element) =>
+      element is ConstructorElement && element.name == 'new'
+          ? element.enclosingElement.displayName
+          : element.displayName;
 
   bool _shouldIgnoreWidgetKey(FormalParameter parameter) {
     final closestDeclaration = parameter.parent?.parent;
