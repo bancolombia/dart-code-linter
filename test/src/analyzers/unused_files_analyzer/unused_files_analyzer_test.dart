@@ -6,6 +6,8 @@ import 'package:dart_code_linter/src/analyzers/unused_files_analyzer/unused_file
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
+import '../generated_usages_project.dart';
+
 void main() {
   group(
     'UnusedFilesAnalyzer',
@@ -43,13 +45,33 @@ void main() {
     },
     testOn: 'posix',
   );
+
+  test(
+    'should count files matched by --exclude as importers, but not report them',
+    () async {
+      final root = createGeneratedUsagesProject();
+
+      final result = await const UnusedFilesAnalyzer().runCliAnalysis(
+        ['lib'],
+        root,
+        _createConfig(excludePatterns: defaultExcludes),
+      );
+
+      expect(
+        result.map((report) => report.relativePath),
+        unorderedEquals(['lib/unused.dart']),
+      );
+    },
+    testOn: 'posix',
+  );
 }
 
 UnusedFilesConfig _createConfig({
+  Iterable<String> excludePatterns = const [],
   Iterable<String> analyzerExcludePatterns = const [],
 }) =>
     UnusedFilesConfig(
-      excludePatterns: const [],
+      excludePatterns: excludePatterns,
       analyzerExcludePatterns: analyzerExcludePatterns,
       isMonorepo: false,
       shouldPrintConfig: false,

@@ -13,6 +13,7 @@ import '../../config_builder/models/analysis_options.dart';
 import '../../logger/logger.dart';
 import '../../reporters/models/reporter.dart';
 import '../../utils/analyzer_utils.dart';
+import '../../utils/exclude_utils.dart';
 import '../../utils/path_utils.dart';
 import '../../utils/suppression.dart';
 import 'element_utils.dart';
@@ -73,12 +74,10 @@ class UnusedCodeAnalyzer {
         _logger?.printConfig(unusedCodeAnalysisConfig.toJson());
       }
 
-      final filePaths = getFilePaths(
-        folders,
-        context,
-        rootFolder,
-        unusedCodeAnalysisConfig.globalExcludes,
-      );
+      // Files matched by the excludes are not reported, but they are still
+      // analyzed for usages: generated code is often the only user of the
+      // code it was generated for.
+      final filePaths = getFilePaths(folders, context, rootFolder, const []);
 
       final analyzedFiles =
           filePaths.intersection(context.contextRoot.analyzedFiles().toSet());
@@ -103,8 +102,9 @@ class UnusedCodeAnalyzer {
           codeUsages.merge(codeUsage);
         }
 
-        if (!unusedCodeAnalysisConfig.analyzerExcludedPatterns
-            .any((pattern) => pattern.matches(filePath))) {
+        if (!isExcluded(filePath, unusedCodeAnalysisConfig.globalExcludes) &&
+            !unusedCodeAnalysisConfig.analyzerExcludedPatterns
+                .any((pattern) => pattern.matches(filePath))) {
           publicCode[filePath] = _analyzeFilePublicCode(
             unit,
             unusedCodeAnalysisConfig,

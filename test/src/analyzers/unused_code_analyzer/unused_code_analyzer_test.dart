@@ -9,6 +9,8 @@ import 'package:dart_code_linter/src/analyzers/unused_code_analyzer/unused_code_
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
+import '../generated_usages_project.dart';
+
 void main() {
   group(
     'UnusedCodeAnalyzer',
@@ -1378,6 +1380,30 @@ void main() {
     },
     testOn: 'posix',
   );
+
+  test(
+    'should count usages in files matched by --exclude, but not report them',
+    () async {
+      final root = createGeneratedUsagesProject();
+
+      final result = await const UnusedCodeAnalyzer().runCliAnalysis(
+        ['lib'],
+        root,
+        _createConfig(
+          excludePatterns: defaultExcludes,
+          analyzePrivateMembers: true,
+        ),
+      );
+
+      expect(
+        result
+            .expand((report) => report.issues)
+            .map((issue) => issue.declarationName),
+        unorderedEquals(['unusedFunction', 'orphan']),
+      );
+    },
+    testOn: 'posix',
+  );
 }
 
 Iterable<String> _namesOfKind(
@@ -1405,6 +1431,7 @@ Iterable<int> _linesOfKind(
         .map((issue) => issue.location.line);
 
 UnusedCodeConfig _createConfig({
+  Iterable<String> excludePatterns = const [],
   Iterable<String> analyzerExcludePatterns = const [],
   bool analyzePrivateMembers = false,
   bool analyzePublicMembers = false,
@@ -1412,7 +1439,7 @@ UnusedCodeConfig _createConfig({
   bool isMonorepo = false,
 }) =>
     UnusedCodeConfig(
-      excludePatterns: const [],
+      excludePatterns: excludePatterns,
       analyzerExcludePatterns: analyzerExcludePatterns,
       isMonorepo: isMonorepo,
       shouldPrintConfig: false,
