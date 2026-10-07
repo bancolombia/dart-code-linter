@@ -28,7 +28,7 @@ void main() {
 
       RuleTestHelper.verifyIssues(
         issues: issues,
-        startLines: [20, 151, 156, 240],
+        startLines: [20, 151, 156, 240, 329],
       );
     });
   });

@@ -47,6 +47,82 @@ void main() {
       });
     });
 
+    test('report with both kinds of issue', () async {
+      final testReport = [
+        UnusedCodeFileReport(
+          path: fullPath,
+          relativePath: 'example.dart',
+          issues: [
+            UnusedCodeIssue(
+              declarationName: 'SomeClass',
+              declarationType: 'class',
+              location: SourceLocation(10, line: 5, column: 3),
+            ),
+            UnusedCodeIssue(
+              declarationName: 'someMethod',
+              declarationType: 'method',
+              kind: UnusedCodeIssueKind.couldBePrivate,
+              location: SourceLocation(20, line: 7, column: 3),
+            ),
+          ],
+        ),
+      ];
+
+      await reporter.report(testReport);
+
+      final captured =
+          verify(() => output.writeln(captureAny())).captured.cast<String>();
+
+      expect(
+        captured,
+        equals([
+          'example.dart:',
+          '    \x1B[38;5;180m⚠\x1B[0m unused class SomeClass',
+          '      at $fullPath:5:3',
+          '    \x1B[38;5;180m⚠\x1B[0m method someMethod could be private',
+          '      at $fullPath:7:3',
+          '',
+          '\x1B[38;5;167m✖\x1B[0m total unused code (classes, functions, variables, extensions, enums, mixins and type aliases) - \x1B[38;5;167m1\x1B[0m',
+          '\x1B[38;5;167m✖\x1B[0m total declarations that could be private - \x1B[38;5;167m1\x1B[0m',
+        ]),
+      );
+    });
+
+    // Suggestions alone must not print a zero next to a heading about dead
+    // code that was never even looked for.
+    test('report with suggestions only', () async {
+      final testReport = [
+        UnusedCodeFileReport(
+          path: fullPath,
+          relativePath: 'example.dart',
+          issues: [
+            UnusedCodeIssue(
+              declarationName: 'someMethod',
+              declarationType: 'method',
+              kind: UnusedCodeIssueKind.couldBePrivate,
+              location: SourceLocation(20, line: 7, column: 3),
+            ),
+          ],
+        ),
+      ];
+
+      await reporter.report(testReport);
+
+      final captured =
+          verify(() => output.writeln(captureAny())).captured.cast<String>();
+
+      expect(
+        captured,
+        equals([
+          'example.dart:',
+          '    \x1B[38;5;180m⚠\x1B[0m method someMethod could be private',
+          '      at $fullPath:7:3',
+          '',
+          '\x1B[38;5;167m✖\x1B[0m total declarations that could be private - \x1B[38;5;167m1\x1B[0m',
+        ]),
+      );
+    });
+
     test('complex report', () async {
       final testReport = [
         UnusedCodeFileReport(

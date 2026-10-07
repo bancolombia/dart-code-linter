@@ -11,7 +11,12 @@ import '../../unused_code_report_params.dart';
 /// Use it to create reports in JSON format.
 class UnusedCodeJsonReporter
     extends JsonReporter<UnusedCodeFileReport, UnusedCodeReportParams> {
-  const UnusedCodeJsonReporter(IOSink output) : super(output, 2);
+  // Bumped from 2 for the `issueKind` key. The addition is compatible on its
+  // own, but the meaning of a report is not: with `suggest-private-members`
+  // on it carries entries that are not unused code at all, and a consumer
+  // pinned to 2 would count every one of them as a dead declaration. The
+  // version is what lets it tell the two shapes apart.
+  const UnusedCodeJsonReporter(IOSink output) : super(output, 3);
 
   @override
   Future<void> report(
@@ -40,6 +45,7 @@ class UnusedCodeJsonReporter
       };
 
   Map<String, Object> _issueToJson(UnusedCodeIssue issue) => {
+        'issueKind': issue.kind.id,
         'declarationType': issue.declarationType,
         'declarationName': issue.declarationName,
         'column': issue.location.column,

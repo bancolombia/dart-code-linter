@@ -9,6 +9,7 @@ import '../../config_builder/models/analysis_options.dart';
 import '../../logger/logger.dart';
 import '../../reporters/models/reporter.dart';
 import '../../utils/analyzer_utils.dart';
+import '../../utils/exclude_utils.dart';
 import '../../utils/suppression.dart';
 import 'models/unused_files_file_report.dart';
 import 'reporters/reporter_factory.dart';
@@ -59,14 +60,14 @@ class UnusedFilesAnalyzer {
         _logger?.printConfig(unusedFilesAnalysisConfig.toJson());
       }
 
-      final filePaths = getFilePaths(
-        folders,
-        context,
-        rootFolder,
-        unusedFilesAnalysisConfig.globalExcludes,
-      );
+      // Files matched by the excludes are not reported, but they are still
+      // analyzed for imports: generated code is often the only importer of
+      // a hand written file.
+      final filePaths = getFilePaths(folders, context, rootFolder, const []);
 
-      unusedFiles.addAll(filePaths);
+      unusedFiles.addAll(filePaths.where(
+        (path) => !isExcluded(path, unusedFilesAnalysisConfig.globalExcludes),
+      ));
 
       final analyzedFiles =
           filePaths.intersection(context.contextRoot.analyzedFiles().toSet());

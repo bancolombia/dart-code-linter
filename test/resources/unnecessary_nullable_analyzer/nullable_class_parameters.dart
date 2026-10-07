@@ -23,3 +23,10 @@ class NamedNonNullable {
 
   const NamedNonNullable({this.value});
 }
+
+// LINT
+class NamedConstructorNonNullable {
+  final String? value;
+
+  const NamedConstructorNonNullable.withValue(this.value);
+}

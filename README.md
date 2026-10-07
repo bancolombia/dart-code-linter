@@ -89,21 +89,37 @@ DCL can be used as a plugin for the Dart `analyzer` [package](https://pub.dev/pa
 
 Depending on your Dart SDK version, you can configure the plugin in two ways:
 
-#### 1. Analysis Server Plugin (Recommended for Dart >= 3.9)
+#### 1. Analysis Server Plugin (Recommended for Dart >= 3.10)
 
-DCL supports the new Dart Analysis Server plugin protocol (`analysis_server_plugin`). To use it, add the plugin configuration under the top-level `plugins` key in your `analysis_options.yaml`:
+Dart 3.9 is not supported by this release's plugin integrations. Use Dart >= 3.10 for the Analysis Server Plugin and Dart < 3.9 for the Legacy Analyzer Plugin.
+DCL supports the new Dart Analysis Server plugin protocol (`analysis_server_plugin`). To use it, add plugin configuration under the top-level `plugins` key in `analysis_options.yaml`:
 
 ```yaml title="analysis_options.yaml"
 plugins:
   dart_code_linter:
     diagnostics:
       avoid-dynamic: true
-      prefer-trailing-comma: true
-      # ... add other rule IDs to enable them
+      no-magic-number: warning
+
+dart_code_linter:
+  rules:
+    - avoid-dynamic
+    - no-magic-number:
+        severity: warning
+        allowed: [42]
 ```
 
-> [!NOTE]
-> Rules that require mandatory user-supplied configuration (such as `avoid-banned-imports` or `ban-name`) are not currently supported via the `analysis_server_plugin` protocol and should be configured using the legacy mechanism instead.
+Top-level `plugins.dart_code_linter.diagnostics` controls IDE enablement and severity. The top-level `dart_code_linter.rules` section supplies full DCL rule configuration, including arbitrary parameters used by both IDE integration and CLI.
+
+Dart 3.13 accepts only scalar diagnostic values in `plugins.dart_code_linter.diagnostics`:
+
+- `true`: enable the rule with its analyzer default severity.
+- `false`: disable the rule in the IDE.
+- `info`, `warning`, or `error`: enable the rule with that IDE severity.
+
+Do not put a map below `plugins.dart_code_linter.diagnostics.<rule>` on Flutter 3.47 / Dart 3.13. The analyzer rejects that shape with `invalid_section_format` before the plugin runs. Put rule maps under `dart_code_linter.rules` instead.
+
+Rules with mandatory configuration, such as `avoid-banned-imports` and `ban-name`, work with the modern plugin when their configuration lives under `dart_code_linter.rules`.
 
 #### 2. Legacy Analyzer Plugin (Dart < 3.9)
 
@@ -130,6 +146,12 @@ As DCL depends on the Dart `analyzer` package. The following table shows the com
 
 | DCL Version       | Analyzer Version   | Dart SDK          |
 |-------------------|--------------------|-------------------|
+| 4.4.2             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
+| 4.4.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
+| 4.4.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
+| 4.3.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
+| 4.2.2             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
+| 4.2.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.2.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.1.9             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.1.8             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
@@ -176,7 +198,7 @@ You can define one analysis_options.yaml at the root file.
 Reports code metrics, rules and anti-patterns violations. To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics analyze lib
+dart run dart_code_linter:metrics analyze lib
 ```
 
 It will produce a result in one of the format:
@@ -194,7 +216,7 @@ It will produce a result in one of the format:
 Checks unnecessary nullable parameters in functions, methods, constructors. To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics check-unnecessary-nullable lib
+dart run dart_code_linter:metrics check-unnecessary-nullable lib
 ```
 
 It will produce a result in one of the format:
@@ -209,7 +231,7 @@ It will produce a result in one of the format:
 Checks unused `*.dart` files. To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics check-unused-files lib
+dart run dart_code_linter:metrics check-unused-files lib
 ```
 
 It will produce a result in one of the format:
@@ -240,7 +262,7 @@ class ClassWithLocalization {
 To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics check-unused-l10n lib
+dart run dart_code_linter:metrics check-unused-l10n lib
 ```
 
 It will produce a result in one of the format:
@@ -254,13 +276,171 @@ It will produce a result in one of the format:
 Checks unused code in `*.dart` files. To execute the command, run
 
 ```sh
-$ dart run dart_code_linter:metrics check-unused-code lib
+dart run dart_code_linter:metrics check-unused-code lib
 ```
 
 It will produce a result in one of the format:
 
 - Console
 - JSON
+
+By default only top level declarations (classes, functions, variables, and so
+on) are checked. Unused private members of type declarations (methods, fields,
+getters, setters and named constructors) are reported too when the check is
+opted in:
+
+```sh
+dart run dart_code_linter:metrics check-unused-code lib --analyze-private-members
+```
+
+The same can be enabled through `analysis_options.yaml`, so it applies to every
+run:
+
+```yaml
+dart_code_linter:
+  unused-code:
+    analyze-private-members: true
+```
+
+The CLI flag wins over the `analysis_options.yaml` value when both are set. Two
+limitations are worth knowing about:
+
+- A private field that is only ever assigned, never read, is reported as unused,
+  the same way an unused top level variable is.
+- Usages that live only in files the `analyzer: exclude:` list of
+  `analysis_options.yaml` excludes from analysis are invisible, so members used
+  exclusively from there are reported. Files matched by `--exclude` (by default
+  the generated `*.g.dart` and `*.freezed.dart` files) are different: they are
+  not reported, but their usages still count.
+
+Public members are covered by a separate opt in, because they need more
+guesswork than private ones and are therefore less reliable:
+
+```sh
+dart run dart_code_linter:metrics check-unused-code lib --analyze-public-members
+```
+
+```yaml
+dart_code_linter:
+  unused-code:
+    analyze-public-members: true
+```
+
+The two options are independent, so a large project can keep the cheap private
+members check on while leaving this one off. Members that cannot be seen to be
+used through a reference are skipped rather than reported:
+
+- Members that override or implement an inherited member, since dispatch
+  resolves to the supertype's declaration. This covers `toString`, `hashCode`
+  and `noSuchMethod` on every class, and overrides that carry no `@override`
+  annotation.
+- Members annotated `@override`, `@mustBeOverridden`, `@visibleForOverriding`,
+  `@redeclare`, `@protected`, `@visibleForTesting`, `@JS`, or
+  `@pragma('vm:entry-point')`.
+- Members exported to JavaScript with `@JSExport`, which JavaScript calls
+  through `createJSInteropWrapper`. This one also counts when the annotation
+  sits on the enclosing class, though only for that class's *instance* members,
+  since statics are never wrapped. Note that a `@pragma('vm:entry-point')` on
+  the enclosing class does *not* work the same way: it only permits allocation
+  from native code, so members still need their own pragma and are otherwise
+  reported.
+- Members whose name is invoked or read somewhere on a target of an unknown
+  (`dynamic`) type. Operators count too: a `host + 1`, `host[0] = 1` or
+  `host(1)` on a `dynamic` target keeps every `operator +`, `operator []=` and
+  `call` member, since any of them could be the one reached.
+- `toJson`, which `json.encode` calls by convention rather than by reference.
+- Enum constants of an enum whose `values` is referenced anywhere, since
+  iteration, `byName` and name based deserialization reach the constants without
+  naming any of them.
+- Unnamed constructors, whose invocations carry no identifier to record. Named
+  constructors are analyzed.
+
+Even so, expect more false positives than from the private members check.
+Members reached only through code generation, reflection or a package that
+depends on yours cannot be seen at all. Note also that members used only by
+your tests are reported when the analysis covers `lib` alone; pass the test
+folder too (`check-unused-code lib test`) if you want those usages counted.
+
+A third opt in reports the opposite situation: public declarations that are
+used, but only ever from inside the library that declares them, and so could
+carry a private name instead.
+
+```sh
+dart run dart_code_linter:metrics check-unused-code lib --suggest-private-members
+```
+
+```yaml
+dart_code_linter:
+  unused-code:
+    suggest-private-members: true
+```
+
+It covers both type members and top level declarations, and is independent of
+the other two options. Because it reports code that is used rather than dead
+code, it has its own exit gate, `--[no-]fatal-could-be-private`, so a project
+can keep the suggestions visible without failing the build on them.
+
+A declaration nothing references at all is never reported here: that is dead
+code, which is what the two options above are for. When both checks are on, an
+unused declaration is reported once, as unused. One shape slips through that
+rule: a dead declaration sharing its name with a used declaration of the same
+library is matched by the deliberately loose name comparison that works around
+[dart-lang/sdk#49182](https://github.com/dart-lang/sdk/issues/49182), so it
+reads as used and can be reported as a suggestion rather than as dead code.
+Members of a type that is itself reported dead are dropped, so what is left of
+this is a dead member of a live type.
+
+Every exemption of the public members check applies here too, since an analysis
+that cannot see how a declaration is reached cannot tell that everything
+reaching it sits in one library either. On top of those, these are never
+suggested:
+
+- Operators, which have no private spelling at all; enum constants, whose
+  identifier is observable at run time through `name` and `toString`, so
+  renaming one can silently change serialized output; and the `call` method
+  that makes its type callable, since `obj(...)` binds a member spelled
+  exactly `call`, so the rename fails to compile even inside the declaring
+  library. Only a method is exempt: a field, a getter or a static named `call`
+  is reached by an ordinary reference and is still suggested.
+- Fields bound by a named `this.x` or `super.x` formal. Dart forbids a named
+  parameter starting with an underscore, so the rename does not compile even
+  for a constructor nothing outside the library calls.
+- Instance members redeclared by a type in another library, anywhere in that
+  type's own hierarchy. Making such a member private compiles, but silently
+  stops dispatch from reaching the override or the interface implementation.
+  A member that no foreign subtype mentions is still suggested: a private
+  member is inherited across libraries and keeps working untouched. An
+  implementer that declares the member nowhere in its hierarchy is the one
+  gap, since there is nothing to match it against: an abstract class, or a
+  hand written mock answering through `noSuchMethod`. The rename compiles
+  there, but a mock that stubs by name stops matching the call.
+- Members of a type that is already private. No other library can name the
+  type, so the rename would change nothing. For a mixin it would change more
+  than nothing, since a public class can mix a private mixin in and republish
+  its members under a name other libraries do reach, which is the other reason
+  to leave the whole group alone. An *unnamed* extension does not count as
+  private here: its members apply in every library that imports the declaring
+  one, so they are still suggested.
+- Everything in a library any consumer of the package can import, which is
+  either of two things: a file another file in the analysis re-exports (a
+  barrel), or a file that simply sits under `lib/` outside `lib/src`, since
+  Dart lets a consumer import that directly whether or not anything exports
+  it. The cut covers the members of its types as well as its top level
+  declarations: a consumer that can name the type reaches the public members
+  of that type just as directly, so the rename breaks it either way. Only the
+  suggestions are dropped, and the unused check still reports these files
+  exactly as it always has. `--monorepo` lifts the exemption, as it does for
+  the unused check, since it says there are no unseen consumers to protect. An
+  application is in that same position, since nothing outside it can import
+  its `lib/` at all, so pass `--monorepo` there too. A published package that
+  keeps nothing under `lib/src` will otherwise see no suggestions at all,
+  which is the intended answer rather than a gap: every declaration it has is
+  reachable by a consumer this analysis cannot see.
+
+The same blind spot as above applies: a subtype or a reference living in a
+package that depends on yours, or in a folder outside the analysis, cannot be
+seen, so run the check over every folder that uses the code
+(`check-unused-code lib test`).
 
 
 

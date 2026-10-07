@@ -55,9 +55,30 @@ void mismatchedArgument() {
   print(LogLevel.info);
 }
 
-// Not flagged: unnamed constructor call (kept verbose to avoid `.new` ambiguity).
+// Flagged: unnamed constructor call matching the parameter type.
 void unnamedConstructorCall() {
   acceptPoint(Point(1, 2));
+}
+
+// Flagged: enum value in a switch expression case matching the scrutinee's type.
+String describeLevel(LogLevel level) {
+  return switch (level) {
+    LogLevel.error => 'red',
+    LogLevel.warning => 'orange',
+    LogLevel.info => 'blue',
+  };
+}
+
+// Flagged: enum value in a switch statement case matching the scrutinee's type.
+void logByLevel(LogLevel level) {
+  switch (level) {
+    case LogLevel.error:
+      print('error');
+    case LogLevel.warning:
+      print('warning');
+    default:
+      print('other');
+  }
 }
 
 class ValueNotifier<T> {

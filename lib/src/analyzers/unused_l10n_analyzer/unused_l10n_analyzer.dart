@@ -14,6 +14,7 @@ import '../../config_builder/models/analysis_options.dart';
 import '../../logger/logger.dart';
 import '../../reporters/models/reporter.dart';
 import '../../utils/analyzer_utils.dart';
+import '../../utils/exclude_utils.dart';
 import 'models/unused_l10n_file_report.dart';
 import 'models/unused_l10n_issue.dart';
 import 'reporters/reporter_factory.dart';
@@ -52,6 +53,7 @@ class UnusedL10nAnalyzer {
         createAnalysisContextCollection(folders, rootFolder, sdkPath);
 
     final localizationUsages = <ClassElement, Set<String>>{};
+    final excludedFiles = <String>{};
 
     for (final context in collection.contexts) {
       final unusedLocalizationAnalysisConfig =
@@ -61,15 +63,17 @@ class UnusedL10nAnalyzer {
         _logger?.printConfig(unusedLocalizationAnalysisConfig.toJson());
       }
 
-      final filePaths = getFilePaths(
-        folders,
-        context,
-        rootFolder,
-        unusedLocalizationAnalysisConfig.globalExcludes,
-      );
+      // Files matched by the excludes are not reported, but they are still
+      // analyzed for usages: generated code is often the only user of a
+      // localization member.
+      final filePaths = getFilePaths(folders, context, rootFolder, const []);
 
       final analyzedFiles =
           filePaths.intersection(context.contextRoot.analyzedFiles().toSet());
+      excludedFiles.addAll(analyzedFiles.where(
+        (path) =>
+            isExcluded(path, unusedLocalizationAnalysisConfig.globalExcludes),
+      ));
 
       for (final filePath in analyzedFiles) {
         _logger?.infoVerbose('Analyzing $filePath');
@@ -87,7 +91,8 @@ class UnusedL10nAnalyzer {
       }
     }
 
-    return _checkUnusedL10n(localizationUsages, rootFolder);
+    return _checkUnusedL10n(localizationUsages, rootFolder)
+        .where((report) => !excludedFiles.contains(report.path));
   }
 
   UnusedL10nAnalysisConfig _getAnalysisConfig(

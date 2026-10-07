@@ -26,7 +26,7 @@ void main() {
 
       RuleTestHelper.verifyIssues(
         issues: issues,
-        startLines: [13, 22, 29],
+        startLines: [13, 22, 29, 79],
       );
     });
   });

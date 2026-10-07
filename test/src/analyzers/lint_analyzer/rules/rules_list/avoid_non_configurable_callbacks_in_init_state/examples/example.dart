@@ -305,3 +305,38 @@ class _ExternalTearOffWebviewState extends State<ExternalTearOffWebview> {
 }
 
 void logGlobalError(Object error) {}
+
+// Flagged: `widget` is a plain named-argument label here, unrelated to the
+// State's own `widget` getter, so it must not be mistaken for a reference
+// that makes this configuration customizable.
+class NamedArgumentWidgetWebview extends StatefulWidget {
+  const NamedArgumentWidgetWebview({required this.webviewController});
+
+  final WebViewController webviewController;
+
+  @override
+  State<NamedArgumentWidgetWebview> createState() =>
+      _NamedArgumentWidgetWebviewState();
+}
+
+class _NamedArgumentWidgetWebviewState
+    extends State<NamedArgumentWidgetWebview> {
+  @override
+  void initState() {
+    super.initState();
+
+    widget.webviewController.setNavigationDelegate(
+      LabeledNavigationDelegate(
+        onWebResourceError: (error) {},
+        widget: Widget(),
+      ),
+    );
+  }
+}
+
+class LabeledNavigationDelegate {
+  const LabeledNavigationDelegate({this.onWebResourceError, this.widget});
+
+  final Function? onWebResourceError;
+  final Widget? widget;
+}

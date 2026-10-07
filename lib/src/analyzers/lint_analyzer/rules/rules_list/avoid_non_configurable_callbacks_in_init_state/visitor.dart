@@ -156,6 +156,15 @@ class _WidgetReferenceVisitor extends RecursiveAstVisitor<void> {
   void visitSimpleIdentifier(SimpleIdentifier node) {
     super.visitSimpleIdentifier(node);
 
+    // On analyzer 10-12 a named argument's name is a `Label` wrapping a
+    // `SimpleIdentifier` (analyzer 13's `NamedArgument` uses a bare `Token`
+    // instead, so this never matches there): `Options(widget: child)` must
+    // not be mistaken for a real reference just because its label reads
+    // `widget`.
+    if (node.parent is Label) {
+      return;
+    }
+
     if (node.name == 'widget') {
       _referencesWidget = true;
     }
@@ -173,6 +182,12 @@ class _MethodReferenceCollector extends RecursiveAstVisitor<void> {
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
     super.visitSimpleIdentifier(node);
+
+    // See `_WidgetReferenceVisitor.visitSimpleIdentifier`: a named argument's
+    // label is not a reference to a same-named method.
+    if (node.parent is Label) {
+      return;
+    }
 
     if (_knownMethodNames.contains(node.name)) {
       referencedNames.add(node.name);
