@@ -146,6 +146,7 @@ As DCL depends on the Dart `analyzer` package. The following table shows the com
 
 | DCL Version       | Analyzer Version   | Dart SDK          |
 |-------------------|--------------------|-------------------|
+| 4.4.2             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.4.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.4.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.3.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
@@ -306,9 +307,11 @@ limitations are worth knowing about:
 
 - A private field that is only ever assigned, never read, is reported as unused,
   the same way an unused top level variable is.
-- Usages that live only in files excluded from analysis (generated `part` files,
-  for example) are invisible, so members used exclusively from there are
-  reported.
+- Usages that live only in files the `analyzer: exclude:` list of
+  `analysis_options.yaml` excludes from analysis are invisible, so members used
+  exclusively from there are reported. Files matched by `--exclude` (by default
+  the generated `*.g.dart` and `*.freezed.dart` files) are different: they are
+  not reported, but their usages still count.
 
 Public members are covered by a separate opt in, because they need more
 guesswork than private ones and are therefore less reliable:
