@@ -365,6 +365,9 @@ class UnusedCodeAnalyzer {
                     usedElement.kind == element.kind))) &&
         !codeUsages.elements.any(
             (usedElement) => _isUsed(usedElement, element, elementIsMember)) &&
+        !codeUsages.prefixMap.values.any((usedElements) => usedElements.any(
+              (usedElement) => _isUsed(usedElement, element, elementIsMember),
+            )) &&
         !codeUsages.usedExtensions.any(
             (usedElement) => _isUsed(usedElement, element, elementIsMember));
   }
