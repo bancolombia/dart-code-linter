@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dart_code_linter/src/cli/cli_runner.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -65,5 +67,48 @@ void main() {
         equals(_usage),
       );
     });
+
+    test(
+      'should not delete files matched by the default --exclude',
+      () async {
+        final root = Directory(
+          Directory.systemTemp
+              .createTempSync('dcl_delete_files_')
+              .resolveSymbolicLinksSync(),
+        );
+        addTearDown(() => root.deleteSync(recursive: true));
+
+        File(p.join(root.path, 'analysis_options.yaml')).writeAsStringSync('');
+        final files = {
+          'main.dart': 'void main() {}',
+          'x.g.dart': 'int x = 1;',
+          'x.freezed.dart': 'int x = 1;',
+          'y.dart': 'int y = 1;',
+        }.map((name, content) {
+          final file = File(p.join(root.path, 'lib', name))
+            ..createSync(recursive: true)
+            ..writeAsStringSync(content);
+
+          return MapEntry(name, file);
+        });
+
+        // CliRunner.run exits the process, so run the command directly.
+        await runner.runCommand(runner.parse([
+          'check-unused-files',
+          'lib',
+          '--root-folder=${root.path}',
+          '--delete-files',
+          '--no-fatal-unused',
+          '--no-congratulate',
+        ]));
+
+        expect(files['main.dart']!.existsSync(), isTrue);
+        expect(files['x.g.dart']!.existsSync(), isTrue);
+        expect(files['x.freezed.dart']!.existsSync(), isTrue);
+        expect(files['y.dart']!.existsSync(), isFalse);
+      },
+      testOn: 'posix',
+      timeout: const Timeout.factor(4),
+    );
   });
 }

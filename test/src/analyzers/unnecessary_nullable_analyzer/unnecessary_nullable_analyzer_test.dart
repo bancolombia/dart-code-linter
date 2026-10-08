@@ -8,6 +8,8 @@ import 'package:dart_code_linter/src/analyzers/unnecessary_nullable_analyzer/unn
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
+import '../generated_usages_project.dart';
+
 void main() {
   group(
     'UnnecessaryNullableAnalyzer',
@@ -154,13 +156,35 @@ void main() {
     },
     testOn: 'posix',
   );
+
+  test(
+    'should count invocations in files matched by --exclude, but not report them',
+    () async {
+      final root = createGeneratedUsagesProject();
+
+      final result = await const UnnecessaryNullableAnalyzer().runCliAnalysis(
+        ['lib'],
+        root,
+        _createConfig(excludePatterns: defaultExcludes),
+      );
+
+      expect(
+        result
+            .expand((report) => report.issues)
+            .map((issue) => issue.declarationName),
+        unorderedEquals(['alsoTakes']),
+      );
+    },
+    testOn: 'posix',
+  );
 }
 
 UnnecessaryNullableConfig _createConfig({
+  Iterable<String> excludePatterns = const [],
   Iterable<String> analyzerExcludePatterns = const [],
 }) =>
     UnnecessaryNullableConfig(
-      excludePatterns: const [],
+      excludePatterns: excludePatterns,
       analyzerExcludePatterns: analyzerExcludePatterns,
       isMonorepo: false,
       shouldPrintConfig: false,

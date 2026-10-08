@@ -6,6 +6,8 @@ import 'package:dart_code_linter/src/analyzers/unused_l10n_analyzer/unused_l10n_
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
+import '../generated_usages_project.dart';
+
 void main() {
   group(
     'UnusedL10nAnalyzer',
@@ -144,14 +146,37 @@ void main() {
     },
     testOn: 'posix',
   );
+
+  test(
+    'should count usages in files matched by --exclude, but not report them',
+    () async {
+      final root = createGeneratedUsagesProject();
+
+      final result = await const UnusedL10nAnalyzer().runCliAnalysis(
+        ['lib'],
+        root,
+        _createConfig(excludePatterns: defaultExcludes),
+      );
+
+      expect(
+        result.expand(
+          (report) => report.issues
+              .map((issue) => '${report.className}.${issue.memberName}'),
+        ),
+        unorderedEquals(['AppI18n.unusedKey']),
+      );
+    },
+    testOn: 'posix',
+  );
 }
 
 UnusedL10nConfig _createConfig({
+  Iterable<String> excludePatterns = const [],
   Iterable<String> analyzerExcludePatterns = const [],
   String classPattern = r'I18n$',
 }) =>
     UnusedL10nConfig(
-      excludePatterns: const [],
+      excludePatterns: excludePatterns,
       analyzerExcludePatterns: analyzerExcludePatterns,
       classPattern: classPattern,
       shouldPrintConfig: false,

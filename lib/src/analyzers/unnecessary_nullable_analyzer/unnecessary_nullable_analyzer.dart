@@ -18,6 +18,7 @@ import '../../reporters/models/reporter.dart';
 import '../../utils/analyzer_utils.dart';
 import '../../utils/ast_compat.dart';
 import '../../utils/dart_types_utils.dart';
+import '../../utils/exclude_utils.dart';
 import '../../utils/flutter_types_utils.dart';
 import '../../utils/suppression.dart';
 import 'declarations_visitor.dart';
@@ -73,12 +74,10 @@ class UnnecessaryNullableAnalyzer {
         _logger?.printConfig(unnecessaryNullableAnalysisConfig.toJson());
       }
 
-      final filePaths = getFilePaths(
-        folders,
-        context,
-        rootFolder,
-        unnecessaryNullableAnalysisConfig.globalExcludes,
-      );
+      // Files matched by the excludes are not reported, but they are still
+      // analyzed for invocations: generated code is often the only user of the
+      // code it was generated for.
+      final filePaths = getFilePaths(folders, context, rootFolder, const []);
 
       final analyzedFiles =
           filePaths.intersection(context.contextRoot.analyzedFiles().toSet());
@@ -104,8 +103,12 @@ class UnnecessaryNullableAnalyzer {
           invocationsUsages.merge(invocationsUsage);
         }
 
-        if (!unnecessaryNullableAnalysisConfig.analyzerExcludedPatterns
-            .any((pattern) => pattern.matches(filePath))) {
+        if (!isExcluded(
+              filePath,
+              unnecessaryNullableAnalysisConfig.globalExcludes,
+            ) &&
+            !unnecessaryNullableAnalysisConfig.analyzerExcludedPatterns
+                .any((pattern) => pattern.matches(filePath))) {
           _logger
               ?.infoVerbose('Found declarations: ${declarationsUsages.length}');
 
