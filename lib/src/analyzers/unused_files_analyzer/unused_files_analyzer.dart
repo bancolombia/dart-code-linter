@@ -50,6 +50,7 @@ class UnusedFilesAnalyzer {
         createAnalysisContextCollection(folders, rootFolder, sdkPath);
 
     final unusedFiles = <String>{};
+    final usedFiles = <String>{};
 
     for (final context in collection.contexts) {
       final unusedFilesAnalysisConfig =
@@ -74,9 +75,11 @@ class UnusedFilesAnalyzer {
         _logger?.infoVerbose('Analyzing $filePath');
 
         final unit = await context.currentSession.getResolvedUnit(filePath);
-        unusedFiles.removeAll(_analyzeFile(filePath, unit, config.isMonorepo));
+        usedFiles.addAll(_analyzeFile(filePath, unit, config.isMonorepo));
       }
     }
+
+    unusedFiles.removeAll(usedFiles);
 
     return unusedFiles.map((path) {
       final relativePath = relative(path, from: rootFolder);
