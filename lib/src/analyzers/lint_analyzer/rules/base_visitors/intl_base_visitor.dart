@@ -6,6 +6,7 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
+import '../../../../utils/ast_compat.dart';
 import '../../../../utils/object_extensions.dart';
 
 abstract class IntlBaseVisitor extends GeneralizingAstVisitor<void> {
@@ -36,11 +37,10 @@ abstract class IntlBaseVisitor extends GeneralizingAstVisitor<void> {
       return;
     }
 
-    final classNode = node.parent?.parent;
+    final classNode = enclosingTypeDeclaration(node);
     final className = switch (classNode) {
-      ClassDeclaration(:final namePart) ||
-      EnumDeclaration(:final namePart) =>
-        namePart.typeName.lexeme,
+      ClassDeclaration() => typeDeclarationName(classNode),
+      EnumDeclaration() => typeDeclarationName(classNode),
       MixinDeclaration() => classNode.name.lexeme,
       ExtensionDeclaration() => classNode.name?.lexeme,
       _ => null,
@@ -124,12 +124,11 @@ abstract class IntlBaseVisitor extends GeneralizingAstVisitor<void> {
   }
 
   String? _getClassName(MethodDeclaration node) {
-    final classNode = node.parent?.parent;
+    final classNode = enclosingTypeDeclaration(node);
 
     return switch (classNode) {
-      ClassDeclaration(:final namePart) ||
-      EnumDeclaration(:final namePart) =>
-        namePart.typeName.lexeme,
+      ClassDeclaration() => typeDeclarationName(classNode),
+      EnumDeclaration() => typeDeclarationName(classNode),
       MixinDeclaration() => classNode.name.lexeme,
       ExtensionDeclaration() => classNode.name?.lexeme,
       _ => null,

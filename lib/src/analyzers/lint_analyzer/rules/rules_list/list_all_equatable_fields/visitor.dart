@@ -18,12 +18,12 @@ class _Visitor extends GeneralizingAstVisitor<void> {
       return;
     }
 
-    final body = node.body;
-    if (body is! BlockClassBody) {
+    final members = classBodyMembers(node);
+    if (members == null) {
       return;
     }
 
-    final fieldNames = body.members
+    final fieldNames = members
         .whereType<FieldDeclaration>()
         .whereNot((field) => field.isStatic)
         .map((declaration) =>
@@ -35,7 +35,7 @@ class _Visitor extends GeneralizingAstVisitor<void> {
       fieldNames.addAll(_getParentFields(classType));
     }
 
-    final props = body.members.firstWhereOrNull((declaration) =>
+    final props = members.firstWhereOrNull((declaration) =>
         declaration is MethodDeclaration &&
         declaration.isGetter &&
         declaration.name.lexeme == 'props') as MethodDeclaration?;

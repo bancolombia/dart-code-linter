@@ -3,6 +3,7 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
 
+import '../../../../../utils/ast_compat.dart';
 import '../../../../../utils/node_utils.dart';
 import '../../../lint_utils.dart';
 import '../../../metrics/scope_visitor.dart';

@@ -334,7 +334,7 @@ class UnnecessaryNullableAnalyzer {
   /// unnamed constructor, so without this the reported name would depend on
   /// which analyzer the consumer resolved. `name` is `new` for the unnamed
   /// constructor and `enclosingElement` is non-nullable on every analyzer this
-  /// package supports, 10.0.0 through 14.4.0.
+  /// package supports, 8.2.0 through 14.4.0.
   String _declarationNameOf(Element element) =>
       element is ConstructorElement && element.name == 'new'
           ? element.enclosingElement.displayName

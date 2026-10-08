@@ -1,3 +1,5 @@
+import 'package:analyzer/dart/analysis/features.dart';
+import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:dart_code_linter/src/analyzers/lint_analyzer/models/severity.dart';
 import 'package:dart_code_linter/src/analyzers/lint_analyzer/rules/rules_list/prefer_static_class/prefer_static_class_rule.dart';
 import 'package:test/test.dart';
@@ -13,6 +15,23 @@ const _correctIgnoreNamesExamplePath =
     'prefer_static_class/examples/correct_ignore_names_example.dart';
 const _correctIgnoreAnnotationExamplePath =
     'prefer_static_class/examples/correct_ignore_annotation_example.dart';
+
+/// Whether the running analyzer can parse primary constructors
+/// (`class Example(final int value) {}`), which landed in analyzer 9.0.0.
+///
+/// `correct_example.dart` declares one. On analyzer 8.x the parser cannot read
+/// it, and error recovery splits the class open: `Example` comes back empty and
+/// the members it declares surface as top-level declarations, which
+/// `prefer-static-class` then correctly reports. The capability is probed
+/// rather than the version compared, so this stays right if the feature is
+/// backported or the supported range moves.
+bool get _parsesPrimaryConstructors =>
+    parseString(
+      content: 'class Example(final int value) { void method() {} }',
+      featureSet: FeatureSet.latestLanguageVersion(),
+      throwIfDiagnostics: false,
+    ).unit.declarations.length ==
+    1;
 
 void main() {
   group('PreferStaticClassRule', () {
@@ -62,7 +81,23 @@ void main() {
       final unit = await RuleTestHelper.resolveFromFile(_correctExamplePath);
       final issues = PreferStaticClassRule().check(unit);
 
-      RuleTestHelper.verifyNoIssues(issues);
+      if (_parsesPrimaryConstructors) {
+        RuleTestHelper.verifyNoIssues(issues);
+
+        return;
+      }
+
+      // Asserted rather than skipped, so this fails loudly the day the guard
+      // stops being needed: if the fixture drops its primary constructor, or
+      // the supported analyzer range no longer reaches below 9.0.0, this
+      // branch starts seeing a clean parse and the guard should be deleted.
+      expect(
+        issues,
+        isNotEmpty,
+        reason: 'This analyzer cannot parse the primary constructor in the '
+            'fixture, so recovery is expected to lift the members of Example '
+            'to the top level, where prefer-static-class reports them.',
+      );
     });
 
     test(

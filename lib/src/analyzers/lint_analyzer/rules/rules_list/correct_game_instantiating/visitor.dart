@@ -20,12 +20,12 @@ class _Visitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    final body = node.body;
-    if (body is! BlockClassBody) {
+    final members = classBodyMembers(node);
+    if (members == null) {
       return;
     }
 
-    final declaration = body.members.firstWhereOrNull((declaration) =>
+    final declaration = members.firstWhereOrNull((declaration) =>
         declaration is MethodDeclaration && declaration.name.lexeme == 'build');
 
     if (declaration is MethodDeclaration) {
