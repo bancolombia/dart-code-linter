@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.3](https://github.com/bancolombia/dart-code-linter/compare/v4.4.2...v4.4.3) (2026-10-08)
+
+
+### Bug Fixes
+
+* resolve cross-package imports in unused-files monorepo mode ([#278](https://github.com/bancolombia/dart-code-linter/issues/278)) ([adab62a](https://github.com/bancolombia/dart-code-linter/commit/adab62a10144a196cb05bab5d063e4128507f595))
+
 ## 4.4.2
 - Fix `--exclude` being ignored when selecting the files to analyze, which made `check-unused-files --delete-files` delete generated files. Two defects were involved. The default pattern, `{/**.g.dart,/**.freezed.dart}`, never matched anything: joining it to the root folder put the root in front of the brace group, which left a double slash after the root in every alternative. And files were matched by their path relative to the root folder, while the patterns are joined to it, so a pattern only ever matched when the root folder was the current directory. With the default exclude, `check-unused-files`, `check-unused-code` and `check-unnecessary-nullable` reported files and declarations inside generated files, and `--delete-files` deleted the generated libraries nothing imported; with `--root-folder` set to anything but the current directory, every `--exclude` pattern was ignored by those commands and by `analyze` and `fix` as well. A pattern that is a single brace group is now joined to the root folder one alternative at a time, an alternative starting with `/` staying absolute just as a whole pattern starting with `/` already did, and files are matched by their own path. `analyze` and `fix` skip `*.g.dart` and `*.freezed.dart` files on their own, so for them only explicit patterns change.
 - Keep counting the files matched by `--exclude` as users of other code in `check-unused-files`, `check-unused-code`, `check-unnecessary-nullable` and `check-unused-l10n`: they are left out of the report, but still analyzed for imports, usages and invocations. Fixing the default pattern alone would have traded one false positive for another, since generated code is often the only user of the code it was generated for: a hand written file imported only by a generated library would have been reported as unused, and deleted by `--delete-files`; the private constructor freezed requires (`const Foo._();`), called only from the generated part, would have been reported with `--analyze-private-members`; and a parameter only generated code passes `null` to would have been reported as unnecessarily nullable. Excluded files are still resolved, so excluding them does not make these commands faster. Files excluded through `analyzer: exclude:` in `analysis_options.yaml` are not analyzed at all, as before.
@@ -175,5 +182,3 @@
 
 ## 1.0.0
 - Fork: [Dart code metrics 5.7.3](https://github.com/dart-code-checker/dart-code-metrics)
-
-
