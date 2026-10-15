@@ -31,7 +31,7 @@ dart run dart_code_linter:metrics analyze lib
 | `--reporter=<value>` | Output format: `console` (default), `github`, `codeclimate`, `html`, `json` |
 | `--output-directory=<path>` | Directory for HTML report output |
 | `--root-folder=<path>` | Root folder of the project |
-| `--exclude=<patterns>` | Comma-separated list of file patterns to exclude |
+| `--exclude=<glob>` | One glob of files to exclude, see [Excluding Files](#excluding-files) |
 | `--set-exit-on-violation-level=<level>` | Set exit code when violations reach this level: `noted`, `warning`, `alarm` |
 | `--fatal-style` | Treat style violations as fatal |
 | `--fatal-performance` | Treat performance violations as fatal |
@@ -76,7 +76,7 @@ dart run dart_code_linter:metrics check-unused-files lib
 |------|-------------|
 | `--reporter=<value>` | Output format: `console` (default), `json` |
 | `--root-folder=<path>` | Root folder of the project |
-| `--exclude=<patterns>` | Comma-separated list of file patterns to exclude |
+| `--exclude=<glob>` | One glob of files to exclude, see [Excluding Files](#excluding-files) |
 | `--no-congratulate` | Suppress congratulatory messages |
 
 **Example:**
@@ -99,7 +99,7 @@ dart run dart_code_linter:metrics check-unused-code lib
 |------|-------------|
 | `--reporter=<value>` | Output format: `console` (default), `json` |
 | `--root-folder=<path>` | Root folder of the project |
-| `--exclude=<patterns>` | Comma-separated list of file patterns to exclude |
+| `--exclude=<glob>` | One glob of files to exclude, see [Excluding Files](#excluding-files) |
 | `--no-congratulate` | Suppress congratulatory messages |
 
 **Example:**
@@ -137,7 +137,7 @@ class ClassWithLocalization {
 |------|-------------|
 | `--reporter=<value>` | Output format: `console` (default), `json` |
 | `--root-folder=<path>` | Root folder of the project |
-| `--exclude=<patterns>` | Comma-separated list of file patterns to exclude |
+| `--exclude=<glob>` | One glob of files to exclude, see [Excluding Files](#excluding-files) |
 | `--class-pattern=<regex>` | Regex pattern to match localization class names |
 | `--no-congratulate` | Suppress congratulatory messages |
 
@@ -161,7 +161,7 @@ dart run dart_code_linter:metrics check-unnecessary-nullable lib
 |------|-------------|
 | `--reporter=<value>` | Output format: `console` (default), `json` |
 | `--root-folder=<path>` | Root folder of the project |
-| `--exclude=<patterns>` | Comma-separated list of file patterns to exclude |
+| `--exclude=<glob>` | One glob of files to exclude, see [Excluding Files](#excluding-files) |
 | `--no-congratulate` | Suppress congratulatory messages |
 
 **Example:**
@@ -169,6 +169,19 @@ dart run dart_code_linter:metrics check-unnecessary-nullable lib
 ```sh
 dart run dart_code_linter:metrics check-unnecessary-nullable --reporter=json lib
 ```
+
+## Excluding Files
+
+`--exclude` takes a single glob, relative to the root folder. It defaults to `{/**.g.dart,/**.freezed.dart}`, which skips the generated `*.g.dart` and `*.freezed.dart` files.
+
+- To exclude several patterns, put them in one brace group. A comma outside braces is read as part of the file name, so `lib/a.dart,lib/b.dart` excludes nothing, and repeating the flag keeps only the last value.
+- Passing `--exclude` replaces the default, so keep the generated files in the group if they should stay excluded:
+
+```sh
+dart run dart_code_linter:metrics check-unused-code lib --exclude="{**.g.dart,**.freezed.dart,lib/gen/**}"
+```
+
+`check-unused-files`, `check-unused-code`, `check-unused-l10n` and `check-unnecessary-nullable` do not report excluded files, but still count them as users of other code, so code used only from generated files is not reported. Files listed under `analyzer: exclude:` in `analysis_options.yaml` are not analyzed at all.
 
 ## Monorepo Support
 

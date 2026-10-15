@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/context_root.dart';
-import 'package:analyzer/file_system/file_system.dart';
+import 'package:analyzer/file_system/file_system.dart' hide File;
 import 'package:dart_code_linter/src/utils/analyzer_utils.dart';
+import 'package:dart_code_linter/src/utils/exclude_utils.dart';
 import 'package:glob/glob.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:path/path.dart';
 import 'package:test/test.dart';
 
 class AnalysisContextMock extends Mock implements AnalysisContext {}
@@ -93,4 +97,58 @@ void main() {
       testOn: 'posix',
     );
   });
+
+  group(
+    'getFilePaths with an absolute root folder outside the current directory',
+    () {
+      late Directory root;
+
+      final rootFolder = FolderMock();
+      final contextRoot = ContextRootMock();
+      final context = AnalysisContextMock();
+
+      setUp(() {
+        root = Directory.systemTemp.createTempSync('dcl_exclude_');
+        root = Directory(root.resolveSymbolicLinksSync());
+        for (final name in ['x.g.dart', 'x.freezed.dart', 'y.dart']) {
+          File(join(root.path, 'lib', name)).createSync(recursive: true);
+        }
+
+        when(() => rootFolder.path).thenReturn(root.path);
+        when(() => contextRoot.root).thenReturn(rootFolder);
+        when(() => context.contextRoot).thenReturn(contextRoot);
+      });
+
+      tearDown(() => root.deleteSync(recursive: true));
+
+      Iterable<String> selectedNames(String pattern) => getFilePaths(
+            ['lib'],
+            context,
+            root.path,
+            createAbsolutePatterns([pattern], root.path),
+          ).map(basename);
+
+      test('excludes generated files with the default pattern', () {
+        expect(
+          selectedNames('{/**.g.dart,/**.freezed.dart}'),
+          unorderedEquals(['y.dart']),
+        );
+      });
+
+      test('excludes files matched by a pattern relative to the root', () {
+        expect(
+          selectedNames('lib/*.g.dart'),
+          unorderedEquals(['x.freezed.dart', 'y.dart']),
+        );
+      });
+
+      test('excludes files matched by a recursive pattern', () {
+        expect(
+          selectedNames('**.g.dart'),
+          unorderedEquals(['x.freezed.dart', 'y.dart']),
+        );
+      });
+    },
+    testOn: 'posix',
+  );
 }

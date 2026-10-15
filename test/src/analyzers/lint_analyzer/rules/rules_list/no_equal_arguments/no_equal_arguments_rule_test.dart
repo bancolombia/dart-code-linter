@@ -11,6 +11,10 @@ const _namedParametersExamplePath =
     'no_equal_arguments/examples/named_parameters_example.dart';
 const _providerExamplePath =
     'no_equal_arguments/examples/provider_example.dart';
+const _noMatchingArgumentsExamplePath =
+    'no_equal_arguments/examples/no_matching_arguments_example.dart';
+const _keywordNamedDuplicateExamplePath =
+    'no_equal_arguments/examples/keyword_named_duplicate_example.dart';
 
 void main() {
   group('NoEqualArgumentsRule', () {
@@ -80,6 +84,28 @@ void main() {
       final issues = NoEqualArgumentsRule().check(unit);
 
       RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    test('reports no issues for argument without a match', () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_noMatchingArgumentsExamplePath);
+      final issues = NoEqualArgumentsRule().check(unit);
+
+      RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    test('reports about found issue for a keyword-named argument', () async {
+      final unit =
+          await RuleTestHelper.resolveFromFile(_keywordNamedDuplicateExamplePath);
+      final issues = NoEqualArgumentsRule().check(unit);
+
+      RuleTestHelper.verifyIssues(
+        issues: issues,
+        startLines: [5],
+        startColumns: [25],
+        locationTexts: ['other: shared'],
+        messages: ['The argument has already been passed.'],
+      );
     });
 
     test('reports no issues with custom config', () async {

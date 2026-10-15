@@ -83,10 +83,9 @@ Set<String> _extractDartFilesFromFolders(
               followLinks: false,
             )
             .whereType<File>()
-            .where((entity) => !isExcluded(
-                  relative(entity.path, from: rootFolder),
-                  globalExcludes,
-                ))
+            // The excludes are joined to the root folder, so they are matched
+            // against the listed path, which is joined to it as well.
+            .where((entity) => !isExcluded(entity.path, globalExcludes))
             .map((entity) => normalize(entity.path)))
         .toSet();
 

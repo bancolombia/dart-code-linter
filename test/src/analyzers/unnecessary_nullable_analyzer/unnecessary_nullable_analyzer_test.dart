@@ -8,6 +8,8 @@ import 'package:dart_code_linter/src/analyzers/unnecessary_nullable_analyzer/unn
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
+import '../generated_usages_project.dart';
+
 void main() {
   group(
     'UnnecessaryNullableAnalyzer',
@@ -45,7 +47,7 @@ void main() {
           final report = result.firstWhere((report) =>
               report.path.endsWith('nullable_class_parameters.dart'));
 
-          expect(report.issues, hasLength(2));
+          expect(report.issues, hasLength(3));
 
           final firstIssue = report.issues.first;
           expect(firstIssue.declarationName, 'AlwaysUsedAsNonNullable');
@@ -54,12 +56,24 @@ void main() {
           expect(firstIssue.location.line, 11);
           expect(firstIssue.location.column, 3);
 
-          final secondIssue = report.issues.last;
+          final secondIssue = report.issues.elementAt(1);
           expect(secondIssue.declarationName, 'NamedNonNullable');
           expect(secondIssue.declarationType, 'constructor');
           expect(secondIssue.parameters.toString(), '(this.value)');
           expect(secondIssue.location.line, 24);
           expect(secondIssue.location.column, 3);
+
+          // Pins the normalization to the unnamed constructors above: a named
+          // constructor keeps its `Type.name` form.
+          final thirdIssue = report.issues.last;
+          expect(
+            thirdIssue.declarationName,
+            'NamedConstructorNonNullable.withValue',
+          );
+          expect(thirdIssue.declarationType, 'constructor');
+          expect(thirdIssue.parameters.toString(), '(this.value)');
+          expect(thirdIssue.location.line, 31);
+          expect(thirdIssue.location.column, 3);
         });
 
         test('should analyze nullable method parameters', () async {
@@ -142,13 +156,35 @@ void main() {
     },
     testOn: 'posix',
   );
+
+  test(
+    'should count invocations in files matched by --exclude, but not report them',
+    () async {
+      final root = createGeneratedUsagesProject();
+
+      final result = await const UnnecessaryNullableAnalyzer().runCliAnalysis(
+        ['lib'],
+        root,
+        _createConfig(excludePatterns: defaultExcludes),
+      );
+
+      expect(
+        result
+            .expand((report) => report.issues)
+            .map((issue) => issue.declarationName),
+        unorderedEquals(['alsoTakes']),
+      );
+    },
+    testOn: 'posix',
+  );
 }
 
 UnnecessaryNullableConfig _createConfig({
+  Iterable<String> excludePatterns = const [],
   Iterable<String> analyzerExcludePatterns = const [],
 }) =>
     UnnecessaryNullableConfig(
-      excludePatterns: const [],
+      excludePatterns: excludePatterns,
       analyzerExcludePatterns: analyzerExcludePatterns,
       isMonorepo: false,
       shouldPrintConfig: false,

@@ -28,6 +28,7 @@ void main() {
   final nullableConstructor = const NullableClassParameters(null);
   final defaultNonNullable = const DefaultNonNullable(value: '321');
   final namedNonNullable = const NamedNonNullable(value: '123');
+  final namedConstructor = const NamedConstructorNonNullable.withValue('123');
 
   IgnoredClassWithMethods().alwaysNonNullable('string');
 

@@ -135,7 +135,8 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     _recordAssignmentTarget(node, node.leftHandSide);
     // `a += b` reaches the combiner `operator +` without naming it.
     _recordMemberUsage(node.element);
-    _recordDynamicOperator(node.element, _assignmentOperatorName(node.operator));
+    _recordDynamicOperator(
+        node.element, _assignmentOperatorName(node.operator));
 
     super.visitAssignmentExpression(node);
   }
