@@ -61,6 +61,40 @@ void main() {
       expect(issues, isEmpty);
     });
 
+    test('does not report a return on the line of the opening brace', () async {
+      // Regression: reporting such a return threw a RangeError.
+      final unit = await RuleTestHelper.createAndResolveFromFile(
+        content: 'int f() { return 1; }\n'
+            '\n'
+            'int g(int a) {\n'
+            '  if (a > 0) { return a;\n'
+            '  }\n'
+            '\n'
+            '  return a;\n'
+            '}\n'
+            '\n'
+            'int h() { /* comment */ return 1; }\n',
+        filePath:
+            'no_blank_line_before_single_return/examples/_brace_line_temp.dart',
+      );
+      final issues = NoBlankLineBeforeSingleReturnRule().check(unit).toList();
+
+      expect(issues, isEmpty);
+    });
+
+    test(
+        'does not report a return on the line of the opening brace '
+        'at the end of a file without a final newline', () async {
+      final unit = await RuleTestHelper.createAndResolveFromFile(
+        content: 'int f() { return 1; }',
+        filePath:
+            'no_blank_line_before_single_return/examples/_no_newline_temp.dart',
+      );
+      final issues = NoBlankLineBeforeSingleReturnRule().check(unit).toList();
+
+      expect(issues, isEmpty);
+    });
+
     test('provides replacement suggestions', () async {
       final unit = await RuleTestHelper.resolveFromFile(_beforeFixPath);
       final issues = NoBlankLineBeforeSingleReturnRule().check(unit);
@@ -80,8 +114,7 @@ void main() {
     test('applies fix suggestions to fixture input', () async {
       final before = await RuleTestHelper.resolveFromFile(_beforeFixPath);
       final expected = await RuleTestHelper.resolveFromFile(_afterFixPath);
-      final issues =
-          NoBlankLineBeforeSingleReturnRule().check(before).toList();
+      final issues = NoBlankLineBeforeSingleReturnRule().check(before).toList();
 
       expect(issues, isNotEmpty);
 
@@ -91,8 +124,7 @@ void main() {
 
     test('fix is idempotent (no issues remain after applying)', () async {
       final before = await RuleTestHelper.resolveFromFile(_beforeFixPath);
-      final issues =
-          NoBlankLineBeforeSingleReturnRule().check(before).toList();
+      final issues = NoBlankLineBeforeSingleReturnRule().check(before).toList();
 
       final fixed = _applyFirstSuggestions(before.content, issues);
       final fixedUnit = await RuleTestHelper.createAndResolveFromFile(

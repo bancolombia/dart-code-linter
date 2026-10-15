@@ -45,7 +45,7 @@ class NoBlankLineBeforeSingleReturnRule extends DartRule {
 
       return parentBlock.statements.length == 1;
     })
-        // Ensure there is no blank line before the return statement, ignoring comments
+        // Keep only returns with a blank line before them, ignoring comments
         .where((statement) {
       final lineInfo = source.lineInfo;
 
@@ -60,7 +60,7 @@ class NoBlankLineBeforeSingleReturnRule extends DartRule {
           )
           .lineNumber;
 
-      return tokenLine != previousTokenLine + 1;
+      return tokenLine > previousTokenLine + 1;
     }).map((statement) {
       final content = source.content;
       final startOffset =
