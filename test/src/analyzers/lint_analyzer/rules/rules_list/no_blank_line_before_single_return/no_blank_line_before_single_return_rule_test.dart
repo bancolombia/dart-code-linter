@@ -122,6 +122,19 @@ void main() {
       expect(transformed, equals(expected.content));
     });
 
+    test('fix keeps CRLF line endings', () async {
+      final unit = await RuleTestHelper.createAndResolveFromFile(
+        content: 'int f() {\r\n\r\n  // comment\r\n  return 1;\r\n}\r\n',
+        filePath: 'no_blank_line_before_single_return/examples/_crlf_temp.dart',
+      );
+      final issues = NoBlankLineBeforeSingleReturnRule().check(unit).toList();
+
+      expect(
+        _applyFirstSuggestions(unit.content, issues),
+        equals('int f() {\r\n  // comment\r\n  return 1;\r\n}\r\n'),
+      );
+    });
+
     test('fix is idempotent (no issues remain after applying)', () async {
       final before = await RuleTestHelper.resolveFromFile(_beforeFixPath);
       final issues = NoBlankLineBeforeSingleReturnRule().check(before).toList();

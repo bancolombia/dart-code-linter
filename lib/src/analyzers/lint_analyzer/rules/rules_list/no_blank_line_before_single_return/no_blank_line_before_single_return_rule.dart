@@ -86,30 +86,34 @@ class NoBlankLineBeforeSingleReturnRule extends DartRule {
   }
 }
 
-// Rebuilds the region between the block's opening token and the return
-// statement, keeping any comments (verbatim, on their own lines) and the
-// return line while dropping the blank lines in between.
+// The region without its blank lines; comments and the return's line stay
+// as they are.
 String _buildReplacement(
   ReturnStatement statement,
   int startOffset,
   String content,
 ) {
-  final buffer = StringBuffer();
-
-  Token? comment = statement.returnKeyword.precedingComments;
-  while (comment != null) {
-    // Skip comments that share the line with the previous token (e.g. a
-    // trailing comment on the opening brace); they stay outside the region.
-    if (comment.offset >= startOffset) {
-      final lineStart = _lineStartOffset(comment.offset, content);
-      final indentation = content.substring(lineStart, comment.offset);
-      buffer.write('$indentation${comment.lexeme}\n');
-    }
-    comment = comment.next;
+  final comments = <Token>[];
+  for (Token? comment = statement.returnKeyword.precedingComments;
+      comment != null;
+      comment = comment.next) {
+    comments.add(comment);
   }
 
-  final returnOffset = statement.returnKeyword.offset;
-  final returnLineStart = _lineStartOffset(returnOffset, content);
+  final buffer = StringBuffer();
+  final returnLineStart =
+      _lineStartOffset(statement.returnKeyword.offset, content);
+  var lineStart = startOffset;
+  while (lineStart < returnLineStart) {
+    final lineEnd = content.indexOf('\n', lineStart) + 1;
+    final line = content.substring(lineStart, lineEnd);
+    final inComment = comments.any(
+        (comment) => comment.offset < lineStart && lineStart < comment.end);
+    if (inComment || line.trim().isNotEmpty) {
+      buffer.write(line);
+    }
+    lineStart = lineEnd;
+  }
   buffer.write(content.substring(returnLineStart, statement.end));
 
   return buffer.toString();
