@@ -64,7 +64,7 @@ class NoBlankLineBeforeSingleReturnRule extends DartRule {
     }).map((statement) {
       final content = source.content;
       final startOffset =
-          content.indexOf('\n', statement.returnKeyword.previous!.end) + 1;
+          content.indexOf('\n', _braceLineEnd(statement, source.lineInfo)) + 1;
       final endOffset = statement.end;
 
       return createIssue(
@@ -113,6 +113,22 @@ String _buildReplacement(
   buffer.write(content.substring(returnLineStart, statement.end));
 
   return buffer.toString();
+}
+
+// The end of the opening brace, or of the last comment starting on its line.
+int _braceLineEnd(ReturnStatement statement, LineInfo lineInfo) {
+  final brace = statement.returnKeyword.previous!;
+  final braceLine = lineInfo.getLocation(brace.end).lineNumber;
+
+  var end = brace.end;
+  Token? comment = statement.returnKeyword.precedingComments;
+  while (comment != null &&
+      lineInfo.getLocation(comment.offset).lineNumber == braceLine) {
+    end = comment.end;
+    comment = comment.next;
+  }
+
+  return end;
 }
 
 int _lineStartOffset(int offset, String content) =>
