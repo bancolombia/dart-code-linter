@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/ast/ast.dart';
 
+import '../../../utils/ast_compat.dart';
 import 'function_type.dart';
 import 'scoped_class_declaration.dart';
 
@@ -22,12 +23,11 @@ class ScopedFunctionDeclaration {
     if (node is FunctionDeclaration) {
       name = node.name.lexeme;
     } else if (node is ConstructorDeclaration) {
-      final parent = node.parent?.parent;
+      final parent = enclosingTypeDeclaration(node);
       name = node.name?.lexeme ??
           switch (parent) {
-            ClassDeclaration(:final namePart) ||
-            EnumDeclaration(:final namePart) =>
-              namePart.typeName.lexeme,
+            ClassDeclaration() => typeDeclarationName(parent) ?? '',
+            EnumDeclaration() => typeDeclarationName(parent) ?? '',
             MixinDeclaration() => parent.name.lexeme,
             _ => '',
           };

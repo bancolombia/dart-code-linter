@@ -583,7 +583,11 @@ class UsedCodeVisitor extends RecursiveAstVisitor<void> {
     }
   }
 
-  Iterable<String> _declaredMemberNames(InterfaceElement element) => [
+  // The element type is written out rather than inferred: the four member
+  // kinds share `Element` through different paths, and on analyzer 8.2.0-8.4.0
+  // the inferred least upper bound of the list collapses to `Object`, which
+  // carries no `name`. Analyzer 9.0.0+ infers `Element` for the same literal.
+  Iterable<String> _declaredMemberNames(InterfaceElement element) => <Element>[
         ...element.methods.where((member) => !member.isStatic),
         ...element.getters.where((member) => !member.isStatic),
         ...element.setters.where((member) => !member.isStatic),

@@ -14,12 +14,12 @@ class _Visitor extends SimpleAstVisitor<void> {
       return;
     }
 
-    final body = node.body;
-    if (body is! BlockClassBody) {
+    final members = classBodyMembers(node);
+    if (members == null) {
       return;
     }
 
-    final onLoadMethod = body.members.firstWhereOrNull((member) =>
+    final onLoadMethod = members.firstWhereOrNull((member) =>
         member is MethodDeclaration &&
         member.name.lexeme == 'onLoad' &&
         isOverride(member.metadata));
