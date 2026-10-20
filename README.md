@@ -121,6 +121,8 @@ Do not put a map below `plugins.dart_code_linter.diagnostics.<rule>` on Flutter 
 
 Rules with mandatory configuration, such as `avoid-banned-imports` and `ban-name`, work with the modern plugin when their configuration lives under `dart_code_linter.rules`.
 
+To turn a rule off everywhere, remove it from both sections: the CLI runs the rules listed in `dart_code_linter.rules`, and this plugin runs those enabled in `plugins.dart_code_linter.diagnostics`, whatever the other section says. `// ignore: <rule-id>` and `// ignore_for_file: <rule-id>` silence a finding in the CLI and in this plugin, and so does the `dart_code_linter/<rule-id>` form the IDE's quick fixes write. `analyzer.errors` does not work for DCL rules: the analyzer reports their ids there as `unrecognized_error_code` and neither this plugin nor the CLI applies the entry, so skip the IDE's "Ignore ... in `analysis_options.yaml`" quick fix for them.
+
 #### 2. Legacy Analyzer Plugin (Dart < 3.9)
 
 Configure the plugin under `analyzer` in your `analysis_options.yaml`:
@@ -146,6 +148,7 @@ As DCL depends on the Dart `analyzer` package. The following table shows the com
 
 | DCL Version       | Analyzer Version   | Dart SDK          |
 |-------------------|--------------------|-------------------|
+| 4.4.3             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.4.2             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.4.1             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |
 | 4.4.0             | >=10.0.0 <15.0.0   | >=3.5.0 <4.0.0   |

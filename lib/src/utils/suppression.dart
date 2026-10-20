@@ -9,6 +9,10 @@ class Suppression {
 
   static const _typeLint = 'type=lint';
 
+  /// The plugin name the analysis server's quick fixes put before an id since
+  /// Dart 3.12, as in `// ignore: dart_code_linter/no-magic-number`.
+  static const _pluginPrefix = 'dart_code_linter/';
+
   final _ignoreMap = <int, List<String>>{};
   final _ignoreForFileSet = <String>{};
 
@@ -59,5 +63,11 @@ class Suppression {
     }
   }
 
-  String _canonicalize(String ruleId) => ruleId.trim().toLowerCase();
+  String _canonicalize(String ruleId) {
+    final id = ruleId.trim().toLowerCase();
+
+    return id.startsWith(_pluginPrefix)
+        ? id.substring(_pluginPrefix.length)
+        : id;
+  }
 }
