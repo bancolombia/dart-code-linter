@@ -45,7 +45,13 @@ class FileElementsUsage {
     exports.addAll(other.exports);
     conditionalElements.addAll(other.conditionalElements);
     conditionalFiles.addAll(other.conditionalFiles);
-    prefixMap.addAll(other.prefixMap);
+    // Merge each prefix's elements instead of replacing them: a library and
+    // its part file share one `PrefixElement` but are analyzed as separate
+    // files, so `addAll` would keep only whichever of the two merged last and
+    // drop the other file's references.
+    for (final entry in other.prefixMap.entries) {
+      (prefixMap[entry.key] ??= []).addAll(entry.value);
+    }
     dynamicallyUsedNames.addAll(other.dynamicallyUsedNames);
     externallyUsedElements.addAll(other.externallyUsedElements);
     externallyRedeclaredMembers.addAll(other.externallyRedeclaredMembers);
