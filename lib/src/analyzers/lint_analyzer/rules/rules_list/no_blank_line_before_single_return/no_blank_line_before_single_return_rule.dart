@@ -45,7 +45,7 @@ class NoBlankLineBeforeSingleReturnRule extends DartRule {
 
       return parentBlock.statements.length == 1;
     })
-        // Ensure there is no blank line before the return statement, ignoring comments
+        // Keep only returns with a blank line before them, ignoring comments
         .where((statement) {
       final lineInfo = source.lineInfo;
 
@@ -60,11 +60,11 @@ class NoBlankLineBeforeSingleReturnRule extends DartRule {
           )
           .lineNumber;
 
-      return tokenLine != previousTokenLine + 1;
+      return tokenLine > previousTokenLine + 1;
     }).map((statement) {
       final content = source.content;
       final startOffset =
-          content.indexOf('\n', statement.returnKeyword.previous!.end) + 1;
+          content.indexOf('\n', _braceLineEnd(statement, source.lineInfo)) + 1;
       final endOffset = statement.end;
 
       return createIssue(
@@ -86,33 +86,53 @@ class NoBlankLineBeforeSingleReturnRule extends DartRule {
   }
 }
 
-// Rebuilds the region between the block's opening token and the return
-// statement, keeping any comments (verbatim, on their own lines) and the
-// return line while dropping the blank lines in between.
+// The region without its blank lines; comments and the return's line stay
+// as they are.
 String _buildReplacement(
   ReturnStatement statement,
   int startOffset,
   String content,
 ) {
-  final buffer = StringBuffer();
-
-  Token? comment = statement.returnKeyword.precedingComments;
-  while (comment != null) {
-    // Skip comments that share the line with the previous token (e.g. a
-    // trailing comment on the opening brace); they stay outside the region.
-    if (comment.offset >= startOffset) {
-      final lineStart = _lineStartOffset(comment.offset, content);
-      final indentation = content.substring(lineStart, comment.offset);
-      buffer.write('$indentation${comment.lexeme}\n');
-    }
-    comment = comment.next;
+  final comments = <Token>[];
+  for (Token? comment = statement.returnKeyword.precedingComments;
+      comment != null;
+      comment = comment.next) {
+    comments.add(comment);
   }
 
-  final returnOffset = statement.returnKeyword.offset;
-  final returnLineStart = _lineStartOffset(returnOffset, content);
+  final buffer = StringBuffer();
+  final returnLineStart =
+      _lineStartOffset(statement.returnKeyword.offset, content);
+  var lineStart = startOffset;
+  while (lineStart < returnLineStart) {
+    final lineEnd = content.indexOf('\n', lineStart) + 1;
+    final line = content.substring(lineStart, lineEnd);
+    final inComment = comments.any(
+        (comment) => comment.offset < lineStart && lineStart < comment.end);
+    if (inComment || line.trim().isNotEmpty) {
+      buffer.write(line);
+    }
+    lineStart = lineEnd;
+  }
   buffer.write(content.substring(returnLineStart, statement.end));
 
   return buffer.toString();
+}
+
+// The end of the opening brace, or of the last comment starting on its line.
+int _braceLineEnd(ReturnStatement statement, LineInfo lineInfo) {
+  final brace = statement.returnKeyword.previous!;
+  final braceLine = lineInfo.getLocation(brace.end).lineNumber;
+
+  var end = brace.end;
+  Token? comment = statement.returnKeyword.precedingComments;
+  while (comment != null &&
+      lineInfo.getLocation(comment.offset).lineNumber == braceLine) {
+    end = comment.end;
+    comment = comment.next;
+  }
+
+  return end;
 }
 
 int _lineStartOffset(int offset, String content) =>
