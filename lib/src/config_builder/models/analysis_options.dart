@@ -197,8 +197,15 @@ Map<String, Object> _loadConfigFromYamlFile(
     var optionsNode =
         node is YamlMap ? yamlMapToDartMap(node) : <String, Object>{};
 
-    final path = optionsNode['include'];
-    if (path is String) {
+    final includeNode = optionsNode['include'];
+    final includes = includeNode is String
+        ? [includeNode]
+        : includeNode is Iterable<Object>
+            ? includeNode.whereType<String>().toList()
+            : <String>[];
+    // As in the analyzer, a later include overrides an earlier one, so they
+    // are merged under the file's own options from last to first.
+    for (final path in includes.reversed) {
       optionsNode =
           _resolveImportAsOptions(options, converter, path, optionsNode);
     }
