@@ -187,8 +187,10 @@ AnalysisOptions analysisOptionsFromFile(
 
 Map<String, Object> _loadConfigFromYamlFile(
   File options,
-  UriConverter converter,
-) {
+  UriConverter converter, {
+  Set<String>? readIncludes,
+}) {
+  final read = readIncludes ?? <String>{};
   try {
     final node = options.existsSync()
         ? loadYamlNode(options.readAsStringSync())
@@ -203,11 +205,26 @@ Map<String, Object> _loadConfigFromYamlFile(
         : includeNode is Iterable<Object>
             ? includeNode.whereType<String>().toList()
             : <String>[];
-    // As in the analyzer, a later include overrides an earlier one, so they
-    // are merged under the file's own options from last to first.
-    for (final path in includes.reversed) {
-      optionsNode =
-          _resolveImportAsOptions(options, converter, path, optionsNode);
+    // As in the analyzer, a later include overrides an earlier one, and a file
+    // reached again, through another include or a cycle, is read only once.
+    if (includes.isNotEmpty) {
+      final included = includes.fold(<String, Object>{}, (merged, path) {
+        final resolved = _resolvePath(options, converter, path);
+        final includePath = resolved == null ? null : p.normalize(resolved);
+        if (includePath == null || !read.add(includePath)) {
+          return merged;
+        }
+
+        return mergeMaps(
+          defaults: merged,
+          overrides: _loadConfigFromYamlFile(
+            File(includePath),
+            converter,
+            readIncludes: read,
+          ),
+        );
+      });
+      optionsNode = mergeMaps(defaults: included, overrides: optionsNode);
     }
 
     final rootConfig = optionsNode[_rootKey];
@@ -235,11 +252,7 @@ Map<String, Object> _resolveImportAsOptions(
   String path,
   Map<String, Object> optionsNode,
 ) {
-  final packageImport = path.startsWith('package:');
-
-  final resolvedUri = packageImport
-      ? converter.uriToPath(Uri.parse(path))
-      : p.absolute(p.dirname(options.path), path);
+  final resolvedUri = _resolvePath(options, converter, path);
 
   if (resolvedUri != null) {
     final resolvedYamlMap =
@@ -250,3 +263,10 @@ Map<String, Object> _resolveImportAsOptions(
 
   return optionsNode;
 }
+
+/// The path [path] names, relative to the options file [options] unless it is
+/// a `package:` URI; null when the package cannot be resolved.
+String? _resolvePath(File options, UriConverter converter, String path) =>
+    path.startsWith('package:')
+        ? converter.uriToPath(Uri.parse(path))
+        : p.absolute(p.dirname(options.path), path);

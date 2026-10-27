@@ -1,0 +1,3 @@
+include:
+  - ./analysis_options_include_diamond_a.yaml
+  - ./analysis_options_include_diamond_b.yaml
