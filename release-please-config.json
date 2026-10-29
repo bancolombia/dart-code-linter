@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "dart",
+  "include-component-in-tag": false,
+  "include-v-in-tag": true,
+  "packages": {
+    ".": {
+      "extra-files": [
+        "lib/src/version.dart",
+        "tools/analyzer_plugin/pubspec.yaml",
+        "README.md"
+      ]
+    }
+  }
+}

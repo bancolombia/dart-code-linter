@@ -13,7 +13,35 @@ name: release-please
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - uses: googleapis/release-please-action@v5
+        id: release
         with:
-          release-type: dart
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    name: 'Publish to pub.dev'
+    environment: pub.dev
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
+      - name: Setup Flutter
+        uses: bancolombia/flutter-setup-action@v1.1
+        with:
+          channel: 'stable'
+          flutter-version: '3.44.0'
+      - name: Install dependencies
+        run: dart pub get
+      - name: Publish to pub.dev
+        run: dart pub publish -f
