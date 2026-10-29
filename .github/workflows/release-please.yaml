@@ -16,4 +16,8 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@v5
         with:
-          release-type: dart
+          # Tags pushed with the default GITHUB_TOKEN don't trigger other
+          # workflows, so release.yaml (and its pub.dev publish) would never run.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

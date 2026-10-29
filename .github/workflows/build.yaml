@@ -11,6 +11,7 @@ on:
       - 'lib/**'
       - 'tools/**'
       - 'test/**'
+      - 'pubspec.yaml'
       - '.github/workflows/build.yaml'
   
 jobs:

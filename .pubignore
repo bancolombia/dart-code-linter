@@ -7,3 +7,5 @@
 /website/*
 /codecov.yaml
 /dart_dependency_validator.yaml
+/release-please-config.json
+/.release-please-manifest.json
