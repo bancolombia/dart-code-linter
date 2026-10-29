@@ -48,15 +48,22 @@ class UnusedCodeAnalyzer {
 
   /// Returns a list of unused code reports
   /// for analyzing all files in the given [folders].
+  /// Files in [usageOnlyFolders] contribute usages but never produce reports.
+  /// Files excluded by analyzer configuration are not analyzed from either
+  /// input.
   /// The analysis is configured with the [config].
   Future<Iterable<UnusedCodeFileReport>> runCliAnalysis(
     Iterable<String> folders,
     String rootFolder,
     UnusedCodeConfig config, {
     String? sdkPath,
+    Iterable<String> usageOnlyFolders = const [],
   }) async {
+    final targetFolders = folders.toList();
+    final usageFolders = usageOnlyFolders.toList();
+    final includedFolders = {...targetFolders, ...usageFolders}.toList();
     final collection =
-        createAnalysisContextCollection(folders, rootFolder, sdkPath);
+        createAnalysisContextCollection(includedFolders, rootFolder, sdkPath);
 
     final codeUsages = FileElementsUsage();
     final publicCode = <String, _FileCandidates>{};
@@ -77,7 +84,13 @@ class UnusedCodeAnalyzer {
       // Files matched by the excludes are not reported, but they are still
       // analyzed for usages: generated code is often the only user of the
       // code it was generated for.
-      final filePaths = getFilePaths(folders, context, rootFolder, const []);
+      final filePaths =
+          getFilePaths(includedFolders, context, rootFolder, const []);
+      final usageOnlyFilePaths =
+          getFilePaths(usageFolders, context, rootFolder, const []);
+      final reportableFilePaths =
+          getFilePaths(targetFolders, context, rootFolder, const [])
+              .difference(usageOnlyFilePaths);
 
       final analyzedFiles =
           filePaths.intersection(context.contextRoot.analyzedFiles().toSet());
@@ -102,7 +115,8 @@ class UnusedCodeAnalyzer {
           codeUsages.merge(codeUsage);
         }
 
-        if (!isExcluded(filePath, unusedCodeAnalysisConfig.globalExcludes) &&
+        if (reportableFilePaths.contains(filePath) &&
+            !isExcluded(filePath, unusedCodeAnalysisConfig.globalExcludes) &&
             !unusedCodeAnalysisConfig.analyzerExcludedPatterns
                 .any((pattern) => pattern.matches(filePath))) {
           publicCode[filePath] = _analyzeFilePublicCode(
