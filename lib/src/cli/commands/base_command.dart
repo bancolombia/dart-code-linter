@@ -29,7 +29,8 @@ abstract class BaseCommand extends Command<void> {
 
   List<String> get targetDirectories {
     final explicitDirectories = argResults.rest;
-    if (!(argResults[FlagNames.workspace] as bool)) {
+    final includeWorkspace = argResults[FlagNames.workspace] as bool? ?? false;
+    if (!includeWorkspace) {
       return explicitDirectories;
     }
 
@@ -76,8 +77,8 @@ abstract class BaseCommand extends Command<void> {
   void validateTargetDirectoriesOrFiles() {
     final directories = targetDirectories;
     if (directories.isEmpty) {
-      const exceptionMessage = 'At least one directory must be specified, '
-          'or use --workspace to discover package lib directories.';
+      const exceptionMessage =
+          'Invalid number of directories or files. At least one must be specified.';
 
       throw const InvalidArgumentException(exceptionMessage);
     }
