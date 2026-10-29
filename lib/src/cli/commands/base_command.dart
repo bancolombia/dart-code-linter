@@ -10,6 +10,7 @@ import 'package:path/path.dart';
 import '../exceptions/invalid_argument_exception.dart';
 import '../models/flag_names.dart';
 import '../utils/detect_sdk_path.dart';
+import '../utils/workspace_paths.dart';
 
 abstract class BaseCommand extends Command<void> {
   @override
@@ -25,6 +26,20 @@ abstract class BaseCommand extends Command<void> {
   bool get isNoCongratulate => argResults[FlagNames.noCongratulate] as bool;
 
   bool get isVerbose => argResults[FlagNames.verbose] as bool;
+
+  List<String> get targetDirectories {
+    final explicitDirectories = argResults.rest;
+    if (!(argResults[FlagNames.workspace] as bool)) {
+      return explicitDirectories;
+    }
+
+    final rootFolderPath = argResults[FlagNames.rootFolder] as String;
+
+    return [
+      ...discoverWorkspaceLibraryPaths(rootFolderPath),
+      ...explicitDirectories,
+    ];
+  }
 
   @override
   Future<void> run() => _verifyThenRunCommand();
@@ -59,16 +74,17 @@ abstract class BaseCommand extends Command<void> {
   }
 
   void validateTargetDirectoriesOrFiles() {
-    if (argResults.rest.isEmpty) {
-      const exceptionMessage =
-          'Invalid number of directories or files. At least one must be specified.';
+    final directories = targetDirectories;
+    if (directories.isEmpty) {
+      const exceptionMessage = 'At least one directory must be specified, '
+          'or use --workspace to discover package lib directories.';
 
       throw const InvalidArgumentException(exceptionMessage);
     }
 
     final rootFolderPath = argResults[FlagNames.rootFolder] as String;
 
-    for (final relativePath in argResults.rest) {
+    for (final relativePath in directories) {
       final absolutePath = join(rootFolderPath, relativePath);
       if (!Directory(absolutePath).existsSync() &&
           !File(absolutePath).existsSync()) {
@@ -83,6 +99,7 @@ abstract class BaseCommand extends Command<void> {
   void addCommonFlags() {
     usesPrintConfig();
     usesRootFolderOption();
+    usesWorkspaceOption();
     usesSdkPathOption();
     usesExcludeOption();
     usesCongratulateFlag();
@@ -109,6 +126,14 @@ abstract class BaseCommand extends Command<void> {
         valueHelp: './',
         defaultsTo: Directory.current.path,
       );
+  }
+
+  void usesWorkspaceOption() {
+    argParser.addFlag(
+      FlagNames.workspace,
+      help: 'Add each Pub workspace package lib directory to the targets.',
+      negatable: false,
+    );
   }
 
   void usesSdkPathOption() {

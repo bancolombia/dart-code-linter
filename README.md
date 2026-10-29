@@ -196,6 +196,16 @@ For additional help on any of the commands, enter `dart run dart_code_linter:met
 
 You can define one analysis_options.yaml at the root file.
 
+Every command accepts `--workspace` to add the `lib/` directory from each
+package listed in the Pub workspace at `--root-folder`. Pass explicit
+directories as usual to add targets outside those package libraries. Workspace
+members can declare nested workspaces; those package libraries are discovered
+too.
+
+```sh
+dart run dart_code_linter:metrics check-unused-code --workspace
+```
+
 #### Analyze
 
 Reports code metrics, rules and anti-patterns violations. To execute the command, run

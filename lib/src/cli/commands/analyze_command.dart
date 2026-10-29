@@ -30,7 +30,7 @@ class AnalyzeCommand extends BaseCommand {
 
   @override
   String get invocation =>
-      '${runner?.executableName} $name [arguments] <directories>';
+      '${runner?.executableName} $name [arguments] [<directories>]';
 
   AnalyzeCommand(this._logger) : _analyzer = LintAnalyzer(_logger) {
     _addFlags();
@@ -48,7 +48,7 @@ class AnalyzeCommand extends BaseCommand {
     final config = ConfigBuilder.getLintConfigFromArgs(parsedArgs);
 
     final lintAnalyzerResult = await _analyzer.runCliAnalysis(
-      argResults.rest,
+      targetDirectories,
       parsedArgs.rootFolder,
       config,
       sdkPath: findSdkPath(),

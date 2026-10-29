@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 
 const _usage = 'Check unused *.dart files.\n'
     '\n'
-    'Usage: metrics check-unused-files [arguments] <directories>\n'
+    'Usage: metrics check-unused-files [arguments] [<directories>]\n'
     '-h, --help                                       Print this usage information.\n'
     '\n'
     '\n'
@@ -19,6 +19,7 @@ const _usage = 'Check unused *.dart files.\n'
     '\n'
     '    --root-folder=<./>                           Root folder.\n'
     '                                                 (defaults to current directory)\n'
+    '    --workspace                                  Add each Pub workspace package lib directory to the targets.\n'
     '    --sdk-path=<directory-path>                  Dart SDK directory path. Should be provided only when you run the application as compiled executable(https://dart.dev/tools/dart-compile#exe) and automatic Dart SDK path detection fails.\n'
     '    --exclude=<{/**.g.dart,/**.freezed.dart}>    File paths in Glob syntax to be exclude.\n'
     '                                                 (defaults to "{/**.g.dart,/**.freezed.dart}")\n'
@@ -57,7 +58,7 @@ void main() {
     test('should have correct invocation', () {
       expect(
         command?.invocation,
-        equals('metrics check-unused-files [arguments] <directories>'),
+        equals('metrics check-unused-files [arguments] [<directories>]'),
       );
     });
 
@@ -106,6 +107,45 @@ void main() {
         expect(files['x.g.dart']!.existsSync(), isTrue);
         expect(files['x.freezed.dart']!.existsSync(), isTrue);
         expect(files['y.dart']!.existsSync(), isFalse);
+      },
+      testOn: 'posix',
+      timeout: const Timeout.factor(4),
+    );
+
+    test(
+      'should target workspace package lib directories without explicit paths',
+      () async {
+        final root = Directory(
+          Directory.systemTemp
+              .createTempSync('dcl_workspace_files_')
+              .resolveSymbolicLinksSync(),
+        );
+        addTearDown(() => root.deleteSync(recursive: true));
+
+        File(p.join(root.path, 'pubspec.yaml')).writeAsStringSync('''
+name: workspace
+workspace:
+  - packages/example
+''');
+        File(p.join(root.path, 'packages', 'example', 'pubspec.yaml'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('name: example\n');
+        final unusedFile = File(
+          p.join(root.path, 'packages', 'example', 'lib', 'unused.dart'),
+        )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('int unused = 0;');
+
+        await runner.runCommand(runner.parse([
+          'check-unused-files',
+          '--workspace',
+          '--root-folder=${root.path}',
+          '--delete-files',
+          '--no-fatal-unused',
+          '--no-congratulate',
+        ]));
+
+        expect(unusedFile.existsSync(), isFalse);
       },
       testOn: 'posix',
       timeout: const Timeout.factor(4),

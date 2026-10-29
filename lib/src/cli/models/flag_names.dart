@@ -11,6 +11,7 @@ class FlagNames {
   static const noCongratulate = 'no-congratulate';
   static const reporter = 'reporter';
   static const rootFolder = 'root-folder';
+  static const workspace = 'workspace';
   static const sdkPath = 'sdk-path';
   static const isMonorepo = 'monorepo';
   static const version = 'version';

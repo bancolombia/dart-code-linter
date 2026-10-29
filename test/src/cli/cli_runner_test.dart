@@ -21,7 +21,7 @@ void main() {
     test('should have correct invocation', () {
       expect(
         CliRunner().invocation,
-        equals('metrics <command> [arguments] <directories>'),
+        equals('metrics <command> [arguments] [<directories>]'),
       );
     });
 

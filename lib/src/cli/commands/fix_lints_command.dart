@@ -19,7 +19,7 @@ class FixCommand extends BaseCommand {
 
   @override
   String get invocation =>
-      '${runner?.executableName} $name [arguments] <directories>';
+      '${runner?.executableName} $name [arguments] [<directories>]';
 
   FixCommand(this._logger) : _analyzer = LintAnalyzer(_logger) {
     _addFlags();
@@ -37,7 +37,7 @@ class FixCommand extends BaseCommand {
 
     // Run the analysis and apply fixes
     await _analyzer.runCliFix(
-      argResults.rest,
+      targetDirectories,
       parsedArgs.rootFolder,
       config,
       sdkPath: findSdkPath(),
