@@ -1,0 +1,2 @@
+include:
+  - ./analysis_options_include_cycle_a.yaml

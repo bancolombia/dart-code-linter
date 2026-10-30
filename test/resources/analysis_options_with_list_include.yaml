@@ -1,0 +1,8 @@
+include:
+  - package:test_lints/analysis_options.yaml
+  - ./analysis_options_list_include_first.yaml
+  - ./analysis_options_list_include_second.yaml
+
+dart_code_linter:
+  metrics:
+    metric-id3: 3
