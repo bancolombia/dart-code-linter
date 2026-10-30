@@ -38,7 +38,7 @@ class CliRunner extends CommandRunner<void> {
 
   /// Represents the invocation string message.
   @override
-  String get invocation => '${super.invocation} <directories>';
+  String get invocation => '${super.invocation} [<directories>]';
 
   /// Main entry point for running a command.
   @override
