@@ -15,12 +15,12 @@ class _Visitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    final body = node.body;
-    if (body is! BlockClassBody) {
+    final members = classBodyMembers(node);
+    if (members == null) {
       return;
     }
 
-    final initState = body.members
+    final initState = members
         .whereType<MethodDeclaration>()
         .where((member) => member.name.lexeme == 'initState')
         .firstOrNull;
@@ -37,7 +37,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
       for (final argument in invocation.argumentList.arguments) {
         final expression = unwrapArgumentExpression(argument);
         if (expression is InstanceCreationExpression &&
-            _isNonConfigurableCallbackObject(expression, body)) {
+            _isNonConfigurableCallbackObject(expression, members)) {
           _hardcodedConfigurations.add(expression);
         }
       }
@@ -46,7 +46,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   bool _isNonConfigurableCallbackObject(
     InstanceCreationExpression node,
-    BlockClassBody classBody,
+    List<ClassMember> classBody,
   ) {
     final hasNamedCallback =
         node.argumentList.arguments.any(_isNamedFunctionArgument);
@@ -76,14 +76,14 @@ class _Visitor extends RecursiveAstVisitor<void> {
   /// treated as referencing the widget.
   bool _mayReferenceWidget(
     InstanceCreationExpression node,
-    BlockClassBody classBody,
+    List<ClassMember> classBody,
   ) {
     if (_referencesWidget(node)) {
       return true;
     }
 
     final methods = <String, MethodDeclaration>{
-      for (final member in classBody.members)
+      for (final member in classBody)
         if (member is MethodDeclaration) member.name.lexeme: member,
     };
 

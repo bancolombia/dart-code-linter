@@ -18,7 +18,10 @@ class _Visitor extends RecursiveAstVisitor<void> {
   void visitClassDeclaration(ClassDeclaration node) {
     super.visitClassDeclaration(node);
 
-    _declarations.add(_TokeInfo(node.namePart.typeName, node));
+    final name = typeDeclarationNameToken(node);
+    if (name != null) {
+      _declarations.add(_TokeInfo(name, node));
+    }
   }
 
   @override
@@ -43,7 +46,10 @@ class _Visitor extends RecursiveAstVisitor<void> {
     super.visitEnumDeclaration(node);
 
     if (!ignoreEnums) {
-      _declarations.add(_TokeInfo(node.namePart.typeName, node));
+      final name = typeDeclarationNameToken(node);
+      if (name != null) {
+        _declarations.add(_TokeInfo(name, node));
+      }
     }
   }
 

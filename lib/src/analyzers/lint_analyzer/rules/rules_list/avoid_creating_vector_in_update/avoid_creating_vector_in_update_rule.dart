@@ -5,6 +5,7 @@ import 'package:analyzer/dart/ast/visitor.dart';
 // ignore: implementation_imports
 import 'package:collection/collection.dart';
 
+import '../../../../../utils/ast_compat.dart';
 import '../../../../../utils/flame_type_utils.dart';
 import '../../../../../utils/node_utils.dart';
 import '../../../lint_utils.dart';
