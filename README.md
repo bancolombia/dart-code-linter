@@ -306,7 +306,19 @@ dart_code_linter:
     analyze-private-members: true
 ```
 
-The CLI flag wins over the `analysis_options.yaml` value when both are set. Two
+The CLI flag wins over the `analysis_options.yaml` value when both are set.
+
+Additional directories can count as usage sources without being checked for
+unused declarations. Pass `--usage-only` once per directory:
+
+```sh
+dart run dart_code_linter:metrics check-unused-code apps/app/lib \
+  --usage-only apps/server/lib \
+  --usage-only apps/server/bin
+```
+
+Files in these directories can keep declarations in the target directories
+from being reported as unused. Their own declarations are not reported. Two
 limitations are worth knowing about:
 
 - A private field that is only ever assigned, never read, is reported as unused,
