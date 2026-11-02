@@ -19,7 +19,7 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
       - name: Setup Flutter
         uses: bancolombia/flutter-setup-action@v1.1
@@ -45,7 +45,7 @@ jobs:
             flutter_version: '3.47.0'
             scalar_diagnostics: 'true'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
       - name: Setup Flutter
         uses: bancolombia/flutter-setup-action@v1.1
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
 
