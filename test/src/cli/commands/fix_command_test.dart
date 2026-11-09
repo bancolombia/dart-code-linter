@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 const _usage =
     'Automatically fix code issues based on lint rules and metrics.\n'
     '\n'
-    'Usage: metrics fix [arguments] <directories>\n'
+    'Usage: metrics fix [arguments] [<directories>]\n'
     '-h, --help                                       Print this usage information.\n'
     '\n'
     '\n'
@@ -21,6 +21,7 @@ const _usage =
     '\n'
     '    --root-folder=<./>                           Root folder.\n'
     '                                                 (defaults to current directory)\n'
+    '    --workspace                                  Add each Pub workspace package lib directory to the targets.\n'
     '    --sdk-path=<directory-path>                  Dart SDK directory path. Should be provided only when you run the application as compiled executable(https://dart.dev/tools/dart-compile#exe) and automatic Dart SDK path detection fails.\n'
     '    --exclude=<{/**.g.dart,/**.freezed.dart}>    File paths in Glob syntax to be exclude.\n'
     '                                                 (defaults to "{/**.g.dart,/**.freezed.dart}")\n'
@@ -61,7 +62,7 @@ void main() {
     test('should have correct invocation', () {
       expect(
         command?.invocation,
-        equals('metrics fix [arguments] <directories>'),
+        equals('metrics fix [arguments] [<directories>]'),
       );
     });
 

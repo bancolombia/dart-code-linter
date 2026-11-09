@@ -22,7 +22,7 @@ class CheckUnusedL10nCommand extends BaseCommand {
 
   @override
   String get invocation =>
-      '${runner?.executableName} $name [arguments] <directories>';
+      '${runner?.executableName} $name [arguments] [<directories>]';
 
   CheckUnusedL10nCommand(this._logger)
       : _analyzer = UnusedL10nAnalyzer(_logger) {
@@ -42,7 +42,7 @@ class CheckUnusedL10nCommand extends BaseCommand {
     final reporterName = argResults[FlagNames.reporter] as String;
     final shouldPrintConfig = argResults[FlagNames.printConfig] as bool;
 
-    final folders = argResults.rest;
+    final folders = targetDirectories;
 
     final config = ConfigBuilder.getUnusedL10nConfigFromArgs(
       [excludePath],

@@ -23,7 +23,7 @@ class CheckUnnecessaryNullableCommand extends BaseCommand {
 
   @override
   String get invocation =>
-      '${runner?.executableName} $name [arguments] <directories>';
+      '${runner?.executableName} $name [arguments] [<directories>]';
 
   CheckUnnecessaryNullableCommand(this._logger)
       : _analyzer = UnnecessaryNullableAnalyzer(_logger) {
@@ -38,7 +38,7 @@ class CheckUnnecessaryNullableCommand extends BaseCommand {
       ..progress.start('Checking unnecessary nullable parameters');
 
     final rootFolder = argResults[FlagNames.rootFolder] as String;
-    final folders = argResults.rest;
+    final folders = targetDirectories;
     final excludePath = argResults[FlagNames.exclude] as String;
     final reporterName = argResults[FlagNames.reporter] as String;
     final isMonorepo = argResults[FlagNames.isMonorepo] as bool;

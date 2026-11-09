@@ -41,7 +41,7 @@ class CheckUnusedCodeCommand extends BaseCommand {
 
   @override
   String get invocation =>
-      '${runner?.executableName} $name [arguments] <directories>';
+      '${runner?.executableName} $name [arguments] [<directories>]';
 
   CheckUnusedCodeCommand(this._logger)
       : _analyzer = UnusedCodeAnalyzer(_logger) {
@@ -56,7 +56,7 @@ class CheckUnusedCodeCommand extends BaseCommand {
       ..progress.start('Checking unused code');
 
     final rootFolder = argResults[FlagNames.rootFolder] as String;
-    final folders = argResults.rest;
+    final folders = targetDirectories;
     final excludePath = argResults[FlagNames.exclude] as String;
     final reporterName = argResults[FlagNames.reporter] as String;
     final isMonorepo = _boolFlagOrNull(FlagNames.isMonorepo);

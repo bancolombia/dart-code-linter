@@ -22,7 +22,7 @@ class CheckUnusedFilesCommand extends BaseCommand {
 
   @override
   String get invocation =>
-      '${runner?.executableName} $name [arguments] <directories>';
+      '${runner?.executableName} $name [arguments] [<directories>]';
 
   CheckUnusedFilesCommand(this._logger)
       : _analyzer = UnusedFilesAnalyzer(_logger) {
@@ -37,7 +37,7 @@ class CheckUnusedFilesCommand extends BaseCommand {
       ..progress.start('Checking unused files');
 
     final rootFolder = argResults[FlagNames.rootFolder] as String;
-    final folders = argResults.rest;
+    final folders = targetDirectories;
     final excludePath = argResults[FlagNames.exclude] as String;
     final reporterName = argResults[FlagNames.reporter] as String;
     final isMonorepo = argResults[FlagNames.isMonorepo] as bool;
