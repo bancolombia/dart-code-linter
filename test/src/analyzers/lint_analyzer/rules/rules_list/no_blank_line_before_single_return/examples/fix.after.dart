@@ -46,5 +46,38 @@ int f(int a) {
     return a + 9;
   }
 
+  if (a > 10) { /* block comment
+     * opened on the brace line */
+    return a + 10;
+  }
+
+  if (a > 11) { /* block comment
+     * opened on the brace line */ // and a line comment
+    return a + 11;
+  }
+
+  if (a > 12) { /* first */ /* second block comment
+     * opened on the brace line */
+    return a + 12;
+  }
+
+  if (a > 13) {
+    /* comment on the return line */ return a + 13;
+  }
+
+  if (a > 14) {
+    /* two comments */ // on one line
+    return a + 14;
+  }
+
+  if (a > 15) {
+    /*
+     * a blank line inside a comment:
+
+     * stays
+     */
+    return a + 15;
+  }
+
   return a;
 }
