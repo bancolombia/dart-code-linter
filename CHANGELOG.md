@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.5](https://github.com/bancolombia/dart-code-linter/compare/v4.4.4...v4.4.5) (2026-11-09)
+
+
+### Bug Fixes
+
+* **config:** follow every file of a list-form include in analysis_options.yaml ([#287](https://github.com/bancolombia/dart-code-linter/issues/287)) ([f4eee41](https://github.com/bancolombia/dart-code-linter/commit/f4eee41e3b9a9a57869b210b180c413dd5cfaed5))
+
 ## 4.4.5
 - Fix a list under `include:` in `analysis_options.yaml` being ignored, as in `include: [package:lints/recommended.yaml, dcl.yaml]`. DCL followed `include:` only when it named a single file, so it read none of the listed files: a project whose `dart_code_linter` configuration came from one of them ran no rules, reported nothing and exited 0. The analysis server plugin still ran the rules its `diagnostics:` enable, but without their options from those files. The listed files are now merged as the analyzer merges them, a later one overriding an earlier one and the including file overriding them all, in `analyze`, `fix`, `check-unused-code`, `check-unnecessary-nullable`, `check-unused-l10n` and both IDE plugins. As in the analyzer, a file reached again, through a second include or an include cycle, is read only once: before, a value it set could override one an earlier include had already changed, and a cycle, even through single-file includes, overflowed the stack and stopped the run with exit code 255.
 
@@ -190,5 +197,3 @@
 
 ## 1.0.0
 - Fork: [Dart code metrics 5.7.3](https://github.com/dart-code-checker/dart-code-metrics)
-
-
