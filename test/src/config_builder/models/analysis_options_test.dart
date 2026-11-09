@@ -126,6 +126,55 @@ void main() {
       );
     });
 
+    test('valid file with a list of includes, later ones overriding', () {
+      const yamlFilePath =
+          './test/resources/analysis_options_with_list_include.yaml';
+
+      final options = analysisOptionsFromFile(
+        File(yamlFilePath),
+        collection.contexts.first,
+      );
+
+      expect(
+        options.readIterableOfString(['analyzer', 'plugins']),
+        equals(['dart_code_linter']),
+      );
+      expect(
+        options.readMap(['metrics'], packageRelated: true),
+        equals({'metric-id1': 1, 'metric-id2': 2, 'metric-id3': 3}),
+      );
+    });
+
+    test('valid file including one file twice, which is read only once', () {
+      const yamlFilePath =
+          './test/resources/analysis_options_with_include_diamond.yaml';
+
+      final options = analysisOptionsFromFile(
+        File(yamlFilePath),
+        collection.contexts.first,
+      );
+
+      expect(
+        options.readMap(['metrics'], packageRelated: true),
+        equals({'metric-id1': 2, 'metric-id2': 2}),
+      );
+    });
+
+    test('valid file with an include cycle', () {
+      const yamlFilePath =
+          './test/resources/analysis_options_with_include_cycle.yaml';
+
+      final options = analysisOptionsFromFile(
+        File(yamlFilePath),
+        collection.contexts.first,
+      );
+
+      expect(
+        options.readMap(['metrics'], packageRelated: true),
+        equals({'metric-id1': 1, 'metric-id2': 2}),
+      );
+    });
+
     test('extends config', () {
       const yamlFilePath =
           './test/resources/analysis_options_with_extends.yaml';
