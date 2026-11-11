@@ -135,6 +135,44 @@ void main() {
       );
     });
 
+    for (final (name, before, finding, after) in [
+      (
+        'a block comment opened on the brace line',
+        'int f() { /* block comment\r\n   * opened on the brace line */\r\n'
+            '\r\n  return 1;\r\n}\r\n',
+        '\r\n  return 1;',
+        'int f() { /* block comment\r\n   * opened on the brace line */\r\n'
+            '  return 1;\r\n}\r\n',
+      ),
+      (
+        'two comments on the brace line, the second multi-line',
+        'int f() { /* first */ /* second\r\n   * block */ // line comment\r\n'
+            '\r\n  return 1;\r\n}\r\n',
+        '\r\n  return 1;',
+        'int f() { /* first */ /* second\r\n   * block */ // line comment\r\n'
+            '  return 1;\r\n}\r\n',
+      ),
+      (
+        'a blank line inside a block comment',
+        'int f() {\r\n  /* first\r\n\r\n     second */\r\n\r\n  return 1;\r\n'
+            '}\r\n',
+        '  /* first\r\n\r\n     second */\r\n\r\n  return 1;',
+        'int f() {\r\n  /* first\r\n\r\n     second */\r\n  return 1;\r\n}\r\n',
+      ),
+    ]) {
+      test('CRLF line endings around $name: finding and fix', () async {
+        final unit = await RuleTestHelper.createAndResolveFromFile(
+          content: before,
+          filePath:
+              'no_blank_line_before_single_return/examples/_crlf_comment_temp.dart',
+        );
+        final issues = NoBlankLineBeforeSingleReturnRule().check(unit).toList();
+
+        expect(issues.single.location.text, equals(finding));
+        expect(_applyFirstSuggestions(unit.content, issues), equals(after));
+      });
+    }
+
     test('fix is idempotent (no issues remain after applying)', () async {
       final before = await RuleTestHelper.resolveFromFile(_beforeFixPath);
       final issues = NoBlankLineBeforeSingleReturnRule().check(before).toList();
