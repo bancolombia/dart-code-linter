@@ -17,6 +17,7 @@ const _multipleMixins = '$_examplePath/multiple_mixins.dart';
 const _codegenFile = '$_examplePath/some_widget.codegen.dart';
 const _exampleWithEnumBefore = '$_examplePath/example_with_enum_before.dart';
 const _exampleWithTypedefBefore = '$_examplePath/example_with_typedef_before.dart';
+const _documentedExample = '$_examplePath/documented_example.dart';
 
 void main() {
   group('PreferMatchFileNameRule', () {
@@ -35,6 +36,16 @@ void main() {
       final unit = await RuleTestHelper.resolveFromFile(_withSingleClass);
       final issues = PreferMatchFileNameRule().check(unit);
 
+      RuleTestHelper.verifyNoIssues(issues);
+    });
+
+    test('reports no issues when the first class is documented', () async {
+      final unit = await RuleTestHelper.resolveFromFile(_documentedExample);
+      final issues = PreferMatchFileNameRule().check(unit);
+
+      // Losing the documented first class does not merely miss a report, it
+      // shifts "the first declaration" onto the next class and reports a
+      // correctly named file.
       RuleTestHelper.verifyNoIssues(issues);
     });
 

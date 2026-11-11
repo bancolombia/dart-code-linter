@@ -16,10 +16,20 @@ class _Visitor extends SimpleAstVisitor<void> {
     super.visitClassDeclaration(node);
 
     final classType = node.extendsClause?.superclass.type;
-    if (isWidgetOrSubclass(classType) &&
-        (!_ignorePrivateWidgets ||
-            !Identifier.isPrivateName(node.namePart.typeName.lexeme))) {
-      _nodes.add(node);
+    if (!isWidgetOrSubclass(classType)) {
+      return;
     }
+
+    if (_ignorePrivateWidgets) {
+      // An unresolvable name is skipped rather than guessed at: reporting a
+      // widget as public when its name could not be read would be a false
+      // positive under this option.
+      final name = typeDeclarationName(node);
+      if (name == null || Identifier.isPrivateName(name)) {
+        return;
+      }
+    }
+
+    _nodes.add(node);
   }
 }

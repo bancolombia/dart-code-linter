@@ -19,11 +19,11 @@ class ScopedClassDeclaration {
     if (node is ExtensionDeclaration) {
       name = node.name?.lexeme;
     } else if (node is ClassDeclaration) {
-      name = node.namePart.typeName.lexeme;
+      name = typeDeclarationName(node);
     } else if (node is MixinDeclaration) {
       name = node.name.lexeme;
     } else if (node is EnumDeclaration) {
-      name = node.namePart.typeName.lexeme;
+      name = typeDeclarationName(node);
     } else if (node is ExtensionTypeDeclaration) {
       name = extensionTypeName(node);
     }

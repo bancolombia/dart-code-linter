@@ -9,6 +9,7 @@ const _classExample = '$_path/class_example.dart';
 const _enumExample = '$_path/enum_example.dart';
 const _extensionExample = '$_path/extension_example.dart';
 const _mixinExample = '$_path/mixin_example.dart';
+const _documentedExample = '$_path/documented_example.dart';
 
 void main() {
   group('PreferCorrectTypeNameRule', () {
@@ -20,6 +21,27 @@ void main() {
         issues: issues,
         ruleId: 'prefer-correct-type-name',
         severity: Severity.style,
+      );
+    });
+
+    test('reports on documented and annotated declarations', () async {
+      final unit = await RuleTestHelper.resolveFromFile(_documentedExample);
+
+      final issues = PreferCorrectTypeNameRule({
+        'max-length': 15,
+        'min-length': 3,
+      }).check(unit);
+
+      RuleTestHelper.verifyIssues(
+        issues: issues,
+        startLines: [6, 11, 16],
+        startColumns: [7, 7, 6],
+        locationTexts: ['ex', 'alsoBad', 'broken'],
+        messages: [
+          "The 'ex' name should only contain alphanumeric characters, start with an uppercase character and span between 3 and 15 characters in length",
+          "The 'alsoBad' name should only contain alphanumeric characters, start with an uppercase character and span between 3 and 15 characters in length",
+          "The 'broken' name should only contain alphanumeric characters, start with an uppercase character and span between 3 and 15 characters in length",
+        ],
       );
     });
 

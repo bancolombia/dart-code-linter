@@ -158,7 +158,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   }
 
   MethodDeclaration? _getDisposeMethodDeclaration(ClassDeclaration parent) =>
-      (parent.body as BlockClassBody).members.firstWhereOrNull((member) =>
+      classBodyMembers(parent)?.firstWhereOrNull((member) =>
               member is MethodDeclaration && member.name.lexeme == 'dispose')
           as MethodDeclaration?;
 
