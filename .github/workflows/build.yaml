@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
+      - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d
       - name: Setup Flutter
         uses: bancolombia/flutter-setup-action@v1.1
         with:
@@ -46,7 +46,7 @@ jobs:
             scalar_diagnostics: 'true'
     steps:
       - uses: actions/checkout@v6
-      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
+      - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d
       - name: Setup Flutter
         uses: bancolombia/flutter-setup-action@v1.1
         with:
@@ -69,7 +69,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
+      - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d
 
       - name: Setup Flutter
         uses: bancolombia/flutter-setup-action@v1.1
