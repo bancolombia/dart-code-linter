@@ -1,0 +1,5 @@
+dart_code_linter:
+  metrics:
+    metric-id1: 1
+    metric-id2: 1
+    metric-id3: 1
