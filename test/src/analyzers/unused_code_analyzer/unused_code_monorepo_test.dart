@@ -58,6 +58,38 @@ void main() {
     expect(packageNames, isNot(contains('UnusedApi')));
   });
 
+  test('counts usages from roots without reporting their declarations',
+      () async {
+    final targetFolder = normalize(join(fixtureRoot, 'package_b', 'lib'));
+    final usageOnlyFolder = normalize(join(fixtureRoot, 'package_a', 'lib'));
+
+    final result = await analyzer.runCliAnalysis(
+      [targetFolder],
+      '',
+      _createConfig(isMonorepo: true),
+      usageOnlyFolders: [usageOnlyFolder],
+    );
+    final names = _names(result);
+
+    expect(names, contains('UnusedApi'));
+    expect(names, isNot(contains('SharedApi')));
+    expect(names, isNot(contains('UsageOnlyDead')));
+  });
+
+  test('does not report usage-only files also included as target folders',
+      () async {
+    final usageOnlyFolder = normalize(join(fixtureRoot, 'package_a', 'lib'));
+
+    final result = await analyzer.runCliAnalysis(
+      [usageOnlyFolder],
+      '',
+      _createConfig(isMonorepo: true),
+      usageOnlyFolders: [usageOnlyFolder],
+    );
+
+    expect(_names(result), isNot(contains('UsageOnlyDead')));
+  });
+
   test('counts a prefixed reference inside a single package', () async {
     // The package boundary is not what this is about: the same reference
     // without `as api` is already counted. What was missed is the prefix.

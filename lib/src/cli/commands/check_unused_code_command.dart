@@ -2,12 +2,15 @@
 
 import 'dart:io';
 
+import 'package:path/path.dart';
+
 import '../../analyzers/unused_code_analyzer/models/unused_code_file_report.dart';
 import '../../analyzers/unused_code_analyzer/models/unused_code_issue.dart';
 import '../../analyzers/unused_code_analyzer/reporters/unused_code_report_params.dart';
 import '../../analyzers/unused_code_analyzer/unused_code_analyzer.dart';
 import '../../config_builder/config_builder.dart';
 import '../../logger/logger.dart';
+import '../exceptions/invalid_argument_exception.dart';
 import '../models/flag_names.dart';
 import 'base_command.dart';
 
@@ -57,6 +60,7 @@ class CheckUnusedCodeCommand extends BaseCommand {
 
     final rootFolder = argResults[FlagNames.rootFolder] as String;
     final folders = argResults.rest;
+    final usageOnlyFolders = argResults[FlagNames.usageOnly] as List<String>;
     final excludePath = argResults[FlagNames.exclude] as String;
     final reporterName = argResults[FlagNames.reporter] as String;
     final isMonorepo = _boolFlagOrNull(FlagNames.isMonorepo);
@@ -82,6 +86,7 @@ class CheckUnusedCodeCommand extends BaseCommand {
       rootFolder,
       config,
       sdkPath: findSdkPath(),
+      usageOnlyFolders: usageOnlyFolders,
     );
 
     _logger.progress.complete('Analysis is completed. Preparing the results:');
@@ -114,11 +119,29 @@ class CheckUnusedCodeCommand extends BaseCommand {
   void _addFlags() {
     _usesReporterOption();
     addCommonFlags();
+    _usesUsageOnlyOption();
     _usesIsMonorepoOption();
     _usesAnalyzePrivateMembersOption();
     _usesAnalyzePublicMembersOption();
     _usesSuggestPrivateMembersOption();
     _usesExitOption();
+  }
+
+  @override
+  void validateTargetDirectoriesOrFiles() {
+    super.validateTargetDirectoriesOrFiles();
+
+    final rootFolderPath = argResults[FlagNames.rootFolder] as String;
+    final usageOnlyFolders = argResults[FlagNames.usageOnly] as List<String>;
+    for (final relativePath in usageOnlyFolders) {
+      final absolutePath = join(rootFolderPath, relativePath);
+      if (!Directory(absolutePath).existsSync() &&
+          !File(absolutePath).existsSync()) {
+        throw InvalidArgumentException(
+          "$absolutePath doesn't exist or isn't a directory or a file.",
+        );
+      }
+    }
   }
 
   void _usesReporterOption() {
@@ -134,6 +157,16 @@ class CheckUnusedCodeCommand extends BaseCommand {
           FlagNames.jsonReporter,
         ],
         defaultsTo: FlagNames.consoleReporter,
+      );
+  }
+
+  void _usesUsageOnlyOption() {
+    argParser
+      ..addSeparator('')
+      ..addMultiOption(
+        FlagNames.usageOnly,
+        valueHelp: 'directory',
+        help: 'Count these paths as usage sources without reporting them.',
       );
   }
 

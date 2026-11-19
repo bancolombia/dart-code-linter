@@ -45,6 +45,9 @@ const _usage = 'Check unused code in *.dart files.\n'
     '    --[no-]verbose                               Show verbose logs.\n'
     '\n'
     '\n'
+    '    --usage-only=<directory>                     Count these paths as usage sources without reporting them.\n'
+    '\n'
+    '\n'
     '    --[no-]monorepo                              Treat all exported code as unused by default.\n'
     '\n'
     '\n'
@@ -91,6 +94,20 @@ void main() {
       expect(
         command?.usage.replaceAll('"${p.current}"', 'current directory'),
         equals(_usage),
+      );
+    });
+
+    test('should parse repeated usage-only directories', () {
+      final results = command!.argParser.parse([
+        '--usage-only',
+        'apps/server/lib',
+        '--usage-only',
+        'apps/server/bin',
+      ]);
+
+      expect(
+        results['usage-only'],
+        ['apps/server/lib', 'apps/server/bin'],
       );
     });
   });

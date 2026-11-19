@@ -15,6 +15,7 @@ class FlagNames {
   static const isMonorepo = 'monorepo';
   static const version = 'version';
   static const verbose = 'verbose';
+  static const usageOnly = 'usage-only';
   static const printConfig = 'print-config';
 
   static const consoleReporter = ConsoleReporter.id;
